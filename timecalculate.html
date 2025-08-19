@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0,viewport-fit=cover">
+
+  <title>CCTV Time Calculator</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .card-header {
+      background-color: #0d6efd;
+      color: white;
+    }
+    .form-label {
+      font-weight: 500;
+    }
+    .section-title {
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container py-5">
+    <!-- ส่วนคำนวณความต่างเวลา -->
+    <div class="card mb-4 shadow-sm">
+      <div class="card-header">
+        <h5 class="mb-0">1.คำนวณความต่างเวลา</h5>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">วันที่กล้องวงจรปิด</label>
+            <input type="date" id="cctvDate" class="form-control">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">วันที่จริง</label>
+            <input type="date" id="realDate" class="form-control">
+          </div>
+        </div>
+        <div class="row g-3 mt-2">
+          <div class="col-md-6">
+            <label class="form-label">เวลากล้องวงจรปิด</label>
+            <input type="time" id="cctvTime" class="form-control">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">เวลาจริง</label>
+            <input type="time" id="realTime" class="form-control">
+          </div>
+        </div>
+        <div class="mt-4 d-flex justify-content-start gap-2">
+          <button class="btn btn-primary" onclick="calculateOffset()">
+            <i class="bi bi-calculator"></i> คำนวณความต่าง
+          </button>
+          <button class="btn btn-outline-danger" onclick="resetCalculator()">
+            <i class="bi bi-arrow-clockwise"></i> รีเซ็ต
+          </button>
+        </div>
+        <div id="offsetResult" class="mt-3"></div>
+      </div>
+    </div>
+
+    <!-- ส่วนแปลงเวลา -->
+    <div class="card shadow-sm">
+      <div class="card-header">
+        <h5 class="mb-0">2.แปลงเวลา</h5>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">วันที่ต้องการแปลง</label>
+            <input type="date" id="convertDate" class="form-control">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">เวลาที่ต้องการแปลง</label>
+            <input type="time" id="convertTime" class="form-control">
+          </div>
+        </div>
+        <div class="row g-3 mt-2">
+          <div class="col-md-6">
+            <label class="form-label">แปลงเป็น</label>
+            <select id="convertType" class="form-select">
+              <option value="toReal">แปลงเป็นเวลาจริง</option>
+              <option value="toCCTV">แปลงเป็นเวลากล้อง</option>
+            </select>
+          </div>
+        </div>
+        <div class="mt-4 d-flex justify-content-start gap-2">
+          <button class="btn btn-success" onclick="convertTime()">
+            <i class="bi bi-arrow-left-right"></i> แปลงเวลา
+          </button>
+          <button class="btn btn-outline-danger" onclick="resetConverter()">
+            <i class="bi bi-arrow-clockwise"></i> รีเซ็ต
+          </button>
+        </div>
+        <div id="convertResult" class="mt-3"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+  <script>
+    let timeOffset = 0;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('cctvDate').value = today;
+      document.getElementById('realDate').value = today;
+      document.getElementById('convertDate').value = today;
+    });
+
+    function calculateOffset() {
+      const cctvDate = document.getElementById('cctvDate').value;
+      const realDate = document.getElementById('realDate').value;
+      const cctvTime = document.getElementById('cctvTime').value;
+      const realTime = document.getElementById('realTime').value;
+
+      if (!cctvDate || !realDate || !cctvTime || !realTime) {
+        return alert('กรุณากรอกวันที่และเวลาให้ครบถ้วน');
+      }
+
+      const cctvDateTime = new Date(`${cctvDate}T${cctvTime}`);
+      const realDateTime = new Date(`${realDate}T${realTime}`);
+      timeOffset = Math.floor((realDateTime - cctvDateTime) / 1000);
+
+      document.getElementById('offsetResult').innerHTML = `
+        <div class="alert alert-info">
+          ความต่างเวลา: ${formatOffset(timeOffset)}
+        </div>
+      `;
+    }
+
+    function convertTime() {
+      const convertDate = document.getElementById('convertDate').value;
+      const time = document.getElementById('convertTime').value;
+      const convertType = document.getElementById('convertType').value;
+
+      if (!convertDate || !time) {
+        return alert('กรุณากรอกวันที่และเวลาให้ครบถ้วน');
+      }
+
+      const dateTime = new Date(`${convertDate}T${time}`);
+      const resultTime = new Date(dateTime.getTime() + (convertType === 'toReal' ? timeOffset : -timeOffset) * 1000);
+
+      const resultDateStr = resultTime.toISOString().split('T')[0];
+      const timeStr = resultTime.toTimeString().split(' ')[0];
+
+      document.getElementById('convertResult').innerHTML = `
+        <div class="alert alert-success">
+          ผลลัพธ์: ${resultDateStr} ${timeStr}
+        </div>
+      `;
+    }
+
+    function resetCalculator() {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('cctvDate').value = today;
+      document.getElementById('realDate').value = today;
+      document.getElementById('cctvTime').value = '';
+      document.getElementById('realTime').value = '';
+      document.getElementById('offsetResult').innerHTML = '';
+    }
+
+    function resetConverter() {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('convertDate').value = today;
+      document.getElementById('convertTime').value = '';
+      document.getElementById('convertType').value = 'toReal';
+      document.getElementById('convertResult').innerHTML = '';
+    }
+
+    function formatOffset(offset) {
+      const abs = Math.abs(offset);
+      const days = Math.floor(abs / 86400);
+      const hrs = Math.floor((abs % 86400) / 3600);
+      const mins = Math.floor((abs % 3600) / 60);
+      const secs = abs % 60;
+      return `${offset >= 0 ? '+' : '-'}${days > 0 ? days + ' วัน ' : ''}${hrs} ชม. ${mins} นาที ${secs} วินาที`;
+    }
+  </script>
+</body>
+</html>

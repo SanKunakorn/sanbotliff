@@ -1,0 +1,2277 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบรายงานรถหาย - ตำรวจ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        }
+
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .status-pending {
+            background: #fbbf24;
+            color: #1f2937;
+        }
+
+        .status-investigating {
+            background: #3b82f6;
+            color: #ffffff;
+        }
+
+        .status-arrested {
+            background: #10b981;
+            color: #ffffff;
+        }
+
+        .status-closed {
+            background: #6b7280;
+            color: #ffffff;
+        }
+
+        .loading-spinner {
+            border: 3px solid #e5e7eb;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50">
+    <!-- Navigation -->
+
+
+
+
+    <nav class="bg-white shadow-lg border-b-4 border-blue-500">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-blue-600 p-2 rounded-lg">
+                        <i class="fas fa-car text-white text-xl"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold text-gray-800">ระบบรายงานรถหาย</h1>
+                </div>
+                <div class="flex space-x-2">
+                    <button onclick="showPage('dashboard')"
+                        class="nav-item px-4 py-2 rounded-lg text-white transition-all duration-300 active">
+                        <i class="fas fa-chart-bar mr-2"></i>Dashboard
+                    </button>
+                    <button onclick="showPage('report')"
+                        class="nav-item px-4 py-2 rounded-lg text-gray-600 hover:bg-blue-50 transition-all duration-300">
+                        <i class="fas fa-plus-circle mr-2"></i>รายงานรถหาย
+                    </button>
+                    <button onclick="showPage('data')"
+                        class="nav-item px-4 py-2 rounded-lg text-gray-600 hover:bg-blue-50 transition-all duration-300">
+                        <i class="fas fa-table mr-2"></i>ข้อมูลทั้งหมด
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Page -->
+    <div id="dashboard-page" class="page">
+        <div class="h-screen overflow-y-auto">
+            <div class="max-w-7xl mx-auto px-2 sm:px-4 py-4 sm:py-6">
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-6">
+                    <div
+                        class="bg-white p-3 sm:p-4 lg:p-6 rounded-lg sm:rounded-xl shadow-lg card-hover transition-all duration-300">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                            <div class="mb-2 sm:mb-0">
+                                <p class="text-gray-600 text-xs sm:text-sm">รถหายทั้งหมด</p>
+                                <p class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800" id="total-cases">0
+                                </p>
+                            </div>
+                            <div class="bg-red-100 p-2 sm:p-3 rounded-full self-end sm:self-auto">
+                                <i class="fas fa-car text-red-600 text-sm sm:text-lg lg:text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div
+                        class="bg-white p-3 sm:p-4 lg:p-6 rounded-lg sm:rounded-xl shadow-lg card-hover transition-all duration-300">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                            <div class="mb-2 sm:mb-0">
+                                <p class="text-gray-600 text-xs sm:text-sm">อยู่ระหว่างสืบสวน</p>
+                                <p class="text-xl sm:text-2xl lg:text-3xl font-bold text-blue-600"
+                                    id="investigating-cases">0</p>
+                            </div>
+                            <div class="bg-blue-100 p-2 sm:p-3 rounded-full self-end sm:self-auto">
+                                <i class="fas fa-search text-blue-600 text-sm sm:text-lg lg:text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div
+                        class="bg-white p-3 sm:p-4 lg:p-6 rounded-lg sm:rounded-xl shadow-lg card-hover transition-all duration-300">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                            <div class="mb-2 sm:mb-0">
+                                <p class="text-gray-600 text-xs sm:text-sm">จับกุมแล้ว</p>
+                                <p class="text-xl sm:text-2xl lg:text-3xl font-bold text-green-600" id="arrested-cases">
+                                    0</p>
+                            </div>
+                            <div class="bg-green-100 p-2 sm:p-3 rounded-full self-end sm:self-auto">
+                                <i class="fas fa-handcuffs text-green-600 text-sm sm:text-lg lg:text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div
+                        class="bg-white p-3 sm:p-4 lg:p-6 rounded-lg sm:rounded-xl shadow-lg card-hover transition-all duration-300">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                            <div class="mb-2 sm:mb-0">
+                                <p class="text-gray-600 text-xs sm:text-sm">ปิดคดีแล้ว</p>
+                                <p class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-600" id="closed-cases">0
+                                </p>
+                            </div>
+                            <div class="bg-gray-100 p-2 sm:p-3 rounded-full self-end sm:self-auto">
+                                <i class="fas fa-check-circle text-gray-600 text-sm sm:text-lg lg:text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="grid grid-cols-1 xl:grid-cols-2 gap-3 sm:gap-6 mb-4 sm:mb-6">
+                    <div class="bg-white p-3 sm:p-4 lg:p-6 rounded-lg sm:rounded-xl shadow-lg">
+                        <h3 class="text-sm sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-4">รถหายรายเดือน</h3>
+                        <div class="h-48 sm:h-64 lg:h-72">
+                            <canvas id="monthlyChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white p-3 sm:p-4 lg:p-6 rounded-lg sm:rounded-xl shadow-lg">
+                        <h3 class="text-sm sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-4">ยี่ห้อรถที่หายบ่อยสุด
+                        </h3>
+                        <div class="h-48 sm:h-64 lg:h-72">
+                            <canvas id="brandChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 xl:grid-cols-2 gap-3 sm:gap-6 mb-4 sm:mb-6">
+                    <div class="bg-white p-3 sm:p-4 lg:p-6 rounded-lg sm:rounded-xl shadow-lg">
+                        <h3 class="text-sm sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-4">พื้นที่เกิดเหตุบ่อย</h3>
+                        <div class="h-48 sm:h-64 lg:h-72">
+                            <canvas id="areaChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white p-3 sm:p-4 lg:p-6 rounded-lg sm:rounded-xl shadow-lg">
+                        <h3 class="text-sm sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-4">เวรสืบสวนที่รับผิดชอบ
+                        </h3>
+                        <div id="shift-stats" class="space-y-2 sm:space-y-3">
+                            <div class="flex justify-center items-center p-4 text-gray-500">
+                                <div class="loading-spinner mr-2"></div>
+                                กำลังโหลดข้อมูล...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Map Section -->
+                <div class="bg-white p-3 sm:p-4 lg:p-6 rounded-lg sm:rounded-xl shadow-lg">
+                    <div class="flex justify-between items-center mb-2 sm:mb-4">
+                        <h3 class="text-sm sm:text-lg font-semibold text-gray-800">แผนที่สถานที่เกิดเหตุ</h3>
+                        <div class="flex space-x-2">
+                            <button onclick="refreshMap()" class="text-blue-600 hover:text-blue-700 text-sm">
+                                <i class="fas fa-sync-alt mr-1"></i>รีเฟรช
+                            </button>
+                            <button onclick="toggleMapView()" class="text-green-600 hover:text-green-700 text-sm">
+                                <i class="fas fa-layer-group mr-1"></i>เปลี่ยนมุมมอง
+                            </button>
+                        </div>
+                    </div>
+                    <div id="incident-map" class="h-64 sm:h-80 lg:h-96 rounded-lg border border-gray-300"></div>
+                    <div class="mt-3 flex flex-wrap gap-2 text-xs text-gray-600">
+                        <div class="flex items-center">
+                            <div class="w-3 h-3 bg-red-500 rounded-full mr-1"></div>
+                            <span>รอดำเนินการ</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-3 h-3 bg-blue-500 rounded-full mr-1"></div>
+                            <span>อยู่ระหว่างสืบสวน</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-3 h-3 bg-green-500 rounded-full mr-1"></div>
+                            <span>จับกุมแล้ว</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-3 h-3 bg-gray-500 rounded-full mr-1"></div>
+                            <span>ปิดคดี</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Page -->
+    <div id="report-page" class="page hidden">
+        <div class="max-w-4xl mx-auto px-4 py-8">
+            <div class="bg-white rounded-xl shadow-lg p-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-plus-circle text-blue-600 mr-3"></i>
+                    รายงานรถหาย
+                </h2>
+
+                <form id="report-form" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- ยี่ห้อรถ -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">ยี่ห้อรถ *</label>
+                            <select id="car-brand"
+                                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                required>
+                                <option value="">เลือกยี่ห้อรถ</option>
+                                <option value="Toyota">Toyota</option>
+                                <option value="Honda">Honda</option>
+                                <option value="Mazda">Mazda</option>
+                                <option value="Nissan">Nissan</option>
+                                <option value="Mitsubishi">Mitsubishi</option>
+                                <option value="Isuzu">Isuzu</option>
+                                <option value="Ford">Ford</option>
+                                <option value="other">อื่นๆ (ระบุ)</option>
+                            </select>
+                            <input type="text" id="custom-brand"
+                                class="w-full p-3 border border-gray-300 rounded-lg mt-2 hidden focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="ระบุยี่ห้อรถ">
+                        </div>
+
+                        <!-- รุ่นรถ -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">รุ่นรถ *</label>
+                            <input type="text" id="car-model"
+                                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="เช่น Vios, City, CX-5" required>
+                        </div>
+
+                        <!-- สีรถ -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">สีรถ *</label>
+                            <select id="car-color"
+                                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                required>
+                                <option value="">เลือกสีรถ</option>
+                                <option value="ขาว">ขาว</option>
+                                <option value="ดำ">ดำ</option>
+                                <option value="เงิน">เงิน</option>
+                                <option value="แดง">แดง</option>
+                                <option value="น้ำเงิน">น้ำเงิน</option>
+                                <option value="เทา">เทา</option>
+                                <option value="other">อื่นๆ (ระบุ)</option>
+                            </select>
+                            <input type="text" id="custom-color"
+                                class="w-full p-3 border border-gray-300 rounded-lg mt-2 hidden focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="ระบุสีรถ">
+                        </div>
+
+                        <!-- ทะเบียนรถ -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">ทะเบียนรถ *</label>
+                            <input type="text" id="license-plate"
+                                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="เช่น กข 1234 กรุงเทพ" required>
+                        </div>
+
+                        <!-- เวรสืบสวน -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">เวรสืบสวน *</label>
+                            <select id="investigation-shift"
+                                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                required>
+                                <option value="">เลือกเวรสืบสวน</option>
+                                <option value="เวรเช้า">เวรเช้า (06:00-14:00)</option>
+                                <option value="เวรบ่าย">เวรบ่าย (14:00-22:00)</option>
+                                <option value="เวรดึก">เวรดึก (22:00-06:00)</option>
+                            </select>
+                        </div>
+
+                        <!-- พนักงานสอบสวน -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">พนักงานสอบสวน</label>
+                            <select id="investigator"
+                                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="">เลือกพนักงานสอบสวน</option>
+                                <option value="พ.ต.ต.สมชาย ใจดี">พ.ต.ต.สมชาย ใจดี</option>
+                                <option value="พ.ต.ต.สมหญิง รักดี">พ.ต.ต.สมหญิง รักดี</option>
+                                <option value="พ.ต.ต.สมศักดิ์ ทำดี">พ.ต.ต.สมศักดิ์ ทำดี</option>
+                                <option value="other">อื่นๆ (ระบุ)</option>
+                            </select>
+                            <input type="text" id="custom-investigator"
+                                class="w-full p-3 border border-gray-300 rounded-lg mt-2 hidden focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="ระบุชื่อพนักงานสอบสวน">
+                        </div>
+
+                        <!-- พื้นที่เกิดเหตุ -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">พื้นที่เกิดเหตุ *</label>
+                            <select id="incident-area"
+                                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                required>
+                                <option value="">เลือกพื้นที่เกิดเหตุ</option>
+                                <option value="บางนา">บางนา</option>
+                                <option value="ลาดกระบัง">ลาดกระบัง</option>
+                                <option value="สวนหลวง">สวนหลวง</option>
+                                <option value="ประเวศ">ประเวศ</option>
+                                <option value="สะพานพุทธ">สะพานพุทธ</option>
+                                <option value="other">อื่นๆ (ระบุ)</option>
+                            </select>
+                            <input type="text" id="custom-area"
+                                class="w-full p-3 border border-gray-300 rounded-lg mt-2 hidden focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="ระบุพื้นที่เกิดเหตุ">
+                        </div>
+
+                        <!-- วันที่เกิดเหตุ -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">วันที่เกิดเหตุ *</label>
+                            <input type="date" id="incident-date"
+                                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                required>
+                        </div>
+
+                        <!-- เวลาเกิดเหตุ -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">เวลาเกิดเหตุ *</label>
+                            <input type="time" id="incident-time"
+                                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                required>
+                        </div>
+
+                        <!-- พิกัดสถานที่ -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">ละติจูด (Latitude)</label>
+                            <input type="number" step="any" id="latitude"
+                                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="เช่น 13.7563">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">ลองจิจูด (Longitude)</label>
+                            <input type="number" step="any" id="longitude"
+                                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="เช่น 100.5018">
+                        </div>
+                    </div>
+
+                    <!-- ปุ่มหาตำแหน่ง -->
+                    <div class="flex justify-center">
+                        <button type="button" onclick="getCurrentLocation()"
+                            class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                            <i class="fas fa-map-marker-alt mr-2"></i>ใช้ตำแหน่งปัจจุบัน
+                        </button>
+                    </div>
+
+                    <!-- รายละเอียดเพิ่มเติม -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">รายละเอียดเพิ่มเติม</label>
+                        <textarea id="additional-details" rows="4"
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="ชื่อผู้เสียหาย, เบอร์โทร, ข้อมูลพยาน, รายละเอียดเหตุการณ์"></textarea>
+                    </div>
+
+                    <!-- อัปโหลดไฟล์ -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">อัปโหลดไฟล์/รูปภาพ</label>
+                        <div
+                            class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors bg-gray-50">
+                            <input type="file" id="file-upload" multiple accept="image/*,.pdf,.doc,.docx"
+                                class="hidden">
+                            <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-2"></i>
+                            <p class="text-gray-600">คลิกเพื่ออัปโหลดไฟล์หรือลากไฟล์มาวาง</p>
+                            <p class="text-sm text-gray-500 mt-1">รองรับ: รูปภาพ, PDF, Word</p>
+                            <button type="button" onclick="document.getElementById('file-upload').click()"
+                                class="mt-3 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                                เลือกไฟล์
+                            </button>
+                        </div>
+                        <div id="file-list" class="mt-3 space-y-2"></div>
+                    </div>
+
+                    <!-- ปุ่มบันทึก -->
+                    <div class="flex justify-between items-center pt-6 border-t border-gray-200">
+                        <button type="button" onclick="loadSettingsFromSheets()"
+                            class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm">
+                            <i class="fas fa-sync mr-2"></i>โหลดข้อมูลฟอร์ม
+                        </button>
+                        <div class="flex space-x-4">
+                            <button type="button" onclick="resetForm()"
+                                class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                                ล้างข้อมูล
+                            </button>
+                            <button type="submit"
+                                class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                <i class="fas fa-save mr-2"></i>บันทึกข้อมูล
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Page -->
+    <div id="data-page" class="page hidden">
+        <div class="max-w-7xl mx-auto px-4 py-8">
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+                        <i class="fas fa-table text-blue-600 mr-3"></i>
+                        ข้อมูลรถหายทั้งหมด
+                    </h2>
+                    <div class="flex space-x-3">
+                        <button onclick="exportData()"
+                            class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                            <i class="fas fa-download mr-2"></i>ส่งออก Excel
+                        </button>
+                        <button onclick="showPage('report')"
+                            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                            <i class="fas fa-plus mr-2"></i>เพิ่มข้อมูล
+                        </button>
+                        <button onclick="loadDataFromGoogleSheets()"
+                            class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                            <i class="fas fa-sync mr-2"></i>โหลดจาก Sheets
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Search and Filter -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <input type="text" id="search-input" placeholder="ค้นหา (ทะเบียน, ยี่ห้อ, พื้นที่)"
+                        class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <select id="filter-brand"
+                        class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">ทุกยี่ห้อ</option>
+                        <option value="Toyota">Toyota</option>
+                        <option value="Honda">Honda</option>
+                        <option value="Mazda">Mazda</option>
+                    </select>
+                    <select id="filter-status"
+                        class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">ทุกสถานะ</option>
+                        <option value="pending">รอดำเนินการ</option>
+                        <option value="investigating">อยู่ระหว่างสืบสวน</option>
+                        <option value="arrested">จับกุมแล้ว</option>
+                        <option value="closed">ปิดคดี</option>
+                    </select>
+                    <button onclick="clearFilters()"
+                        class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors">
+                        <i class="fas fa-times mr-2"></i>ล้างตัวกรอง
+                    </button>
+                </div>
+
+                <!-- Data Table -->
+                <div class="overflow-x-auto">
+                    <table class="w-full table-auto bg-white">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">วันที่</th>
+                                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">ทะเบียน</th>
+                                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">ยี่ห้อ/รุ่น</th>
+                                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">สี</th>
+                                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">พื้นที่</th>
+                                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">เวรสืบสวน</th>
+                                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">สถานะ</th>
+                                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="data-table-body" class="divide-y divide-gray-200">
+                            <!-- Data will be rendered here by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div id="pagination-container" class="flex justify-between items-center mt-6">
+                    <!-- Pagination will be rendered here by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data for demonstration
+        let stolenCarsData = [
+            {
+                id: 1,
+                date: '2024-12-15',
+                time: '14:30',
+                licensePlate: 'กข 1234 กทม',
+                brand: 'Toyota',
+                model: 'Vios',
+                color: 'ขาว',
+                area: 'บางนา',
+                shift: 'เวรเช้า',
+                investigator: 'พ.ต.ต.สมชาย ใจดี',
+                status: 'investigating',
+                details: 'รถหายจากหน้าห้างสรรพสินค้า มีพยานเห็นผู้ต้องสงสัย',
+                latitude: 13.6904,
+                longitude: 100.6093,
+                createdAt: '2024-12-15T14:30:00'
+            },
+            {
+                id: 2,
+                date: '2024-12-14',
+                time: '02:15',
+                licensePlate: 'คง 5678 กทม',
+                brand: 'Honda',
+                model: 'City',
+                color: 'ดำ',
+                area: 'ลาดกระบัง',
+                shift: 'เวรดึก',
+                investigator: 'พ.ต.ต.สมหญิง รักดี',
+                status: 'arrested',
+                details: 'จับกุมผู้ต้องสงสัยได้แล้ว กำลังดำเนินคดี',
+                latitude: 13.7307,
+                longitude: 100.7418,
+                createdAt: '2024-12-14T02:15:00'
+            },
+            {
+                id: 3,
+                date: '2024-12-13',
+                time: '18:45',
+                licensePlate: 'งจ 9876 กทม',
+                brand: 'Mazda',
+                model: 'CX-5',
+                color: 'เงิน',
+                area: 'สวนหลวง',
+                shift: 'เวรบ่าย',
+                investigator: 'พ.ต.ต.สมศักดิ์ ทำดี',
+                status: 'pending',
+                details: 'รถหายจากลานจอดรถคอนโด',
+                latitude: 13.7200,
+                longitude: 100.6500,
+                createdAt: '2024-12-13T18:45:00'
+            },
+            {
+                id: 4,
+                date: '2024-12-12',
+                time: '09:20',
+                licensePlate: 'ฉช 4567 กทม',
+                brand: 'Nissan',
+                model: 'Almera',
+                color: 'แดง',
+                area: 'ประเวศ',
+                shift: 'เวรเช้า',
+                investigator: 'พ.ต.ต.สมชาย ใจดี',
+                status: 'closed',
+                details: 'พบรถแล้ว คดีปิด',
+                latitude: 13.6692,
+                longitude: 100.6650,
+                createdAt: '2024-12-12T09:20:00'
+            },
+            {
+                id: 5,
+                date: '2024-12-11',
+                time: '16:00',
+                licensePlate: 'ซฌ 7890 กทม',
+                brand: 'Mitsubishi',
+                model: 'Attrage',
+                color: 'น้ำเงิน',
+                area: 'สะพานพุทธ',
+                shift: 'เวรบ่าย',
+                investigator: 'พ.ต.ต.สมชาย ใจดี',
+                status: 'investigating',
+                details: 'รถหายจากหน้าบ้าน มีกล้องวงจรปิด',
+                latitude: 13.6958,
+                longitude: 100.5281,
+                createdAt: '2024-12-11T16:00:00'
+            }
+        ];
+
+        // Global variables
+        let incidentMap = null;
+        let mapMarkers = [];
+        let filteredData = [...stolenCarsData];
+        let currentPage = 1;
+        let itemsPerPage = 10;
+        let editingCaseId = null;
+
+        // Navigation
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.add('hidden');
+            });
+
+            // Show selected page
+            document.getElementById(pageId + '-page').classList.remove('hidden');
+
+            // Update navigation
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                item.classList.add('text-gray-600', 'hover:bg-blue-50');
+                item.classList.remove('text-white');
+            });
+
+            event.target.classList.add('active');
+            event.target.classList.remove('text-gray-600', 'hover:bg-blue-50');
+            event.target.classList.add('text-white');
+
+            // Initialize specific page content
+            if (pageId === 'dashboard') {
+                setTimeout(async () => {
+                    await initCharts();
+                    initMap();
+                    await updateDashboardStats();
+                }, 100);
+            } else if (pageId === 'data') {
+                renderDataTable();
+            }
+        }
+
+        // Form handling and initialization
+        document.addEventListener('DOMContentLoaded', async function () {
+            // Set default date to today
+            document.getElementById('incident-date').value = new Date().toISOString().split('T')[0];
+            // โหลดข้อมูลอัตโนมัติเมื่อเปิดเว็บ
+            showNotification('กำลังโหลดข้อมูลเริ่มต้น...', 'info');
+            // โหลดข้อมูลรถหายจาก Google Sheets ก่อน
+            await loadDataFromGoogleSheets();
+            // โหลดข้อมูลตั้งค่าฟอร์มจาก Google Sheets
+            await loadSettingsFromSheets();
+
+            // Handle custom options
+            document.getElementById('car-brand').addEventListener('change', function () {
+                const customInput = document.getElementById('custom-brand');
+                if (this.value === 'other') {
+                    customInput.classList.remove('hidden');
+                    customInput.required = true;
+                } else {
+                    customInput.classList.add('hidden');
+                    customInput.required = false;
+                }
+            });
+
+            document.getElementById('car-color').addEventListener('change', function () {
+                const customInput = document.getElementById('custom-color');
+                if (this.value === 'other') {
+                    customInput.classList.remove('hidden');
+                    customInput.required = true;
+                } else {
+                    customInput.classList.add('hidden');
+                    customInput.required = false;
+                }
+            });
+
+            document.getElementById('investigator').addEventListener('change', function () {
+                const customInput = document.getElementById('custom-investigator');
+                if (this.value === 'other') {
+                    customInput.classList.remove('hidden');
+                    customInput.required = true;
+                } else {
+                    customInput.classList.add('hidden');
+                    customInput.required = false;
+                }
+            });
+
+            document.getElementById('incident-area').addEventListener('change', function () {
+                const customInput = document.getElementById('custom-area');
+                if (this.value === 'other') {
+                    customInput.classList.remove('hidden');
+                    customInput.required = true;
+                } else {
+                    customInput.classList.add('hidden');
+                    customInput.required = false;
+                }
+            });
+
+            // File upload handling with remove functionality
+            document.getElementById('file-upload').addEventListener('change', function () {
+                const fileList = document.getElementById('file-list');
+                fileList.innerHTML = '';
+
+                Array.from(this.files).forEach((file, index) => {
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'flex items-center justify-between p-2 bg-gray-50 rounded';
+                    fileItem.innerHTML = `
+                        <div class="flex items-center">
+                            <i class="fas fa-file text-blue-500 mr-2"></i>
+                            <span class="text-sm">${file.name} (${formatFileSize(file.size)})</span>
+                        </div>
+                        <button type="button" onclick="removeFile(${index})" class="text-red-500 hover:text-red-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                    fileList.appendChild(fileItem);
+                });
+            });
+
+            // Search and filter functionality
+            document.getElementById('search-input').addEventListener('input', applyFilters);
+            document.getElementById('filter-brand').addEventListener('change', applyFilters);
+            document.getElementById('filter-status').addEventListener('change', applyFilters);
+
+            // Form submission
+            document.getElementById('report-form').addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                // Validate required fields
+                const requiredFields = ['car-brand', 'car-model', 'car-color', 'license-plate', 'investigation-shift', 'incident-area', 'incident-date', 'incident-time'];
+                let isValid = true;
+
+                requiredFields.forEach(fieldId => {
+                    const field = document.getElementById(fieldId);
+                    if (!field.value) {
+                        field.classList.add('border-red-500');
+                        isValid = false;
+                    } else {
+                        field.classList.remove('border-red-500');
+                    }
+                });
+
+                if (!isValid) {
+                    showNotification('กรุณากรอกข้อมูลให้ครบถ้วน', 'error');
+                    return;
+                }
+
+                // Collect form data
+                const formData = {
+                    brand: document.getElementById('car-brand').value === 'other' ?
+                        document.getElementById('custom-brand').value :
+                        document.getElementById('car-brand').value,
+                    model: document.getElementById('car-model').value,
+                    color: document.getElementById('car-color').value === 'other' ?
+                        document.getElementById('custom-color').value :
+                        document.getElementById('car-color').value,
+                    licensePlate: document.getElementById('license-plate').value,
+                    shift: document.getElementById('investigation-shift').value,
+                    investigator: document.getElementById('investigator').value === 'other' ?
+                        document.getElementById('custom-investigator').value :
+                        document.getElementById('investigator').value || 'ไม่ระบุ',
+                    area: document.getElementById('incident-area').value === 'other' ?
+                        document.getElementById('custom-area').value :
+                        document.getElementById('incident-area').value,
+                    incidentDate: document.getElementById('incident-date').value,
+                    incidentTime: document.getElementById('incident-time').value,
+                    latitude: parseFloat(document.getElementById('latitude').value) || null,
+                    longitude: parseFloat(document.getElementById('longitude').value) || null,
+                    details: document.getElementById('additional-details').value || 'ไม่มีรายละเอียดเพิ่มเติม',
+                    status: editingCaseId ? stolenCarsData.find(item => item.id === editingCaseId).status : 'pending'
+                };
+
+                // Save data
+                let success = false;
+                if (editingCaseId) {
+                    success = await updateCase(editingCaseId, formData);
+                } else {
+                    success = await addNewCase(formData);
+                }
+
+                if (success) {
+                    resetForm();
+                    showPage('data');
+                }
+            });
+
+            // Initialize
+            setTimeout(async () => {
+                await initCharts();
+                initMap();
+                await updateDashboardStats();
+                renderDataTable();
+            }, 100);
+        });
+
+        // Utility functions
+        function resetForm() {
+            document.getElementById('report-form').reset();
+            document.querySelectorAll('.hidden').forEach(el => {
+                if (el.id.includes('custom-')) {
+                    el.classList.add('hidden');
+                    el.required = false;
+                }
+            });
+            document.getElementById('file-list').innerHTML = '';
+            document.getElementById('incident-date').value = new Date().toISOString().split('T')[0];
+            editingCaseId = null;
+
+            // Reset form title
+            const formTitle = document.querySelector('#report-page h2');
+            formTitle.innerHTML = '<i class="fas fa-plus-circle text-blue-600 mr-3"></i>รายงานรถหาย';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function removeFile(index) {
+            const fileInput = document.getElementById('file-upload');
+            const dt = new DataTransfer();
+            const files = Array.from(fileInput.files);
+
+            files.forEach((file, i) => {
+                if (i !== index) dt.items.add(file);
+            });
+
+            fileInput.files = dt.files;
+            fileInput.dispatchEvent(new Event('change'));
+        }
+
+        function showNotification(message, type = 'success') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 ${type === 'success' ? 'bg-green-500 text-white' :
+                    type === 'error' ? 'bg-red-500 text-white' :
+                        'bg-blue-500 text-white'
+                }`;
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} mr-2"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+
+            document.body.appendChild(notification);
+
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        async function addNewCase(formData) {
+            const newId = Math.max(...stolenCarsData.map(item => item.id), 0) + 1;
+            const newCase = {
+                id: newId,
+                date: formData.incidentDate,
+                time: formData.incidentTime,
+                createdAt: new Date().toISOString(),
+                ...formData
+            };
+
+            // Try to save to Google Sheets first
+            const sheetsSuccess = await saveToGoogleSheets(newCase);
+
+            // Always update local data
+            stolenCarsData.unshift(newCase);
+            filteredData = [...stolenCarsData];
+
+            updateMapMarkers();
+            await updateDashboardStats();
+            renderDataTable();
+
+            if (!sheetsSuccess && SCRIPT_URL !== 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE') {
+                showNotification('บันทึกในเครื่องเรียบร้อย แต่ไม่สามารถซิงค์กับ Google Sheets ได้', 'error');
+            } else if (SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE') {
+                showNotification('บันทึกข้อมูลในเครื่องเรียบร้อยแล้ว');
+            }
+
+            return true;
+        }
+
+        async function updateCase(caseId, formData) {
+            const index = stolenCarsData.findIndex(item => item.id === caseId);
+            if (index === -1) return false;
+
+            // Update local data
+            stolenCarsData[index] = {
+                ...stolenCarsData[index],
+                ...formData,
+                date: formData.incidentDate,
+                time: formData.incidentTime
+            };
+
+            // Try to save to Google Sheets
+            const sheetsSuccess = await saveToGoogleSheets(stolenCarsData[index]);
+
+            filteredData = [...stolenCarsData];
+            updateMapMarkers();
+            await updateDashboardStats();
+            renderDataTable();
+
+            if (!sheetsSuccess && SCRIPT_URL !== 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE') {
+                showNotification('อัปเดตในเครื่องเรียบร้อย แต่ไม่สามารถซิงค์กับ Google Sheets ได้', 'error');
+            } else if (SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE') {
+                showNotification('อัปเดตข้อมูลเรียบร้อยแล้ว');
+            }
+
+            return true;
+        }
+
+        // Map functions
+        function initMap() {
+            if (incidentMap) {
+                incidentMap.remove();
+            }
+
+            // Initialize map centered on Bangkok
+            incidentMap = L.map('incident-map').setView([13.7563, 100.5018], 11);
+
+            // Add tile layer
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(incidentMap);
+
+            // Add markers for incidents with coordinates
+            updateMapMarkers();
+        }
+
+        function updateMapMarkers() {
+            // Clear existing markers
+            mapMarkers.forEach(marker => incidentMap.removeLayer(marker));
+            mapMarkers = [];
+
+            // Add new markers
+            stolenCarsData.forEach(incident => {
+                if (incident.latitude && incident.longitude) {
+                    const color = getStatusColor(incident.status);
+
+                    const marker = L.circleMarker([incident.latitude, incident.longitude], {
+                        color: color,
+                        fillColor: color,
+                        fillOpacity: 0.7,
+                        radius: 8,
+                        weight: 2
+                    }).addTo(incidentMap);
+
+                    // Create popup content
+                    const popupContent = `
+                        <div class="p-2">
+                            <h4 class="font-bold text-sm mb-1">${incident.licensePlate}</h4>
+                            <p class="text-xs mb-1"><strong>ยี่ห้อ:</strong> ${incident.brand} ${incident.model}</p>
+                            <p class="text-xs mb-1"><strong>สี:</strong> ${incident.color}</p>
+                            <p class="text-xs mb-1"><strong>พื้นที่:</strong> ${incident.area}</p>
+                            <p class="text-xs mb-1"><strong>วันที่:</strong> ${incident.date}</p>
+                            <p class="text-xs mb-1"><strong>เวลา:</strong> ${incident.time}</p>
+                            <p class="text-xs mb-1"><strong>สถานะ:</strong> ${getStatusText(incident.status)}</p>
+                            <p class="text-xs"><strong>รายละเอียด:</strong> ${incident.details}</p>
+                        </div>
+                    `;
+
+                    marker.bindPopup(popupContent);
+                    mapMarkers.push(marker);
+                }
+            });
+        }
+
+        function getStatusColor(status) {
+            switch (status) {
+                case 'pending': return '#ef4444'; // red
+                case 'investigating': return '#3b82f6'; // blue
+                case 'arrested': return '#10b981'; // green
+                case 'closed': return '#6b7280'; // gray
+                default: return '#6b7280';
+            }
+        }
+
+        function getStatusText(status) {
+            switch (status) {
+                case 'pending': return 'รอดำเนินการ';
+                case 'investigating': return 'อยู่ระหว่างสืบสวน';
+                case 'arrested': return 'จับกุมแล้ว';
+                case 'closed': return 'ปิดคดี';
+                default: return 'ไม่ระบุ';
+            }
+        }
+
+        async function refreshMap() {
+            if (incidentMap) {
+                showNotification('กำลังรีเฟรชแผนที่...', 'info');
+                updateMapMarkers();
+                // Refresh data from Google Sheets
+                await loadDataFromGoogleSheets();
+                await updateDashboardStats();
+                showNotification('รีเฟรชแผนที่เรียบร้อย');
+            }
+        }
+
+        function toggleMapView() {
+            if (incidentMap) {
+                // Toggle between different map views
+                const currentZoom = incidentMap.getZoom();
+                if (currentZoom > 12) {
+                    incidentMap.setView([13.7563, 100.5018], 11);
+                } else {
+                    incidentMap.setView([13.7563, 100.5018], 14);
+                }
+            }
+        }
+
+        function getCurrentLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function (position) {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+
+                        document.getElementById('latitude').value = lat.toFixed(6);
+                        document.getElementById('longitude').value = lon.toFixed(6);
+
+                        alert('ได้ตำแหน่งปัจจุบันแล้ว!');
+                    },
+                    function (error) {
+                        alert('ไม่สามารถหาตำแหน่งได้: ' + error.message);
+                    }
+                );
+            } else {
+                alert('เบราว์เซอร์ไม่รองรับการหาตำแหน่ง');
+            }
+        }
+
+        // Google Apps Script integration
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwiu4NSuKKRd1EjlBobu_KZZIX0RzIKA0S5jQ4muvpGryvRPPHX0N0BCnq-lw6_1ojQ/exec';
+        let isLoading = false;
+
+        async function saveToGoogleSheets(data) {
+            if (!SCRIPT_URL || SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE') {
+                showNotification('กรุณาตั้งค่า Google Apps Script URL ก่อน', 'error');
+                return false;
+            }
+
+            try {
+                showNotification('กำลังบันทึกข้อมูล...', 'info');
+
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        action: 'save',
+                        data: JSON.stringify(data)
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showNotification('บันทึกข้อมูลเรียบร้อยแล้ว');
+                    await loadDataFromGoogleSheets();
+                    return true;
+                } else {
+                    showNotification('เกิดข้อผิดพลาด: ' + result.message, 'error');
+                    return false;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('เกิดข้อผิดพลาดในการบันทึกข้อมูล', 'error');
+                return false;
+            }
+        }
+
+        async function loadDataFromGoogleSheets() {
+            if (!SCRIPT_URL || SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE') {
+                showNotification('ใช้ข้อมูลตัวอย่าง (ยังไม่ได้เชื่อมต่อ Google Sheets)', 'info');
+                return;
+            }
+
+            if (isLoading) return;
+            isLoading = true;
+
+            try {
+                showNotification('กำลังโหลดข้อมูลจาก Google Sheets...', 'info');
+
+                const response = await fetch(SCRIPT_URL + '?action=getAll');
+                const data = await response.json();
+
+                if (Array.isArray(data)) {
+                    stolenCarsData = data.map(item => ({
+                        ...item,
+                        id: parseInt(item.id) || item.id,
+                        latitude: item.latitude ? parseFloat(item.latitude) : null,
+                        longitude: item.longitude ? parseFloat(item.longitude) : null
+                    }));
+
+                    filteredData = [...stolenCarsData];
+                    updateMapMarkers();
+                    await updateDashboardStats();
+                    renderDataTable();
+
+                    showNotification(`โหลดข้อมูล ${stolenCarsData.length} รายการเรียบร้อย`);
+                } else {
+                    throw new Error('Invalid data format');
+                }
+            } catch (error) {
+                console.error('Error loading data:', error);
+                showNotification('ไม่สามารถโหลดข้อมูลจาก Google Sheets ได้', 'error');
+            } finally {
+                isLoading = false;
+            }
+        }
+
+        async function updateCaseStatusInSheets(caseId, status) {
+            if (!SCRIPT_URL || SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE') {
+                return true; // Allow local update if no Sheets connection
+            }
+
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        action: 'updateStatus',
+                        caseId: caseId,
+                        status: status
+                    })
+                });
+
+                const result = await response.json();
+                return result.success;
+            } catch (error) {
+                console.error('Error updating status:', error);
+                return false;
+            }
+        }
+
+        async function deleteCaseFromSheets(caseId) {
+            if (!SCRIPT_URL || SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE') {
+                return true; // Allow local delete if no Sheets connection
+            }
+
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        action: 'delete',
+                        caseId: caseId
+                    })
+                });
+
+                const result = await response.json();
+                return result.success;
+            } catch (error) {
+                console.error('Error deleting case:', error);
+                return false;
+            }
+        }
+
+        async function loadSettingsFromSheets() {
+            if (!SCRIPT_URL || SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE') {
+                showNotification('ใช้ข้อมูลตัวอย่าง (ยังไม่ได้เชื่อมต่อ Google Sheets)', 'info');
+                return;
+            }
+
+            try {
+                showNotification('กำลังโหลดข้อมูลฟอร์ม...', 'info');
+
+                // Load car brands
+                const brandsResponse = await fetch(SCRIPT_URL + '?action=getSetting&type=ยี่ห้อรถ');
+                const brands = await brandsResponse.json();
+
+                // Load investigation shifts  
+                const shiftsResponse = await fetch(SCRIPT_URL + '?action=getSetting&type=เวรสืบสวน');
+                const shifts = await shiftsResponse.json();
+
+                // Load investigators
+                const investigatorsResponse = await fetch(SCRIPT_URL + '?action=getSetting&type=พนักงานสอบสวน');
+                const investigators = await investigatorsResponse.json();
+
+                // Load areas
+                const areasResponse = await fetch(SCRIPT_URL + '?action=getSetting&type=พื้นที่เกิดเหตุ');
+                const areas = await areasResponse.json();
+
+                // Update form options
+                updateFormOptions('car-brand', brands);
+                updateFormOptions('investigation-shift', shifts);
+                updateFormOptions('investigator', investigators);
+                updateFormOptions('incident-area', areas);
+
+                // Update filter options in data page
+                updateFilterOptions('filter-brand', brands);
+
+                showNotification('โหลดข้อมูลฟอร์มเรียบร้อย');
+
+            } catch (error) {
+                console.error('Error loading settings:', error);
+                showNotification('ไม่สามารถโหลดข้อมูลฟอร์มได้ ใช้ข้อมูลเริ่มต้น', 'error');
+            }
+        }
+
+        function updateFormOptions(selectId, options) {
+            const select = document.getElementById(selectId);
+            if (!select || !Array.isArray(options)) return;
+
+            // Keep the first option (placeholder) and "other" option
+            const firstOption = select.options[0];
+            const otherOption = Array.from(select.options).find(opt => opt.value === 'other');
+
+            // Clear all options
+            select.innerHTML = '';
+
+            // Add back first option
+            select.appendChild(firstOption);
+
+            // Add new options from Sheets
+            options.forEach(option => {
+                if (option && option.trim()) {
+                    const optionElement = document.createElement('option');
+                    optionElement.value = option;
+                    optionElement.textContent = option;
+                    select.appendChild(optionElement);
+                }
+            });
+
+            // Add back "other" option if it existed
+            if (otherOption) {
+                select.appendChild(otherOption);
+            }
+        }
+
+        function updateFilterOptions(selectId, options) {
+            const select = document.getElementById(selectId);
+            if (!select || !Array.isArray(options)) return;
+
+            // Keep the first option (placeholder)
+            const firstOption = select.options[0];
+
+            // Clear all options
+            select.innerHTML = '';
+
+            // Add back first option
+            select.appendChild(firstOption);
+
+            // Add new options from Sheets
+            options.forEach(option => {
+                if (option && option.trim()) {
+                    const optionElement = document.createElement('option');
+                    optionElement.value = option;
+                    optionElement.textContent = option;
+                    select.appendChild(optionElement);
+                }
+            });
+        }
+
+        // Data rendering functions
+        function renderDataTable() {
+            const tableBody = document.getElementById('data-table-body');
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageData = filteredData.slice(startIndex, endIndex);
+
+            if (pageData.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="px-4 py-8 text-center text-gray-500">
+                            <i class="fas fa-search text-4xl mb-2"></i>
+                            <p>ไม่พบข้อมูลที่ตรงกับการค้นหา</p>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                tableBody.innerHTML = pageData.map(item => `
+                    <tr class="hover:bg-gray-50 text-gray-700">
+                        <td class="px-4 py-3 text-sm">${formatDate(item.date)}</td>
+                        <td class="px-4 py-3 text-sm font-medium text-gray-900">${item.licensePlate}</td>
+                        <td class="px-4 py-3 text-sm">${item.brand} ${item.model}</td>
+                        <td class="px-4 py-3 text-sm">${item.color}</td>
+                        <td class="px-4 py-3 text-sm">${item.area}</td>
+                        <td class="px-4 py-3 text-sm">${item.shift}</td>
+                        <td class="px-4 py-3">
+                            <div class="relative">
+                                <select onchange="updateCaseStatus(${item.id}, this.value)" 
+                                        class="status-${item.status} px-2 py-1 rounded-full text-xs font-medium border-0 cursor-pointer">
+                                    <option value="pending" ${item.status === 'pending' ? 'selected' : ''}>รอดำเนินการ</option>
+                                    <option value="investigating" ${item.status === 'investigating' ? 'selected' : ''}>อยู่ระหว่างสืบสวน</option>
+                                    <option value="arrested" ${item.status === 'arrested' ? 'selected' : ''}>จับกุมแล้ว</option>
+                                    <option value="closed" ${item.status === 'closed' ? 'selected' : ''}>ปิดคดี</option>
+                                </select>
+                            </div>
+                        </td>
+                        <td class="px-4 py-3">
+                            <div class="flex space-x-2">
+                                <button onclick="viewCaseDetails(${item.id})" class="text-green-600 hover:text-green-700" title="ดูรายละเอียด">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button onclick="editCase(${item.id})" class="text-blue-600 hover:text-blue-700" title="แก้ไข">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button onclick="deleteCase(${item.id})" class="text-red-600 hover:text-red-700" title="ลบ">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            renderPagination();
+        }
+
+        function renderPagination() {
+            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+            const container = document.getElementById('pagination-container');
+
+            if (totalPages <= 1) {
+                container.innerHTML = `
+                    <p class="text-sm text-gray-700">แสดง ${filteredData.length} รายการ</p>
+                `;
+                return;
+            }
+
+            const startItem = (currentPage - 1) * itemsPerPage + 1;
+            const endItem = Math.min(currentPage * itemsPerPage, filteredData.length);
+
+            let paginationHTML = `
+                <p class="text-sm text-gray-700">แสดง ${startItem}-${endItem} จาก ${filteredData.length} รายการ</p>
+                <div class="flex space-x-2">
+            `;
+
+            // Previous button
+            paginationHTML += `
+                <button onclick="changePage(${currentPage - 1})" 
+                        ${currentPage === 1 ? 'disabled' : ''} 
+                        class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                    ก่อนหน้า
+                </button>
+            `;
+
+            // Page numbers
+            const startPage = Math.max(1, currentPage - 2);
+            const endPage = Math.min(totalPages, currentPage + 2);
+
+            if (startPage > 1) {
+                paginationHTML += `<button onclick="changePage(1)" class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">1</button>`;
+                if (startPage > 2) {
+                    paginationHTML += `<span class="px-3 py-2">...</span>`;
+                }
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                paginationHTML += `
+                    <button onclick="changePage(${i})" 
+                            class="px-3 py-2 ${i === currentPage ? 'bg-blue-600 text-white' : 'border border-gray-300 hover:bg-gray-50'} rounded-lg">
+                        ${i}
+                    </button>
+                `;
+            }
+
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    paginationHTML += `<span class="px-3 py-2">...</span>`;
+                }
+                paginationHTML += `<button onclick="changePage(${totalPages})" class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">${totalPages}</button>`;
+            }
+
+            // Next button
+            paginationHTML += `
+                <button onclick="changePage(${currentPage + 1})" 
+                        ${currentPage === totalPages ? 'disabled' : ''} 
+                        class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                    ถัดไป
+                </button>
+            `;
+
+            paginationHTML += '</div>';
+            container.innerHTML = paginationHTML;
+        }
+
+        function changePage(page) {
+            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+            if (page >= 1 && page <= totalPages) {
+                currentPage = page;
+                renderDataTable();
+            }
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('th-TH', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        }
+
+        function viewCaseDetails(id) {
+            const caseData = stolenCarsData.find(item => item.id === id);
+            if (!caseData) return;
+
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+            modal.innerHTML = `
+                <div class="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-bold text-gray-800">รายละเอียดคดี #${caseData.id}</h3>
+                            <button onclick="this.closest('.fixed').remove()" class="text-gray-500 hover:text-gray-700">
+                                <i class="fas fa-times text-xl"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="space-y-3">
+                                <div><strong>ทะเบียนรถ:</strong> ${caseData.licensePlate}</div>
+                                <div><strong>ยี่ห้อ/รุ่น:</strong> ${caseData.brand} ${caseData.model}</div>
+                                <div><strong>สี:</strong> ${caseData.color}</div>
+                                <div><strong>วันที่เกิดเหตุ:</strong> ${formatDate(caseData.date)}</div>
+                                <div><strong>เวลา:</strong> ${caseData.time}</div>
+                            </div>
+                            <div class="space-y-3">
+                                <div><strong>พื้นที่เกิดเหตุ:</strong> ${caseData.area}</div>
+                                <div><strong>เวรสืบสวน:</strong> ${caseData.shift}</div>
+                                <div><strong>พนักงานสอบสวน:</strong> ${caseData.investigator}</div>
+                                <div><strong>สถานะ:</strong> <span class="status-${caseData.status} px-2 py-1 rounded-full text-xs">${getStatusText(caseData.status)}</span></div>
+                                ${caseData.latitude && caseData.longitude ? `<div><strong>พิกัด:</strong> ${caseData.latitude}, ${caseData.longitude}</div>` : ''}
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <strong>รายละเอียดเพิ่มเติม:</strong>
+                            <p class="mt-2 p-3 bg-gray-50 rounded-lg">${caseData.details}</p>
+                        </div>
+                        
+                        <div class="mt-6 flex justify-end space-x-3">
+                            <button onclick="editCase(${caseData.id}); this.closest('.fixed').remove();" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                                <i class="fas fa-edit mr-2"></i>แก้ไข
+                            </button>
+                            <button onclick="this.closest('.fixed').remove()" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">
+                                ปิด
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+        }
+
+        async function updateDashboardStats() {
+            const totalCases = stolenCarsData.length;
+            const pending = stolenCarsData.filter(item => item.status === 'pending').length;
+            const investigating = stolenCarsData.filter(item => item.status === 'investigating').length;
+            const arrested = stolenCarsData.filter(item => item.status === 'arrested').length;
+            const closed = stolenCarsData.filter(item => item.status === 'closed').length;
+
+            document.getElementById('total-cases').textContent = totalCases;
+            document.getElementById('investigating-cases').textContent = investigating;
+            document.getElementById('arrested-cases').textContent = arrested;
+            document.getElementById('closed-cases').textContent = closed;
+
+            // Update shift statistics
+            await updateShiftStats();
+        }
+
+        async function updateShiftStats() {
+            const shiftStats = {};
+            stolenCarsData.forEach(item => {
+                const shift = item.shift || 'ไม่ระบุ';
+                shiftStats[shift] = (shiftStats[shift] || 0) + 1;
+            });
+
+            // Get shifts from Settings if available
+            let availableShifts = [];
+            if (SCRIPT_URL && SCRIPT_URL !== 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE') {
+                try {
+                    const response = await fetch(SCRIPT_URL + '?action=getSetting&type=เวรสืบสวน');
+                    availableShifts = await response.json();
+                } catch (error) {
+                    console.log('Using local shift data');
+                }
+            }
+
+            const shiftContainer = document.getElementById('shift-stats');
+
+            // If no Settings data, use all shifts from data
+            if (availableShifts.length === 0) {
+                availableShifts = Object.keys(shiftStats);
+            }
+
+            // Create display data based on Settings shifts
+            const displayData = availableShifts.map(shift => ({
+                shift: shift,
+                count: shiftStats[shift] || 0
+            })).filter(item => item.count > 0)
+                .sort((a, b) => b.count - a.count);
+
+            if (displayData.length === 0) {
+                shiftContainer.innerHTML = `
+                    <div class="flex justify-center items-center p-4 text-gray-500">
+                        ไม่มีข้อมูล
+                    </div>
+                `;
+                return;
+            }
+
+            const colors = ['bg-blue-100 text-blue-800', 'bg-green-100 text-green-800', 'bg-red-100 text-red-800', 'bg-purple-100 text-purple-800'];
+            let colorIndex = 0;
+
+            shiftContainer.innerHTML = displayData.map(({ shift, count }) => {
+                const colorClass = colors[colorIndex % colors.length];
+                colorIndex++;
+                return `
+                    <div class="flex justify-between items-center p-2 sm:p-3 bg-gray-50 rounded-lg">
+                        <span class="font-medium text-sm sm:text-base text-gray-700">${shift}</span>
+                        <span class="${colorClass} px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm">${count} คดี</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Charts initialization with real data
+        let chartInstances = {};
+
+        async function initCharts() {
+            // Destroy existing charts
+            Object.values(chartInstances).forEach(chart => {
+                if (chart) chart.destroy();
+            });
+            chartInstances = {};
+
+            // Generate real data from stolenCarsData
+            const monthlyData = generateMonthlyChartData();
+            const brandData = await generateBrandChartData();
+            const areaData = await generateAreaChartData();
+
+            // Monthly chart
+            const monthlyCtx = document.getElementById('monthlyChart');
+            if (monthlyCtx) {
+                chartInstances.monthly = new Chart(monthlyCtx, {
+                    type: 'line',
+                    data: {
+                        labels: monthlyData.labels,
+                        datasets: [{
+                            label: 'รถหาย',
+                            data: monthlyData.data,
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.4,
+                            borderWidth: 2,
+                            pointRadius: 3,
+                            pointHoverRadius: 5,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false,
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(0,0,0,0.1)'
+                                },
+                                ticks: {
+                                    font: {
+                                        size: window.innerWidth < 640 ? 10 : 12
+                                    }
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    font: {
+                                        size: window.innerWidth < 640 ? 10 : 12
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Brand chart
+            const brandCtx = document.getElementById('brandChart');
+            if (brandCtx) {
+                chartInstances.brand = new Chart(brandCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: brandData.labels,
+                        datasets: [{
+                            data: brandData.data,
+                            backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6'],
+                            borderWidth: 0,
+                            cutout: '60%'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    padding: 15,
+                                    usePointStyle: true,
+                                    font: {
+                                        size: window.innerWidth < 640 ? 10 : 12
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = ((context.parsed * 100) / total).toFixed(1);
+                                        return `${context.label}: ${context.parsed} คดี (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Area chart
+            const areaCtx = document.getElementById('areaChart');
+            if (areaCtx) {
+                chartInstances.area = new Chart(areaCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: areaData.labels,
+                        datasets: [{
+                            label: 'จำนวนคดี',
+                            data: areaData.data,
+                            backgroundColor: '#3b82f6',
+                            borderRadius: 4,
+                            borderSkipped: false
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        return `${context.label}: ${context.parsed.y} คดี`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(0,0,0,0.1)'
+                                },
+                                ticks: {
+                                    font: {
+                                        size: window.innerWidth < 640 ? 10 : 12
+                                    }
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    font: {
+                                        size: window.innerWidth < 640 ? 10 : 12
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function generateMonthlyChartData() {
+            const monthNames = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+            const monthlyCount = new Array(12).fill(0);
+
+            stolenCarsData.forEach(item => {
+                const date = new Date(item.date);
+                const month = date.getMonth();
+                monthlyCount[month]++;
+            });
+
+            return {
+                labels: monthNames,
+                data: monthlyCount
+            };
+        }
+
+        async function generateBrandChartData() {
+            const brandCount = {};
+
+            stolenCarsData.forEach(item => {
+                brandCount[item.brand] = (brandCount[item.brand] || 0) + 1;
+            });
+
+            // Get brands from Settings if available
+            let availableBrands = [];
+            if (SCRIPT_URL && SCRIPT_URL !== 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE') {
+                try {
+                    const response = await fetch(SCRIPT_URL + '?action=getSetting&type=ยี่ห้อรถ');
+                    availableBrands = await response.json();
+                } catch (error) {
+                    console.log('Using local brand data');
+                }
+            }
+
+            // If no Settings data, use all brands from data
+            if (availableBrands.length === 0) {
+                availableBrands = Object.keys(brandCount);
+            }
+
+            // Create chart data based on Settings brands
+            const chartData = availableBrands.map(brand => ({
+                brand: brand,
+                count: brandCount[brand] || 0
+            })).filter(item => item.count > 0)
+                .sort((a, b) => b.count - a.count)
+                .slice(0, 7); // Top 7 brands
+
+            return {
+                labels: chartData.map(item => item.brand),
+                data: chartData.map(item => item.count)
+            };
+        }
+
+        async function generateAreaChartData() {
+            const areaCount = {};
+
+            stolenCarsData.forEach(item => {
+                areaCount[item.area] = (areaCount[item.area] || 0) + 1;
+            });
+
+            // Get areas from Settings if available
+            let availableAreas = [];
+            if (SCRIPT_URL && SCRIPT_URL !== 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE') {
+                try {
+                    const response = await fetch(SCRIPT_URL + '?action=getSetting&type=พื้นที่เกิดเหตุ');
+                    availableAreas = await response.json();
+                } catch (error) {
+                    console.log('Using local area data');
+                }
+            }
+
+            // If no Settings data, use all areas from data
+            if (availableAreas.length === 0) {
+                availableAreas = Object.keys(areaCount);
+            }
+
+            // Create chart data based on Settings areas
+            const chartData = availableAreas.map(area => ({
+                area: area,
+                count: areaCount[area] || 0
+            })).filter(item => item.count > 0)
+                .sort((a, b) => b.count - a.count)
+                .slice(0, 8); // Top 8 areas
+
+            return {
+                labels: chartData.map(item => item.area),
+                data: chartData.map(item => item.count)
+            };
+        }
+
+
+
+
+
+
+        // Data management functions
+        function editCase(id) {
+            const caseData = stolenCarsData.find(item => item.id === id);
+            if (!caseData) return;
+
+            editingCaseId = id;
+
+            // Fill form with existing data
+            document.getElementById('car-brand').value = caseData.brand;
+            document.getElementById('car-model').value = caseData.model;
+            document.getElementById('car-color').value = caseData.color;
+            document.getElementById('license-plate').value = caseData.licensePlate;
+            document.getElementById('investigation-shift').value = caseData.shift;
+            document.getElementById('investigator').value = caseData.investigator;
+            document.getElementById('incident-area').value = caseData.area;
+            document.getElementById('incident-date').value = caseData.date;
+            document.getElementById('incident-time').value = caseData.time;
+            document.getElementById('latitude').value = caseData.latitude || '';
+            document.getElementById('longitude').value = caseData.longitude || '';
+            document.getElementById('additional-details').value = caseData.details;
+
+            // Update form title
+            const formTitle = document.querySelector('#report-page h2');
+            formTitle.innerHTML = '<i class="fas fa-edit text-orange-600 mr-3"></i>แก้ไขข้อมูลรถหาย';
+
+            showPage('report');
+            showNotification('กำลังแก้ไขข้อมูล', 'info');
+        }
+
+        async function deleteCase(id) {
+            if (confirm('ต้องการลบคดีนี้หรือไม่? การดำเนินการนี้ไม่สามารถยกเลิกได้')) {
+                const index = stolenCarsData.findIndex(item => item.id === id);
+                if (index !== -1) {
+                    stolenCarsData.splice(index, 1);
+                    filteredData = [...stolenCarsData];
+
+                    updateMapMarkers();
+                    await updateDashboardStats();
+                    renderDataTable();
+
+                    showNotification('ลบข้อมูลเรียบร้อยแล้ว');
+                }
+            }
+        }
+
+        async function updateCaseStatus(id, newStatus) {
+            const index = stolenCarsData.findIndex(item => item.id === id);
+            if (index !== -1) {
+                stolenCarsData[index].status = newStatus;
+                filteredData = [...stolenCarsData];
+
+                updateMapMarkers();
+                await updateDashboardStats();
+                renderDataTable();
+
+                showNotification(`อัปเดตสถานะเป็น "${getStatusText(newStatus)}" แล้ว`);
+            }
+        }
+
+        function exportData() {
+            const csvContent = generateCSV();
+            // เพิ่ม UTF-8 BOM เพื่อให้ Excel แสดงภาษาไทยได้ถูกต้อง
+            const BOM = '\uFEFF';
+            const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+
+            if (link.download !== undefined) {
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', `รายงานรถหาย_${new Date().toISOString().split('T')[0]}.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                showNotification('ส่งออกข้อมูลเรียบร้อยแล้ว');
+            }
+        }
+
+        function generateCSV() {
+            const headers = ['ID', 'วันที่เกิดเหตุ', 'เวลา', 'ทะเบียนรถ', 'ยี่ห้อ', 'รุ่น', 'สี', 'พื้นที่', 'เวรสืบสวน', 'พนักงานสอบสวน', 'สถานะ', 'รายละเอียด', 'Latitude', 'Longitude'];
+            let csv = headers.join(',') + '\n';
+
+            filteredData.forEach(item => {
+                const row = [
+                    item.id,
+                    item.date,
+                    item.time,
+                    `"${item.licensePlate}"`,
+                    `"${item.brand}"`,
+                    `"${item.model}"`,
+                    `"${item.color}"`,
+                    `"${item.area}"`,
+                    `"${item.shift}"`,
+                    `"${item.investigator}"`,
+                    `"${getStatusText(item.status)}"`,
+                    `"${item.details.replace(/"/g, '""')}"`,
+                    item.latitude || '',
+                    item.longitude || ''
+                ];
+                csv += row.join(',') + '\n';
+            });
+
+            return csv;
+        }
+
+        function clearFilters() {
+            document.getElementById('search-input').value = '';
+            document.getElementById('filter-brand').value = '';
+            document.getElementById('filter-status').value = '';
+            applyFilters();
+            showNotification('ล้างตัวกรองแล้ว', 'info');
+        }
+
+        // Search and filter functionality
+        function applyFilters() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const brandFilter = document.getElementById('filter-brand').value;
+            const statusFilter = document.getElementById('filter-status').value;
+
+            filteredData = stolenCarsData.filter(item => {
+                const matchesSearch = !searchTerm ||
+                    item.licensePlate.toLowerCase().includes(searchTerm) ||
+                    item.brand.toLowerCase().includes(searchTerm) ||
+                    item.model.toLowerCase().includes(searchTerm) ||
+                    item.area.toLowerCase().includes(searchTerm) ||
+                    item.investigator.toLowerCase().includes(searchTerm);
+
+                const matchesBrand = !brandFilter || item.brand === brandFilter;
+                const matchesStatus = !statusFilter || item.status === statusFilter;
+
+                return matchesSearch && matchesBrand && matchesStatus;
+            });
+
+            currentPage = 1;
+            renderDataTable();
+        }
+
+        /*
+        วิธีการตั้งค่า Google Apps Script:
+        
+        1. ไปที่ https://script.google.com
+        2. สร้าง New Project
+        3. วางโค้ดด้านล่างใน code.gs
+        4. สร้าง Google Sheets ใหม่ที่มี 3 ชีต:
+           - ชีต "รถหาย" สำหรับข้อมูลรถหาย
+           - ชีต "Setting" สำหรับข้อมูลตั้งค่า (ยี่ห้อ, เวรสืบสวน, พนักงานสอบสวน, พื้นที่)
+        5. Deploy เป็น Web App
+        6. เลือก Execute as: Me
+        7. Who has access: Anyone
+        8. คัดลอก URL ที่ได้มาใส่ในตัวแปร SCRIPT_URL ด้านบน
+        
+        โครงสร้างชีต Setting:
+        คอลัมน์ A: ยี่ห้อ (Toyota, Honda, Mazda, ...)
+        คอลัมน์ B: เวรสืบสวน (เวรเช้า, เวรบ่าย, เวรดึก)
+        คอลัมน์ C: พนักงานสอบสวน (พ.ต.ต.สมชาย ใจดี, ...)
+        คอลัมน์ D: พื้นที่ (บางนา, ลาดกระบัง, ...)
+
+        Google Apps Script Code (code.gs):
+        
+        // ฟังก์ชันสำหรับบันทึกข้อมูลรถหาย (รวมพิกัด)
+        function saveCarTheftData(data) {
+          const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('รถหาย');
+          if (!sheet) {
+            SpreadsheetApp.getActiveSpreadsheet().insertSheet('รถหาย');
+            const newSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('รถหาย');
+            // สร้างหัวตาราง (เพิ่มคอลัมน์ latitude, longitude)
+            newSheet.getRange(1, 1, 1, 14).setValues([
+              ['ID', 'วันที่บันทึก', 'วันที่เกิดเหตุ', 'เวลาเกิดเหตุ', 'ทะเบียนรถ', 'ยี่ห้อ', 'รุ่น', 'สี', 'พื้นที่เกิดเหตุ', 'เวรสืบสวน', 'พนักงานสอบสวน', 'รายละเอียด', 'สถานะ', 'Latitude', 'Longitude']
+            ]);
+          }
+          
+          const lastRow = sheet.getLastRow();
+          const newId = lastRow > 1 ? sheet.getRange(lastRow, 1).getValue() + 1 : 1;
+          
+          sheet.getRange(lastRow + 1, 1, 1, 15).setValues([[
+            newId,
+            new Date(),
+            data.incidentDate,
+            data.incidentTime,
+            data.licensePlate,
+            data.brand,
+            data.model,
+            data.color,
+            data.area,
+            data.shift,
+            data.investigator,
+            data.details,
+            data.status || 'รอดำเนินการ',
+            data.latitude || '',
+            data.longitude || ''
+          ]]);
+          
+          return { success: true, message: 'บันทึกข้อมูลเรียบร้อย', id: newId };
+        }
+
+        // ฟังก์ชันดึงข้อมูลทั้งหมด (รวมพิกัด)
+        function getAllCarTheftData() {
+          const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('รถหาย');
+          if (!sheet || sheet.getLastRow() < 2) return [];
+          
+          const data = sheet.getDataRange().getValues();
+          const headers = data[0];
+          const rows = data.slice(1);
+          
+          return rows.map(row => {
+            const obj = {};
+            headers.forEach((header, index) => {
+              obj[header] = row[index];
+            });
+            
+            // แปลงข้อมูลให้ตรงกับโครงสร้างที่ใช้ใน frontend
+            return {
+              id: obj['ID'],
+              date: obj['วันที่เกิดเหตุ'],
+              time: obj['เวลาเกิดเหตุ'],
+              licensePlate: obj['ทะเบียนรถ'],
+              brand: obj['ยี่ห้อ'],
+              model: obj['รุ่น'],
+              color: obj['สี'],
+              area: obj['พื้นที่เกิดเหตุ'],
+              shift: obj['เวรสืบสวน'],
+              investigator: obj['พนักงานสอบสวน'],
+              status: obj['สถานะ'],
+              details: obj['รายละเอียด'],
+              latitude: obj['Latitude'] ? parseFloat(obj['Latitude']) : null,
+              longitude: obj['Longitude'] ? parseFloat(obj['Longitude']) : null
+            };
+          });
+        }
+
+        // ฟังก์ชันอัปเดตสถานะคดี
+        function updateCaseStatus(caseId, status) {
+          const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('รถหาย');
+          const data = sheet.getDataRange().getValues();
+          
+          for (let i = 1; i < data.length; i++) {
+            if (data[i][0] == caseId) { // คอลัมน์ ID
+              sheet.getRange(i + 1, 13).setValue(status); // คอลัมน์สถานะ
+              return { success: true };
+            }
+          }
+          
+          return { success: false, message: 'ไม่พบคดีที่ระบุ' };
+        }
+
+        // ฟังก์ชันลบข้อมูล
+        function deleteCase(caseId) {
+          const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('รถหาย');
+          const data = sheet.getDataRange().getValues();
+          
+          for (let i = 1; i < data.length; i++) {
+            if (data[i][0] == caseId) { // คอลัมน์ ID
+              sheet.deleteRow(i + 1);
+              return { success: true };
+            }
+          }
+          
+          return { success: false, message: 'ไม่พบคดีที่ระบุ' };
+        }
+
+        // ฟังก์ชันดึงข้อมูล Setting
+        function getSettingData(type) {
+          const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Setting');
+          if (!sheet) {
+            // สร้างชีต Setting ถ้ายังไม่มี
+            const newSheet = SpreadsheetApp.getActiveSpreadsheet().insertSheet('Setting');
+            newSheet.getRange(1, 1, 1, 4).setValues([['ยี่ห้อรถ', 'เวรสืบสวน', 'พนักงานสอบสวน', 'พื้นที่เกิดเหตุ']]);
+            
+            // ใส่ข้อมูลตัวอย่าง
+            const sampleData = [
+              ['Toyota', 'เวรเช้า (06:00-14:00)', 'พ.ต.ต.สมชาย ใจดี', 'บางนา'],
+              ['Honda', 'เวรบ่าย (14:00-22:00)', 'พ.ต.ต.สมหญิง รักดี', 'ลาดกระบัง'],
+              ['Mazda', 'เวรดึก (22:00-06:00)', 'พ.ต.ต.สมศักดิ์ ทำดี', 'สวนหลวง'],
+              ['Nissan', '', '', 'ประเวศ'],
+              ['Mitsubishi', '', '', 'สะพานพุทธ'],
+              ['Isuzu', '', '', ''],
+              ['Ford', '', '', '']
+            ];
+            newSheet.getRange(2, 1, sampleData.length, 4).setValues(sampleData);
+            return [];
+          }
+          
+          const data = sheet.getDataRange().getValues();
+          let columnIndex;
+          
+          switch(type) {
+            case 'ยี่ห้อรถ': columnIndex = 0; break;
+            case 'เวรสืบสวน': columnIndex = 1; break;
+            case 'พนักงานสอบสวน': columnIndex = 2; break;
+            case 'พื้นที่เกิดเหตุ': columnIndex = 3; break;
+            default: return [];
+          }
+          
+          return data.slice(1).map(row => row[columnIndex]).filter(item => item && item.trim() !== '');
+        }
+
+        // ฟังก์ชันสำหรับ Web App
+        function doGet(e) {
+          const action = e.parameter.action;
+          
+          try {
+            switch(action) {
+              case 'getAll':
+                return ContentService.createTextOutput(
+                  JSON.stringify(getAllCarTheftData())
+                ).setMimeType(ContentService.MimeType.JSON);
+                
+              case 'getSetting':
+                return ContentService.createTextOutput(
+                  JSON.stringify(getSettingData(e.parameter.type))
+                ).setMimeType(ContentService.MimeType.JSON);
+                
+              case 'getStats':
+                return ContentService.createTextOutput(
+                  JSON.stringify(getStatistics())
+                ).setMimeType(ContentService.MimeType.JSON);
+                
+              default:
+                return HtmlService.createTemplateFromFile('index').evaluate()
+                  .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+            }
+          } catch (error) {
+            return ContentService.createTextOutput(
+              JSON.stringify({ success: false, error: error.toString() })
+            ).setMimeType(ContentService.MimeType.JSON);
+          }
+        }
+
+        function doPost(e) {
+          const action = e.parameter.action;
+          
+          try {
+            switch(action) {
+              case 'save':
+                return ContentService.createTextOutput(
+                  JSON.stringify(saveCarTheftData(JSON.parse(e.parameter.data)))
+                ).setMimeType(ContentService.MimeType.JSON);
+                
+              case 'updateStatus':
+                return ContentService.createTextOutput(
+                  JSON.stringify(updateCaseStatus(e.parameter.caseId, e.parameter.status))
+                ).setMimeType(ContentService.MimeType.JSON);
+                
+              case 'delete':
+                return ContentService.createTextOutput(
+                  JSON.stringify(deleteCase(e.parameter.caseId))
+                ).setMimeType(ContentService.MimeType.JSON);
+                
+              default:
+                return ContentService.createTextOutput(
+                  JSON.stringify({ success: false, message: 'Invalid action' })
+                ).setMimeType(ContentService.MimeType.JSON);
+            }
+          } catch (error) {
+            return ContentService.createTextOutput(
+              JSON.stringify({ success: false, error: error.toString() })
+            ).setMimeType(ContentService.MimeType.JSON);
+          }
+        }
+
+        // ฟังก์ชันสำหรับสถิติ
+        function getStatistics() {
+          const data = getAllCarTheftData();
+          
+          const stats = {
+            total: data.length,
+            pending: data.filter(item => item.status === 'รอดำเนินการ' || item.status === 'pending').length,
+            investigating: data.filter(item => item.status === 'อยู่ระหว่างสืบสวน' || item.status === 'investigating').length,
+            arrested: data.filter(item => item.status === 'จับกุมแล้ว' || item.status === 'arrested').length,
+            closed: data.filter(item => item.status === 'ปิดคดี' || item.status === 'closed').length,
+            monthlyData: generateMonthlyReport(),
+            brandStats: getBrandStatistics(),
+            areaStats: getAreaStatistics()
+          };
+          
+          return stats;
+        }
+
+        // ฟังก์ชันสำหรับสร้างรายงานรายเดือน
+        function generateMonthlyReport() {
+          const data = getAllCarTheftData();
+          const monthlyData = {};
+          
+          data.forEach(item => {
+            if (item.date) {
+              const date = new Date(item.date);
+              const month = date.getMonth() + 1;
+              const year = date.getFullYear();
+              const key = `${year}-${month.toString().padStart(2, '0')}`;
+              
+              if (!monthlyData[key]) monthlyData[key] = 0;
+              monthlyData[key]++;
+            }
+          });
+          
+          return monthlyData;
+        }
+
+        // ฟังก์ชันสำหรับสถิติยี่ห้อรถ
+        function getBrandStatistics() {
+          const data = getAllCarTheftData();
+          const brandStats = {};
+          
+          data.forEach(item => {
+            if (item.brand) {
+              if (!brandStats[item.brand]) brandStats[item.brand] = 0;
+              brandStats[item.brand]++;
+            }
+          });
+          
+          return brandStats;
+        }
+
+        // ฟังก์ชันสำหรับสถิติพื้นที่
+        function getAreaStatistics() {
+          const data = getAllCarTheftData();
+          const areaStats = {};
+          
+          data.forEach(item => {
+            if (item.area) {
+              if (!areaStats[item.area]) areaStats[item.area] = 0;
+              areaStats[item.area]++;
+            }
+          });
+          
+          return areaStats;
+        }
+
+        // ฟังก์ชันสำหรับส่งออกข้อมูลเป็น CSV
+        function exportToCSV() {
+          const data = getAllCarTheftData();
+          const headers = ['ID', 'วันที่เกิดเหตุ', 'เวลา', 'ทะเบียนรถ', 'ยี่ห้อ', 'รุ่น', 'สี', 'พื้นที่', 'เวรสืบสวน', 'พนักงานสอบสวน', 'สถานะ', 'รายละเอียด', 'Latitude', 'Longitude'];
+          
+          let csv = headers.join(',') + '\n';
+          
+          data.forEach(item => {
+            const row = [
+              item.id,
+              item.date,
+              item.time,
+              item.licensePlate,
+              item.brand,
+              item.model,
+              item.color,
+              item.area,
+              item.shift,
+              item.investigator,
+              item.status,
+              `"${item.details || ''}"`,
+              item.latitude || '',
+              item.longitude || ''
+            ];
+            csv += row.join(',') + '\n';
+          });
+          
+          return csv;
+        }
+        */
+    </script>
+    <script>(function () { function c() { var b = a.contentDocument || a.contentWindow.document; if (b) { var d = b.createElement('script'); d.innerHTML = "window.__CF$cv$params={r:'970ed96aa5ec7b3e',t:'MTc1NTQ5MzI0NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);"; b.getElementsByTagName('head')[0].appendChild(d) } } if (document.body) { var a = document.createElement('iframe'); a.height = 1; a.width = 1; a.style.position = 'absolute'; a.style.top = 0; a.style.left = 0; a.style.border = 'none'; a.style.visibility = 'hidden'; document.body.appendChild(a); if ('loading' !== document.readyState) c(); else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c); else { var e = document.onreadystatechange || function () { }; document.onreadystatechange = function (b) { e(b); 'loading' !== document.readyState && (document.onreadystatechange = e, c()) } } } })();</script>
+</body>
+
+</html>

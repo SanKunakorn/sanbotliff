@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>San BOT - ระบบสนับสนุนงานตำรวจ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="script.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'police-blue': '#1e3a8a',
+                        'police-gold': '#fbbf24'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+
+    <!-- ========================================
+         HEADER SECTION - MOBILE OPTIMIZED
+    ======================================== -->
+    <!-- Header -->
+    <header class="bg-white shadow-lg border-b-4 border-police-blue">
+        <div class="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2 sm:space-x-4">
+                    <div
+                        class="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-police-blue to-blue-600 rounded-full flex items-center justify-center shadow-lg">
+                        <span class="text-white font-bold text-lg sm:text-xl">SB</span>
+                    </div>
+                    <div>
+                        <h1 class="text-lg sm:text-2xl font-bold text-police-blue">San BOT</h1>
+                        <p class="text-gray-600 text-xs sm:text-sm hidden xs:block">ระบบสนับสนุนงานตำรวจ</p>
+                    </div>
+                </div>
+
+                <!-- User Profile -->
+                <div class="flex items-center space-x-2 sm:space-x-4">
+                    <div class="hidden lg:flex items-center space-x-3">
+                        <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gray-300 rounded-full overflow-hidden">
+                            <img id="pictureUrl" class="w-full h-full object-cover" alt="Profile">
+                        </div>
+                        <div>
+                            <p id="displayName" class="font-medium text-gray-800 text-sm">Loading...</p>
+                        </div>
+                    </div>
+                    <div class="flex space-x-1 sm:space-x-2">
+                        <button id="btnLogin" onclick="liff.login()"
+                            class="bg-police-blue text-white px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg hover:bg-blue-800 transition-colors text-xs sm:text-sm">
+                            <span class="hidden sm:inline">เข้าสู่ระบบ</span>
+                            <span class="sm:hidden">เข้า</span>
+                        </button>
+                        <button id="btnLogOut" onclick="logOut()"
+                            class="bg-red-500 text-white px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg hover:bg-red-600 transition-colors text-xs sm:text-sm">
+                            <span class="hidden sm:inline">ออกจากระบบ</span>
+                            <span class="sm:hidden">ออก</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ================================= NAVIGATION SECTION - MOBILE OPTIMIZED ================================== -->
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-2 sm:px-4">
+            <div class="flex space-x-1 sm:space-x-2 overflow-x-auto py-3 scrollbar-hide">
+                <button onclick="showPage('report')"
+                    class="nav-btn active whitespace-nowrap px-3 sm:px-4 py-2.5 sm:py-2 rounded-lg font-medium transition-all text-sm sm:text-base min-w-max touch-manipulation">
+                    <span class="block sm:inline">📍</span>
+                    <span class="hidden xs:inline sm:inline">ตรวจที่เกิดเหตุ</span>
+                    <span class="xs:hidden sm:hidden">ตรวจ</span>
+                </button>
+                <button onclick="showPage('phone')"
+                    class="nav-btn whitespace-nowrap px-3 sm:px-4 py-2.5 sm:py-2 rounded-lg font-medium transition-all text-sm sm:text-base min-w-max touch-manipulation">
+                    <span class="block sm:inline">📞</span>
+                    <span class="hidden xs:inline sm:inline">เบอร์โทร</span>
+                    <span class="xs:hidden sm:hidden">โทร</span>
+                </button>
+                <button onclick="showPage('ip')"
+                    class="nav-btn whitespace-nowrap px-3 sm:px-4 py-2.5 sm:py-2 rounded-lg font-medium transition-all text-sm sm:text-base min-w-max touch-manipulation">
+                    <span class="block sm:inline">🌐</span>
+                    <span class="hidden xs:inline sm:inline">เช็ค IP</span>
+                    <span class="xs:hidden sm:hidden">IP</span>
+                </button>
+                <button onclick="showPage('idcard')"
+                    class="nav-btn whitespace-nowrap px-3 sm:px-4 py-2.5 sm:py-2 rounded-lg font-medium transition-all text-sm sm:text-base min-w-max touch-manipulation">
+                    <span class="block sm:inline">🆔</span>
+                    <span class="hidden xs:inline sm:inline">ค้นหาบัตร</span>
+                    <span class="xs:hidden sm:hidden">บัตร</span>
+                </button>
+                <button onclick="showPage('timecal')"
+                    class="nav-btn whitespace-nowrap px-3 sm:px-4 py-2.5 sm:py-2 rounded-lg font-medium transition-all text-sm sm:text-base min-w-max touch-manipulation">
+                    <span class="block sm:inline">⏰</span>
+                    <span class="hidden xs:inline sm:inline">คำนวณเวลา</span>
+                    <span class="xs:hidden sm:hidden">เวลา</span>
+                </button>
+                <button onclick="showPage('sanapp')"
+                    class="nav-btn whitespace-nowrap px-3 sm:px-4 py-2.5 sm:py-2 rounded-lg font-medium transition-all text-sm sm:text-base min-w-max touch-manipulation">
+                    <span class="block sm:inline">📱</span>
+                    <span class="hidden xs:inline sm:inline">San APP</span>
+                    <span class="xs:hidden sm:hidden">APP</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ================================MAIN CONTENT SECTION=============================== -->
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
+        <!-- =================================REPORT PAGE============================= -->
+        <!-- Report Page -->
+        <div id="page-report" class="page-content">
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex items-center space-x-3 mb-6">
+                    <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                        <span class="text-2xl">📍</span>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800">รายงานตรวจที่เกิดเหตุ</h2>
+                        <p class="text-gray-600">บันทึกข้อมูลการตรวจสอบสถานที่เกิดเหตุ</p>
+                    </div>
+                </div>
+
+                <form id="mainform" class="space-y-6">
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">วันที่</label>
+                            <input type="date" id="datetime"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-police-blue focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">ผู้ปฏิบัติงาน</label>
+                            <input list="userlist" id="user" placeholder="เลือกผู้ปฏิบัติงาน"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-police-blue focus:border-transparent">
+                            <datalist id="userlist">
+                                <option value="ชุดสืบสวน">
+                                <option value="ร้อยเวร 20">
+                                <option value="สายตรวจเขต">
+                                <option value="สายตรวจตู้ยาม">
+                            </datalist>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">รายละเอียด</label>
+                        <textarea id="detail" rows="4"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-police-blue focus:border-transparent"
+                            placeholder="ระบุรายละเอียดการตรวจสอบ..."></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">พิกัดแผนที่</label>
+                        <div class="flex space-x-2">
+                            <input type="text" id="latlong" placeholder="12.8371109,101.1992687"
+                                class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-police-blue focus:border-transparent">
+                            <button type="button" onclick="getCurrentLocation()"
+                                class="bg-green-500 text-white px-4 py-3 rounded-lg hover:bg-green-600 transition-colors whitespace-nowrap">
+                                📍พิกัด
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <div id="showResultmap" class="hidden mt-8 p-6 bg-gray-50 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">ผลลัพธ์:</h3>
+                    <div id="resultMessage" class="bg-white p-4 rounded-lg mb-4 whitespace-pre-wrap border"></div>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-medium mb-2">QR Code:</h4>
+                            <img id="qrImage" class="w-48 h-48 border rounded-lg">
+                        </div>
+                        <div>
+                            <h4 class="font-medium mb-2">แผนที่:</h4>
+                            <img id="map-img" class="w-48 h-48 border rounded-lg">
+                            <a id="mapLink" href="#" target="_blank"
+                                class="inline-block mt-2 text-police-blue hover:underline">เปิดแผนที่ใน Google Maps</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap gap-3 mt-6">
+                    <button id="btnsettext"
+                        class="bg-police-blue text-white px-6 py-3 rounded-lg hover:bg-blue-800 transition-colors">
+                        แสดงข้อมูล
+                    </button>
+                    <button id="btnsendrp"
+                        class="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-colors">
+                        ส่งรายงาน
+                    </button>
+                    <button id="btnShare"
+                        class="bg-police-gold text-white px-6 py-3 rounded-lg hover:bg-yellow-500 transition-colors">
+                        แชร์
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ===================================PHONE CHECK PAGE=============================== -->
+        <!-- Phone Check Page -->
+        <div id="page-phone" class="page-content hidden">
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex items-center space-x-3 mb-6">
+                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                        <span class="text-2xl">📞</span>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800">ตรวจสอบเบอร์โทรศัพท์</h2>
+                        <p class="text-gray-600">ค้นหาข้อมูลเบอร์โทรศัพท์</p>
+                    </div>
+                </div>
+
+                <div class="max-w-md">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">หมายเลขโทรศัพท์</label>
+                    <input type="text" id="txtphone" placeholder="0812345678"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-police-blue focus:border-transparent mb-4">
+                    <button id="btncheckphone"
+                        class="w-full bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition-colors">
+                        ตรวจสอบ
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- ============================IP CHECK PAGE================================ -->
+        <!-- IP Check Page -->
+        <div id="page-ip" class="page-content hidden">
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex items-center space-x-3 mb-6">
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <span class="text-2xl">🌐</span>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800">ตรวจสอบ IP Address</h2>
+                        <p class="text-gray-600">ค้นหาข้อมูล IP Address</p>
+                    </div>
+                </div>
+
+                <div class="max-w-md">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">IP Address</label>
+                    <input type="text" id="txtip" placeholder="192.168.0.1"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-police-blue focus:border-transparent mb-4">
+                    <button id="btncheckip"
+                        class="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition-colors">
+                        ตรวจสอบ
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- =================================ID CARD PAGE===================================== -->
+        <!-- ID Card Page -->
+        <div id="page-idcard" class="page-content hidden">
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex items-center space-x-3 mb-6">
+                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <span class="text-2xl">🆔</span>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800">ค้นหาจากเลขบัตรประชาชน</h2>
+                        <p class="text-gray-600">ตรวจสอบข้อมูลบัตรประจำตัวประชาชน</p>
+                    </div>
+                </div>
+
+                <div class="max-w-md">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">เลขประจำตัวประชาชน</label>
+                    <div class="flex space-x-2 mb-2">
+                        <input type="text" id="txtid" placeholder="เลขประจำตัวประชาชน" maxlength="13"
+                            oninput="validateIDCard()"
+                            class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-police-blue focus:border-transparent">
+                        <div id="idcheck" class="flex items-center px-3"></div>
+                    </div>
+                    <button id="btnidcheck"
+                        class="w-full bg-purple-500 text-white py-3 rounded-lg hover:bg-purple-600 transition-colors">
+                        ตรวจสอบ
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+
+
+        <!-- ===================================TIMECAL PAGE================================== -->
+        <!-- TimeCal Page -->
+        <div id="page-timecal" class="page-content hidden">
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <!-- Header -->
+                <div class="bg-gradient-to-r from-indigo-600 to-indigo-700 text-white p-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+                            <span class="text-sm">⏰</span>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold">Time Calculator</h2>
+                            <p class="text-orange-100 text-sm">คำนวณเวลาสำหรับระบบกล้องวงจรปิด</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TimeCal Content -->
+                <div class="relative">
+                    <iframe id="timeCalFrame" src="timecalculate.html" style="min-height: 700px;"
+                        class="w-full h-96 border-0" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+                        style="min-height: 600px;">
+                    </iframe>
+
+                </div>
+            </div>
+        </div>
+
+
+        <!-- =================================SAN APP PAGE================================ -->
+        <!-- San APP Page with URL Viewer -->
+        <div id="page-sanapp" class="page-content hidden">
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <!-- Header -->
+                <div class="bg-gradient-to-r from-indigo-600 to-indigo-700 text-white p-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+                            <span class="text-sm">📱</span>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold">ลิงก์แนะนำ</h2>
+                            <p class="text-indigo-100 text-sm">ข้อมูลภายนอก</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Website Display Area -->
+                <div class="relative">
+                    <div id="sanAppLoading"
+                        class="hidden absolute inset-0 bg-white bg-opacity-90 flex items-center justify-center z-10">
+                        <div class="text-center">
+                            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4">
+                            </div>
+                            <p class="text-gray-600">กำลังโหลด...</p>
+                        </div>
+                    </div>
+
+                    <!-- Default Content -->
+                    <div id="sanAppDefault" class="p-12 text-center text-gray-500">
+                        <!-- Quick Links for San APP -->
+                        <div class="mt-6">
+                            <div class="flex flex-wrap gap-2 justify-center">
+
+                                <a href="./lostcar.html" target="_blank"
+                                    class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm hover:bg-blue-200 transition-colors">
+                                    ข้อมูลรถหาย
+                                </a>
+
+
+                                <a href="https://www.police.go.th" target="_blank"
+                                    class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm hover:bg-blue-200 transition-colors">
+                                    สำนักงานตำรวจแห่งชาติ
+                                </a>
+                                <a href="https://www.dopa.go.th" target="_blank"
+                                    class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm hover:bg-green-200 transition-colors">
+                                    กรมการปกครอง
+                                </a>
+                                <a href="https://www.dlt.go.th" target="_blank"
+                                    class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm hover:bg-orange-200 transition-colors">
+                                    กรมขนส่งทางบก
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- ======================================RESULTS SECTION============================== -->
+        <!-- Results Section -->
+        <div id="result" class="mt-8 hidden">
+            <div id="statusMessage" class="bg-white rounded-xl shadow-lg p-6 whitespace-pre-line"></div>
+        </div>
+    </main>
+</body>
+
+<!-- =====================================FOOTER SECTION=============================== -->
+<!-- Footer -->
+<footer class="bg-police-blue text-white py-8 mt-12">
+    <div class="max-w-7xl mx-auto px-4 text-center">
+        <p class="text-sm opacity-90">พัฒนาโดย San Kunakorn | งานสืบสวน สภ.นิคมพัฒนา ภ.จว.ระยอง</p>
+    </div>
+</footer>
+
+
+<style>
+    /* Navigation Button Styles */
+    .nav-btn {
+        @apply text-gray-600 hover:text-police-blue hover:bg-blue-50;
+    }
+
+    .nav-btn.active {
+        @apply text-white bg-police-blue;
+    }
+
+    /* Mobile Touch Optimization */
+    .touch-manipulation {
+        touch-action: manipulation;
+    }
+
+    /* Hide scrollbar but keep functionality */
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Custom scrollbar for other elements */
+    .overflow-x-auto::-webkit-scrollbar {
+        height: 4px;
+    }
+
+    .overflow-x-auto::-webkit-scrollbar-track {
+        background: #f1f5f9;
+    }
+
+    .overflow-x-auto::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 2px;
+    }
+
+    /* Mobile responsive breakpoints */
+    @media (max-width: 480px) {
+        .nav-btn {
+            min-width: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .nav-btn span {
+            line-height: 1.2;
+        }
+    }
+
+    /* Extra small screens */
+    @media (max-width: 360px) {
+        .nav-btn {
+            min-width: 50px;
+            padding: 8px 6px !important;
+            font-size: 11px !important;
+        }
+    }
+
+    /* Tablet and up */
+    @media (min-width: 640px) {
+        .nav-btn {
+            flex-direction: row;
+            gap: 8px;
+        }
+    }
+</style>
+
+
+
+<!-- Scripts -->
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script>
+    // Navigation functionality
+    function showPage(pageId) {
+        // Hide all pages
+        document.querySelectorAll('.page-content').forEach(page => {
+            page.classList.add('hidden');
+            result.classList.add('hidden');
+        });
+        // Show selected page
+        document.getElementById(`page-${pageId}`).classList.remove('hidden');
+        // Update navigation buttons
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        event.target.classList.add('active');
+    }
+
+    // Get current location
+    function getCurrentLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                function (position) {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    document.getElementById('latlong').value = `${lat},${lon}`;
+                    Swal.fire('สำเร็จ', 'ได้พิกัดปัจจุบันแล้ว', 'success');
+                },
+                function (error) {
+                    Swal.fire('ข้อผิดพลาด', 'ไม่สามารถรับพิกัดได้: ' + error.message, 'error');
+                }
+            );
+        } else {
+            Swal.fire('ข้อผิดพลาด', 'เบราว์เซอร์ไม่รองรับการรับพิกัด', 'error');
+        }
+    }
+
+    // Initialize the app
+    document.addEventListener('DOMContentLoaded', function () {
+        // Set today's date
+        document.getElementById('datetime').valueAsDate = new Date();
+        // Initialize LIFF
+        if (typeof initializeLiff === 'function') {
+            initializeLiff();
+        }
+    });
+</script>
+
+<script>(function () { function c() { var b = a.contentDocument || a.contentWindow.document; if (b) { var d = b.createElement('script'); d.innerHTML = "window.__CF$cv$params={r:'971942a9e163ee39',t:'MTc1NTYwMjQxMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);"; b.getElementsByTagName('head')[0].appendChild(d) } } if (document.body) { var a = document.createElement('iframe'); a.height = 1; a.width = 1; a.style.position = 'absolute'; a.style.top = 0; a.style.left = 0; a.style.border = 'none'; a.style.visibility = 'hidden'; document.body.appendChild(a); if ('loading' !== document.readyState) c(); else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c); else { var e = document.onreadystatechange || function () { }; document.onreadystatechange = function (b) { e(b); 'loading' !== document.readyState && (document.onreadystatechange = e, c()) } } } })();</script>
+
+</html>
