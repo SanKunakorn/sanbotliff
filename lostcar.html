@@ -1,5 +1,3 @@
-<!-- เปลียน url 803 / 813-->
-
 <!doctype html>
 <html lang="th">
  <head>
@@ -688,26 +686,26 @@
    </div><!-- Report Page -->
    <div id="report-page" class="page">
     <h2 class="text-2xl font-bold text-gray-800 mb-4">รายงานรถหาย</h2>
-    <form id="report-form" class="space-y-4"><!-- Priority -->
-     <div><label class="block text-sm font-medium text-gray-700 mb-2">ระดับความสำคัญ *</label>
-      <div class="flex gap-2"><label class="flex-1"> <input type="radio" name="priority" value="high" class="hidden peer">
+    <form id="report-form" class="space-y-4"><!-- Vehicle Type -->
+     <div><label class="block text-sm font-medium text-gray-700 mb-2">ประเภทรถ *</label>
+      <div class="flex gap-2"><label class="flex-1"> <input type="radio" name="vehicleType" value="รถยนต์" class="hidden peer" checked>
         <div class="status-badge priority-high text-center cursor-pointer peer-checked:ring-2 peer-checked:ring-red-600">
-         ด่วนมาก
-        </div></label> <label class="flex-1"> <input type="radio" name="priority" value="medium" class="hidden peer" checked>
+         🚗 รถยนต์
+        </div></label> <label class="flex-1"> <input type="radio" name="vehicleType" value="รถจักรยานยนต์" class="hidden peer">
         <div class="status-badge priority-medium text-center cursor-pointer peer-checked:ring-2 peer-checked:ring-yellow-600">
-         ปานกลาง
-        </div></label> <label class="flex-1"> <input type="radio" name="priority" value="low" class="hidden peer">
+         🏍️ มอเตอร์ไซค์
+        </div></label> <label class="flex-1"> <input type="radio" name="vehicleType" value="อื่นๆ" class="hidden peer">
         <div class="status-badge priority-low text-center cursor-pointer peer-checked:ring-2 peer-checked:ring-blue-600">
-         ปกติ
+         🚚 อื่นๆ
         </div></label>
       </div>
      </div><!-- Shift -->
-     <div><label class="block text-sm font-medium text-gray-700 mb-2">เวรที่รับผิดชอบ *</label> <select id="shift" class="form-input" required> <option value="">เลือกเวร</option> <option value="เวร 1 (08:00-16:00)">เวร 1 (08:00-16:00)</option> <option value="เวร 2 (16:00-00:00)">เวร 2 (16:00-00:00)</option> <option value="เ���ร 3 (00:00-08:00)">เวร 3 (00:00-08:00)</option> </select>
+     <div><label class="block text-sm font-medium text-gray-700 mb-2">เวรที่รับผิดชอบ *</label> <select id="shift" class="form-input" required> <option value="">เลือกเวร</option> <!-- Options จะถูกเพิ่มจาก JavaScript --> </select>
      </div><!-- Photo Upload -->
      <div><label class="block text-sm font-medium text-gray-700 mb-2">ถ่ายรูปรถ</label>
       <div id="photo-preview" class="hidden"><img id="preview-image" class="image-preview" alt="Preview"> <button type="button" onclick="removePhoto()" class="btn-secondary mb-4"> <i class="fas fa-trash mr-2"></i>เปลี่ยนรูป </button>
       </div>
-      <div id="camera-button" class="camera-button" onclick="takePhoto()"><i class="fas fa-camera"></i> <span class="text-gray-600 mt-2">แตะเ��ื่อถ่ายรูป</span>
+      <div id="camera-button" class="camera-button" onclick="takePhoto()"><i class="fas fa-camera"></i> <span class="text-gray-600 mt-2">แตะเพื่อถ่ายรูป</span>
       </div>
      </div><!-- License Plate -->
      <div><label class="block text-sm font-medium text-gray-700 mb-2">ทะเบียนรถ *</label> <input type="text" id="license-plate" class="form-input" placeholder="เช่น กข 1234 กรุงเทพ" required>
@@ -717,8 +715,8 @@
      <div><label class="block text-sm font-medium text-gray-700 mb-2">รุ่นรถ *</label> <input type="text" id="car-model" class="form-input" placeholder="เช่น Vios, City, CX-5" required>
      </div><!-- Color (Free text) -->
      <div><label class="block text-sm font-medium text-gray-700 mb-2">สีรถ *</label> <input type="text" id="car-color" class="form-input" placeholder="เช่น ขาว, ดำ, เงิน" required list="color-list"> <datalist id="color-list"> <option value="ขาว"> </option><option value="ดำ"> </option><option value="เงิน"> </option><option value="เทา"> </option><option value="แดง"> </option><option value="น้ำเงิน"> </option><option value="เขียว"> </option><option value="ทอง"> </option><option value="น้ำตาล"> </option></datalist>
-     </div><!-- Location (Free text) -->
-     <div><label class="block text-sm font-medium text-gray-700 mb-2">สถานที่เกิดเหตุ *</label> <input type="text" id="incident-area" class="form-input" placeholder="เช่น บางนา, ลาดกระบัง, สวนหลวง" required list="area-list"> <datalist id="area-list"> <option value="บางนา"> </option><option value="ลาดกระบัง"> </option><option value="สวนหลวง"> </option><option value="ประเวศ"> </option><option value="สะพานพุทธ"> </option><option value="บางกะปิ"> </option><option value="วังทองหลาง"> </option></datalist>
+     </div><!-- Location (Input with Datalist from Google Sheets) -->
+     <div><label class="block text-sm font-medium text-gray-700 mb-2">สถานที่เกิดเหตุ *</label> <input type="text" id="incident-area" class="form-input" placeholder="พิมพ์หรือเลือกสถานที่" required list="area-list"> <datalist id="area-list"> <!-- Areas จะถูกเพิ่มจาก JavaScript --> </datalist>
      </div><!-- Date and Time -->
      <div class="grid grid-cols-2 gap-4">
       <div><label class="block text-sm font-medium text-gray-700 mb-2">วันที่ *</label> <input type="date" id="incident-date" class="form-input" required>
@@ -726,7 +724,7 @@
       <div><label class="block text-sm font-medium text-gray-700 mb-2">เวลา *</label> <input type="time" id="incident-time" class="form-input" required>
       </div>
      </div><!-- GPS Location -->
-     <div><label class="block text-sm font-medium text-gray-700 mb-2">ตำแหน่ง GPS</label> <button type="button" onclick="getCurrentLocation()" class="btn-secondary"> <i class="fas fa-map-marker-alt mr-2"></i>ระบุตำแหน่งปั��จุบัน </button>
+     <div><label class="block text-sm font-medium text-gray-700 mb-2">ตำแหน่ง GPS</label> <button type="button" onclick="getCurrentLocation()" class="btn-secondary"> <i class="fas fa-map-marker-alt mr-2"></i>ระบุตำแหน่งปัจจุบัน </button>
       <div id="location-display" class="mt-2 text-sm text-gray-600 hidden"></div>
      </div><!-- Additional Details -->
      <div><label class="block text-sm font-medium text-gray-700 mb-2">รายละเอียดเพิ่มเติม</label> <textarea id="additional-details" rows="4" class="form-input" placeholder="ระบุรายละเอียดเพิ่มเติม..."></textarea>
@@ -765,7 +763,7 @@
      </div>
     </div><!-- Version -->
     <div class="text-center text-sm text-gray-500">
-     <p>เวอร์ชัน 3.0.0 - Apps Script</p>
+     <p>เวอร์ชัน 3.3.0 - Auto Load Settings</p>
      <p class="mt-1">กองบังคับการตำรวจ</p>
     </div>
    </div><!-- Floating Action Button --> <button class="floating-button" onclick="showPage('report')"> <i class="fas fa-plus"></i> </button> <!-- Bottom Navigation -->
@@ -806,11 +804,13 @@
         let liffProfile = null;
         let theftData = [];
         let currentFilter = 'all';
+        let shiftOptions = [];
+        let areaOptions = [];
 
         // Initialize LIFF
         async function initializeLiff() {
             try {
-                await liff.init({ liffId: '2004593216-crBLYgWK' }); // Replace with your LIFF ID
+             //   await liff.init({ liffId: '2004593216-crBLYgWK' }); // Replace with your LIFF ID
                 
                 if (!liff.isLoggedIn()) {
                     liff.login();
@@ -834,7 +834,7 @@
                 // Use mock data for testing
                 liffProfile = {
                     userId: 'U1234567890',
-                    displayName: 'ผู้ใช้ทดส��บ',
+                    displayName: 'ผู้ใช้ทดสอบ',
                     pictureUrl: 'https://via.placeholder.com/120',
                     statusMessage: 'Hello LINE!'
                 };
@@ -863,7 +863,8 @@
         // Initialize Application
         document.addEventListener('DOMContentLoaded', function() {
             initializeLiff();
-            loadFromGoogleSheets();
+            loadDefaultSettings();
+            loadFromGoogleSheets(); // จะโหลดทั้งข้อมูลหลักและสถานที่จาก Sheet
             
             // Set default date/time
             const today = new Date().toISOString().split('T')[0];
@@ -879,7 +880,7 @@
         // Save to Google Sheets via Apps Script
         async function saveToGoogleSheets(data) {
             if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_WEB_APP_URL_HERE') {
-                showToast('ก���ุณาตั้งค่า Apps Script URL ในโค้ด', 'warning');
+                showToast('กรุณาตั้งค่า Apps Script URL ในโค้ด', 'warning');
                 return false;
             }
 
@@ -916,6 +917,7 @@
         async function loadFromGoogleSheets() {
             if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_WEB_APP_URL_HERE') {
                 showToast('กรุณาตั้งค่า Apps Script URL ในโค้ด', 'warning');
+                loadDefaultSettings();
                 updateDashboard();
                 return;
             }
@@ -923,25 +925,63 @@
             try {
                 showLoading(true);
                 
-                const response = await fetch(`${APPS_SCRIPT_URL}?action=read`, {
+                // ดึงข้อมูล Settings (เวร และ พื้นที่) ก่อน
+                try {
+                    const settingsResponse = await fetch(`${APPS_SCRIPT_URL}?action=readSettings`, {
+                        method: 'GET',
+                    });
+                    
+                    if (settingsResponse.ok) {
+                        const settingsResult = await settingsResponse.json();
+                        if (settingsResult.status === 'success' && settingsResult.data) {
+                            shiftOptions = settingsResult.data.shifts || [];
+                            areaOptions = settingsResult.data.areas || [];
+                            localStorage.setItem('shiftOptions', JSON.stringify(shiftOptions));
+                            localStorage.setItem('areaOptions', JSON.stringify(areaOptions));
+                            updateShiftDropdown();
+                            updateAreaDropdown();
+                            console.log('โหลดเวร:', shiftOptions);
+                            console.log('โหลดพื้นที่:', areaOptions);
+                        }
+                    }
+                } catch (settingsError) {
+                    console.error('Error loading settings:', settingsError);
+                    // โหลดจาก localStorage หรือ default
+                    const savedShifts = localStorage.getItem('shiftOptions');
+                    const savedAreas = localStorage.getItem('areaOptions');
+                    
+                    if (savedShifts) {
+                        shiftOptions = JSON.parse(savedShifts);
+                        updateShiftDropdown();
+                    }
+                    
+                    if (savedAreas) {
+                        areaOptions = JSON.parse(savedAreas);
+                        updateAreaDropdown();
+                    } else {
+                        loadDefaultSettings();
+                    }
+                }
+                
+                // ดึงข้อมูลหลัก
+                const dataResponse = await fetch(`${APPS_SCRIPT_URL}?action=read`, {
                     method: 'GET',
                 });
                 
-                if (!response.ok) {
+                if (!dataResponse.ok) {
                     throw new Error('Failed to load from Google Sheets');
                 }
 
-                const result = await response.json();
+                const dataResult = await dataResponse.json();
                 
-                if (result.status === 'success' && result.data) {
-                    theftData = result.data;
+                if (dataResult.status === 'success' && dataResult.data) {
+                    theftData = dataResult.data;
                     localStorage.setItem('theftData', JSON.stringify(theftData));
-                    updateDashboard();
-                    showLoading(false);
-                    showToast(`โหลดข้อมูล ${theftData.length} รายการสำเร็จ`, 'success');
-                } else {
-                    throw new Error(result.message || 'Unknown error');
                 }
+                
+                updateDashboard();
+                showLoading(false);
+                showToast(`โหลดข้อมูล ${theftData.length} รายการสำเร็จ`, 'success');
 
             } catch (error) {
                 console.error('Error loading from Google Sheets:', error);
@@ -949,15 +989,77 @@
                 
                 // Load from local storage as fallback
                 const saved = localStorage.getItem('theftData');
+                const savedShifts = localStorage.getItem('shiftOptions');
+                const savedAreas = localStorage.getItem('areaOptions');
+                
                 if (saved) {
                     theftData = JSON.parse(saved);
-                    updateDashboard();
-                    showToast('โหลดข้อมูลจากเครื่องนี้', 'info');
-                } else {
-                    updateDashboard();
-                    showToast('ไม่สามารถโหลดข้อมูลได้', 'error');
                 }
+                
+                if (savedShifts) {
+                    shiftOptions = JSON.parse(savedShifts);
+                    updateShiftDropdown();
+                } else {
+                    loadDefaultSettings();
+                }
+                
+                if (savedAreas) {
+                    areaOptions = JSON.parse(savedAreas);
+                    updateAreaDropdown();
+                }
+                
+                updateDashboard();
+                showToast('โหลดข้อมูลจากเครื่องนี้', 'info');
             }
+        }
+
+        // Load Default Settings
+        function loadDefaultSettings() {
+            shiftOptions = [
+                'เวรเช้า (06:00-14:00)',
+                'เวรบ่าย (14:00-22:00)',
+                'เวรดึก (22:00-06:00)'
+            ];
+            updateShiftDropdown();
+            
+            // ไม่ตั้งค่า default สำหรับพื้นที่ - รอโหลดจาก Sheet เท่านั้น
+            areaOptions = [];
+            updateAreaDropdown();
+        }
+
+        // Update Shift Dropdown
+        function updateShiftDropdown() {
+            const shiftSelect = document.getElementById('shift');
+            if (!shiftSelect) return;
+            
+            const currentValue = shiftSelect.value;
+            
+            shiftSelect.innerHTML = '<option value="">เลือกเวร</option>';
+            
+            shiftOptions.forEach(shift => {
+                const option = document.createElement('option');
+                option.value = shift;
+                option.textContent = shift;
+                shiftSelect.appendChild(option);
+            });
+            
+            if (currentValue && shiftOptions.includes(currentValue)) {
+                shiftSelect.value = currentValue;
+            }
+        }
+
+        // Update Area Datalist
+        function updateAreaDropdown() {
+            const areaDatalist = document.getElementById('area-list');
+            if (!areaDatalist) return;
+            
+            areaDatalist.innerHTML = '';
+            
+            areaOptions.forEach(area => {
+                const option = document.createElement('option');
+                option.value = area;
+                areaDatalist.appendChild(option);
+            });
         }
 
         // Show/Hide Loading
@@ -1118,9 +1220,10 @@
             locatedItems.forEach(item => {
                 const x = ((parseFloat(item.longitude) - minLng) / lngRange) * 100;
                 const y = ((maxLat - parseFloat(item.latitude)) / latRange) * 100;
+                const priority = getVehicleTypePriority(item.vehicleType);
                 
                 mapHTML += `
-                    <div class="map-marker priority-${item.priority}" 
+                    <div class="map-marker priority-${priority}" 
                          style="left: ${x}%; top: ${y}%;"
                          onclick="showDetail(${item.id})"
                          onmouseenter="showMapTooltip(event, ${item.id})"
@@ -1136,6 +1239,13 @@
             `;
             
             container.innerHTML = mapHTML;
+        }
+
+        // Get Vehicle Type Priority for Map Color
+        function getVehicleTypePriority(vehicleType) {
+            if (vehicleType === 'รถยนต์') return 'high';
+            if (vehicleType === 'รถจักรยานยนต์') return 'medium';
+            return 'low';
         }
 
         // Show Map Tooltip
@@ -1200,7 +1310,7 @@
                     <div class="empty-state">
                         <i class="fas fa-folder-open"></i>
                         <h3>ยังไม่มีรายงาน</h3>
-                        <p>เริ่มต้นโดยการรายงานรถ���ายใหม่</p>
+                        <p>เริ่มต้นโดยการรายงานรถหายใหม่</p>
                     </div>
                 `;
                 return;
@@ -1300,7 +1410,7 @@
                 id: Date.now(),
                 timestamp: new Date().toISOString(),
                 shift: document.getElementById('shift').value,
-                priority: document.querySelector('input[name="priority"]:checked').value,
+                vehicleType: document.querySelector('input[name="vehicleType"]:checked').value,
                 brand: document.getElementById('car-brand').value,
                 model: document.getElementById('car-model').value,
                 color: document.getElementById('car-color').value,
@@ -1329,11 +1439,13 @@
             if (liff.isInClient()) {
                 const message = `📢 รายงานรถหายใหม่\n\n` +
                     `เวร: ${formData.shift}\n` +
-                    `ทะ���บียน: ${formData.licensePlate}\n` +
+                    `ประเภท: ${formData.vehicleType}\n` +
+                    `ทะเบียน: ${formData.licensePlate}\n` +
                     `รถ: ${formData.brand} ${formData.model}\n` +
                     `สี: ${formData.color}\n` +
                     `สถานที่: ${formData.incidentArea}\n` +
-                    `วันที่: ${formatDate(formData.incidentDate)} ${formData.incidentTime}`;
+                    `วันที่: ${formatDate(formData.incidentDate)} ${formData.incidentTime}\n\n` +
+                    `${formData.additionalDetails ? '📝 รายละเอียดเพิ่มเติม:\n' + formData.additionalDetails : ''}`;
                 
                 liff.sendMessages([{
                     type: 'text',
@@ -1458,6 +1570,13 @@
                     </div>
                     ` : ''}
                     
+                    ${item.vehicleType ? `
+                    <div>
+                        <div class="text-sm text-gray-600 mb-1">ประเภทรถ</div>
+                        <div class="font-medium">${item.vehicleType}</div>
+                    </div>
+                    ` : ''}
+                    
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <div class="text-sm text-gray-600 mb-1">ยี่ห้อ</div>
@@ -1471,14 +1590,10 @@
                             <div class="text-sm text-gray-600 mb-1">สี</div>
                             <div class="font-medium">${item.color}</div>
                         </div>
-                        <div>
-                            <div class="text-sm text-gray-600 mb-1">ความสำคัญ</div>
-                            <span class="status-badge priority-${item.priority}">${item.priority}</span>
-                        </div>
                     </div>
                     
                     <div>
-                        <div class="text-sm text-gray-600 mb-1">สถานที่เกิด���หตุ</div>
+                        <div class="text-sm text-gray-600 mb-1">สถานที่เกิดเหตุ</div>
                         <div class="font-medium">${item.incidentArea}</div>
                     </div>
                     
@@ -1557,11 +1672,13 @@
             
             const message = `🚗 รายงานรถหาย\n\n` +
                 `เวร: ${item.shift || 'ไม่ระบุ'}\n` +
+                `ประเภท: ${item.vehicleType || 'ไม่ระบุ'}\n` +
                 `ทะเบียน: ${item.licensePlate}\n` +
                 `รถ: ${item.brand} ${item.model} สี${item.color}\n` +
                 `สถานที่: ${item.incidentArea}\n` +
                 `วันที่: ${formatDate(item.incidentDate)} ${item.incidentTime}\n` +
-                `สถานะ: ${getStatusText(item.status)}`;
+                `สถานะ: ${getStatusText(item.status)}\n\n` +
+                `${item.additionalDetails ? '📝 รายละเอียด:\n' + item.additionalDetails : ''}`;
             
             if (liff.isApiAvailable('shareTargetPicker')) {
                 liff.shareTargetPicker([{
@@ -1683,5 +1800,5 @@
             };
         }
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b5862ba145cfce0',t:'MTc2NzAwMTc0Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b59d9e9533e8e13',t:'MTc2NzAxNzExNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
