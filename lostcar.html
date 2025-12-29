@@ -1428,8 +1428,8 @@
             
             // Save to local storage first
             theftData.unshift(formData);
-            localStorage.setItem('theftData', JSON.stringify(theftData));
-            
+            //localStorage.setItem('theftData', JSON.stringify(theftData));
+            localStorage.clear();
             // Save to Google Sheets
             await saveToGoogleSheets(formData);
             
