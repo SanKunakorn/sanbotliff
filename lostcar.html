@@ -33,15 +33,15 @@
         }
         
         .gradient-bg {
-            background: linear-gradient(135deg, #06C755 0%, #00B900 100%);
+            background: linear-gradient(135deg, #2a7c4c 0%, #1a3e1a 100%);
         }
         
         .line-green {
-            background-color: #06C755;
+            background-color: #2a7c4c;
         }
         
         .line-green-dark {
-            background-color: #00B900;
+            background-color: #1a3e1a;
         }
         
         .card {
@@ -594,7 +594,7 @@
        </div>
        <div>
         <h1 class="text-lg font-bold">รายงานรถหาย</h1>
-        <p class="text-xs text-green-100">กองบังคับการตำรวจ</p>
+        <p class="text-xs text-green-100">งานสืบสวน สภ.นิคมพัฒนา</p>
        </div>
       </div><button onclick="showProfile()" class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center"> <i class="fas fa-user"></i> </button>
      </div>
@@ -700,7 +700,7 @@
         </div></label>
       </div>
      </div><!-- Shift -->
-     <div><label class="block text-sm font-medium text-gray-700 mb-2">เวรที่รับผิดชอบ *</label> <select id="shift" class="form-input" required> <option value="">เลือกเวร</option> <!-- Options จะถูกเพิ่มจาก JavaScript --> </select>
+     <div><label class="block text-sm font-medium text-gray-700 mb-2">เวรที่รับผิดชอบ *</label> <select id="shift" class="form-input" required> <option value="">เลือกเวรผู้รับผิดชอบ</option> <!-- Options จะถูกเพิ่มจาก JavaScript --> </select>
      </div><!-- Photo Upload -->
      <div><label class="block text-sm font-medium text-gray-700 mb-2">ถ่ายรูปรถ</label>
       <div id="photo-preview" class="hidden"><img id="preview-image" class="image-preview" alt="Preview"> <button type="button" onclick="removePhoto()" class="btn-secondary mb-4"> <i class="fas fa-trash mr-2"></i>เปลี่ยนรูป </button>
@@ -728,7 +728,7 @@
       <div id="location-display" class="mt-2 text-sm text-gray-600 hidden"></div>
      </div><!-- Additional Details -->
      <div><label class="block text-sm font-medium text-gray-700 mb-2">รายละเอียดเพิ่มเติม</label> <textarea id="additional-details" rows="4" class="form-input" placeholder="ระบุรายละเอียดเพิ่มเติม..."></textarea>
-     </div><!-- Submit Button --> <button type="submit" id="submit-btn" class="btn-primary"> <i class="fas fa-paper-plane mr-2"></i>ส่งรายงาน </button>
+     </div><!-- Submit Button --> <button type="submit" id="submit-btn" class="btn-primary"> <i class="fas fa-paper-plane mr-2"></i>บันทึกข้อมูล </button>
     </form>
    </div><!-- Cases Page -->
    <div id="cases-page" class="page">
@@ -763,8 +763,8 @@
      </div>
     </div><!-- Version -->
     <div class="text-center text-sm text-gray-500">
-     <p>เวอร์ชัน 3.3.0 - Auto Load Settings</p>
-     <p class="mt-1">กองบังคับการตำรวจ</p>
+     <p>เวอร์ชัน 3.3.0 - พัฒนาโดย San Kunakorn</p>
+     <p class="mt-1">'งานสืบสวน สภ.นิคมพัฒนา'</p>
     </div>
    </div><!-- Floating Action Button --> <button class="floating-button" onclick="showPage('report')"> <i class="fas fa-plus"></i> </button> <!-- Bottom Navigation -->
    <nav class="bottom-nav">
@@ -810,7 +810,8 @@
         // Initialize LIFF
         async function initializeLiff() {
             try {
-                await liff.init({ liffId: '2004593216-crBLYgWK' }); // Replace with your LIFF ID
+                await liff.init({ liffId: '2006258135-xRQEYk7W' }); // Replace with your LIFF ID
+                //await liff.init({ liffId: '2004593216-crBLYgWK' }); // ไอดีจริง
                 
                 if (!liff.isLoggedIn()) {
                     liff.login();
@@ -1034,7 +1035,7 @@
             
             const currentValue = shiftSelect.value;
             
-            shiftSelect.innerHTML = '<option value="">เลือกเวร</option>';
+            shiftSelect.innerHTML = '<option value="">เลือกเวรผู้รับผิดชอบ</option>';
             
             shiftOptions.forEach(shift => {
                 const option = document.createElement('option');
@@ -1428,8 +1429,8 @@
             
             // Save to local storage first
             theftData.unshift(formData);
-            //localStorage.setItem('theftData', JSON.stringify(theftData));
-            localStorage.clear();
+            localStorage.setItem('theftData', JSON.stringify(theftData));
+            
             // Save to Google Sheets
             await saveToGoogleSheets(formData);
             
@@ -1456,7 +1457,7 @@
             }
             
             submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>ส่งรายงาน';
+            submitBtn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>บันทึกข้อมูล';
             
             showToast('บันทึกรายงานสำเร็จ', 'success');
             resetForm();
@@ -1801,5 +1802,4 @@
         }
     </script>
  <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b59d9e9533e8e13',t:'MTc2NzAxNzExNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
-
 </html>
