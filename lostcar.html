@@ -7,6 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
@@ -33,15 +34,15 @@
         }
         
         .gradient-bg {
-            background: linear-gradient(135deg, #2a7c4c 0%, #1a3e1a 100%);
+            background: linear-gradient(135deg, #06C755 0%, #00B900 100%);
         }
         
         .line-green {
-            background-color: #2a7c4c;
+            background-color: #06C755;
         }
         
         .line-green-dark {
-            background-color: #1a3e1a;
+            background-color: #00B900;
         }
         
         .card {
@@ -126,9 +127,9 @@
         .status-arrested { background: #d1fae5; color: #065f46; }
         .status-closed { background: #f3f4f6; color: #374151; }
         
-        .priority-high { background: #fee2e2; color: #991b1b; }
-        .priority-medium { background: #fef3c7; color: #92400e; }
-        .priority-low { background: #f0f9ff; color: #0c4a6e; }
+        .vehicle-car { background: #fee2e2; color: #991b1b; }
+        .vehicle-motorcycle { background: #fef3c7; color: #92400e; }
+        .vehicle-other { background: #f0f9ff; color: #0c4a6e; }
         
         .form-input {
             width: 100%;
@@ -182,6 +183,22 @@
         
         .btn-secondary:active {
             background: #f9fafb;
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            border: none;
+            font-size: 16px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .btn-danger:active {
+            background: #dc2626;
         }
         
         .page {
@@ -453,24 +470,6 @@
             color: #9ca3af;
         }
         
-        .chart-bar {
-            height: 24px;
-            background: linear-gradient(135deg, #06C755 0%, #00B900 100%);
-            border-radius: 6px;
-            transition: all 0.3s;
-        }
-        
-        .chart-item {
-            margin-bottom: 12px;
-        }
-        
-        .chart-label {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 4px;
-            font-size: 14px;
-        }
-        
         .loading-overlay {
             position: fixed;
             inset: 0;
@@ -504,6 +503,15 @@
             font-weight: 500;
         }
         
+        .map-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #e0f2fe 0%, #f0f9ff 100%);
+            overflow: hidden;
+            border-radius: 12px;
+        }
+        
         .map-marker {
             position: absolute;
             transform: translate(-50%, -100%);
@@ -522,62 +530,42 @@
             filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
         }
         
-        .map-marker.priority-high i {
-            color: #dc2626;
-            animation: pulse 2s infinite;
-        }
-        
-        .map-marker.priority-medium i {
-            color: #f59e0b;
-        }
-        
-        .map-marker.priority-low i {
-            color: #3b82f6;
-        }
-        
-        @keyframes pulse {
-            0%, 100% {
-                opacity: 1;
-                transform: scale(1);
-            }
-            50% {
-                opacity: 0.8;
-                transform: scale(1.1);
-            }
-        }
-        
-        .map-tooltip {
-            position: absolute;
-            background: white;
-            padding: 8px 12px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            font-size: 12px;
-            white-space: nowrap;
-            pointer-events: none;
-            z-index: 1000;
-            display: none;
-        }
-        
-        .map-tooltip.active {
-            display: block;
-        }
-        
-        .map-container {
+        .chart-container {
             position: relative;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(180deg, #e0f2fe 0%, #f0f9ff 100%);
-            overflow: hidden;
+            height: 250px;
+            margin-top: 16px;
         }
         
-        .map-grid {
-            position: absolute;
-            inset: 0;
-            background-image: 
-                linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
-            background-size: 40px 40px;
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+        
+        .action-buttons button {
+            flex: 1;
+        }
+        
+        .gps-toggle {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .gps-toggle button {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .gps-toggle button.active {
+            border-color: #06C755;
+            background: #f0fdf4;
+            color: #06C755;
         }
     </style>
   <style>@view-transition { navigation: auto; }</style>
@@ -594,7 +582,7 @@
        </div>
        <div>
         <h1 class="text-lg font-bold">รายงานรถหาย</h1>
-        <p class="text-xs text-green-100">งานสืบสวน สภ.นิคมพัฒนา</p>
+        <p class="text-xs text-green-100">กองบังคับการตำรวจ</p>
        </div>
       </div><button onclick="showProfile()" class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center"> <i class="fas fa-user"></i> </button>
      </div>
@@ -646,20 +634,29 @@
        อัตราแก้ไข
       </div>
      </div>
-    </div><!-- Shift Statistics -->
+    </div><!-- Charts -->
     <div class="card p-4 mb-4">
-     <h3 class="text-lg font-bold text-gray-800 mb-3">สถิติตามเวร</h3>
-     <div id="shift-stats" class="space-y-2"><!-- Shift stats will be populated here -->
+     <h3 class="text-lg font-bold text-gray-800 mb-2">สถิติตามยี่ห้อ-รุ่น</h3>
+     <div class="chart-container">
+      <canvas id="vehicleChart"></canvas>
      </div>
-    </div><!-- Area Statistics -->
+    </div>
     <div class="card p-4 mb-4">
-     <h3 class="text-lg font-bold text-gray-800 mb-3">พื้นที่ที่พบเหตุบ่อย</h3>
-     <div id="area-stats" class="space-y-2"><!-- Area stats will be populated here -->
+     <h3 class="text-lg font-bold text-gray-800 mb-2">สถิติตามสถานะ</h3>
+     <div class="chart-container">
+      <canvas id="statusChart"></canvas>
      </div>
-    </div><!-- Brand/Model Statistics -->
+    </div>
     <div class="card p-4 mb-4">
-     <h3 class="text-lg font-bold text-gray-800 mb-3">ยี่ห้อ-รุ่นที่หายบ่อย</h3>
-     <div id="brand-stats" class="space-y-2"><!-- Brand stats will be populated here -->
+     <h3 class="text-lg font-bold text-gray-800 mb-2">สถิติตามเดือน</h3>
+     <div class="chart-container">
+      <canvas id="timeChart"></canvas>
+     </div>
+    </div>
+    <div class="card p-4 mb-4">
+     <h3 class="text-lg font-bold text-gray-800 mb-2">สถิติตามเวร</h3>
+     <div class="chart-container">
+      <canvas id="shiftChart"></canvas>
      </div>
     </div><!-- Map Section -->
     <div class="card p-4 mb-4">
@@ -686,21 +683,21 @@
    </div><!-- Report Page -->
    <div id="report-page" class="page">
     <h2 class="text-2xl font-bold text-gray-800 mb-4">รายงานรถหาย</h2>
-    <form id="report-form" class="space-y-4"><!-- Vehicle Type -->
+    <form id="report-form" class="space-y-4"><input type="hidden" id="edit-id" value=""> <!-- Vehicle Type -->
      <div><label class="block text-sm font-medium text-gray-700 mb-2">ประเภทรถ *</label>
       <div class="flex gap-2"><label class="flex-1"> <input type="radio" name="vehicleType" value="รถยนต์" class="hidden peer" checked>
-        <div class="status-badge priority-high text-center cursor-pointer peer-checked:ring-2 peer-checked:ring-red-600">
+        <div class="vehicle-car text-center cursor-pointer peer-checked:ring-2 peer-checked:ring-red-600 px-3 py-2 rounded-lg">
          🚗 รถยนต์
         </div></label> <label class="flex-1"> <input type="radio" name="vehicleType" value="รถจักรยานยนต์" class="hidden peer">
-        <div class="status-badge priority-medium text-center cursor-pointer peer-checked:ring-2 peer-checked:ring-yellow-600">
+        <div class="vehicle-motorcycle text-center cursor-pointer peer-checked:ring-2 peer-checked:ring-yellow-600 px-3 py-2 rounded-lg">
          🏍️ มอเตอร์ไซค์
         </div></label> <label class="flex-1"> <input type="radio" name="vehicleType" value="อื่นๆ" class="hidden peer">
-        <div class="status-badge priority-low text-center cursor-pointer peer-checked:ring-2 peer-checked:ring-blue-600">
+        <div class="vehicle-other text-center cursor-pointer peer-checked:ring-2 peer-checked:ring-blue-600 px-3 py-2 rounded-lg">
          🚚 อื่นๆ
         </div></label>
       </div>
      </div><!-- Shift -->
-     <div><label class="block text-sm font-medium text-gray-700 mb-2">เวรที่รับผิดชอบ *</label> <select id="shift" class="form-input" required> <option value="">เลือกเวรผู้รับผิดชอบ</option> <!-- Options จะถูกเพิ่มจาก JavaScript --> </select>
+     <div><label class="block text-sm font-medium text-gray-700 mb-2">เวรที่รับผิดชอบ *</label> <select id="shift" class="form-input" required> <option value="">เลือกเวร</option> </select>
      </div><!-- Photo Upload -->
      <div><label class="block text-sm font-medium text-gray-700 mb-2">ถ่ายรูปรถ</label>
       <div id="photo-preview" class="hidden"><img id="preview-image" class="image-preview" alt="Preview"> <button type="button" onclick="removePhoto()" class="btn-secondary mb-4"> <i class="fas fa-trash mr-2"></i>เปลี่ยนรูป </button>
@@ -709,33 +706,45 @@
       </div>
      </div><!-- License Plate -->
      <div><label class="block text-sm font-medium text-gray-700 mb-2">ทะเบียนรถ *</label> <input type="text" id="license-plate" class="form-input" placeholder="เช่น กข 1234 กรุงเทพ" required>
-     </div><!-- Brand (Free text) -->
+     </div><!-- Brand -->
      <div><label class="block text-sm font-medium text-gray-700 mb-2">ยี่ห้อรถ *</label> <input type="text" id="car-brand" class="form-input" placeholder="เช่น Toyota, Honda, Mazda" required list="brand-list"> <datalist id="brand-list"> <option value="Toyota"> </option><option value="Honda"> </option><option value="Mazda"> </option><option value="Nissan"> </option><option value="Mitsubishi"> </option><option value="Isuzu"> </option><option value="Suzuki"> </option><option value="Ford"> </option><option value="Chevrolet"> </option><option value="BMW"> </option><option value="Mercedes-Benz"> </option></datalist>
      </div><!-- Model -->
      <div><label class="block text-sm font-medium text-gray-700 mb-2">รุ่นรถ *</label> <input type="text" id="car-model" class="form-input" placeholder="เช่น Vios, City, CX-5" required>
-     </div><!-- Color (Free text) -->
+     </div><!-- Color -->
      <div><label class="block text-sm font-medium text-gray-700 mb-2">สีรถ *</label> <input type="text" id="car-color" class="form-input" placeholder="เช่น ขาว, ดำ, เงิน" required list="color-list"> <datalist id="color-list"> <option value="ขาว"> </option><option value="ดำ"> </option><option value="เงิน"> </option><option value="เทา"> </option><option value="แดง"> </option><option value="น้ำเงิน"> </option><option value="เขียว"> </option><option value="ทอง"> </option><option value="น้ำตาล"> </option></datalist>
-     </div><!-- Location (Input with Datalist from Google Sheets) -->
-     <div><label class="block text-sm font-medium text-gray-700 mb-2">สถานที่เกิดเหตุ *</label> <input type="text" id="incident-area" class="form-input" placeholder="พิมพ์หรือเลือกสถานที่" required list="area-list"> <datalist id="area-list"> <!-- Areas จะถูกเพิ่มจาก JavaScript --> </datalist>
+     </div><!-- Location -->
+     <div><label class="block text-sm font-medium text-gray-700 mb-2">สถานที่เกิดเหตุ *</label> <input type="text" id="incident-area" class="form-input" placeholder="พิมพ์หรือเลือกสถานที่" required list="area-list"> <datalist id="area-list"> </datalist>
      </div><!-- Date and Time -->
      <div class="grid grid-cols-2 gap-4">
       <div><label class="block text-sm font-medium text-gray-700 mb-2">วันที่ *</label> <input type="date" id="incident-date" class="form-input" required>
       </div>
-      <div><label class="block text-sm font-medium text-gray-700 mb-2">เวลา *</label> <input type="time" id="incident-time" class="form-input" required>
+      <div><label class="block text-sm font-medium text-gray-700 mb-2">เวลา (24 ชม.) *</label> <input type="time" id="incident-time" class="form-input" required>
       </div>
      </div><!-- GPS Location -->
-     <div><label class="block text-sm font-medium text-gray-700 mb-2">ตำแหน่ง GPS</label> <button type="button" onclick="getCurrentLocation()" class="btn-secondary"> <i class="fas fa-map-marker-alt mr-2"></i>ระบุตำแหน่งปัจจุบัน </button>
+     <div><label class="block text-sm font-medium text-gray-700 mb-2">ตำแหน่ง GPS</label>
+      <div class="gps-toggle"><button type="button" id="gps-current-btn" class="active" onclick="setGpsMode('current')"> <i class="fas fa-location-arrow mr-2"></i>ใช้ตำแหน่งปัจจุบัน </button> <button type="button" id="gps-manual-btn" onclick="setGpsMode('manual')"> <i class="fas fa-keyboard mr-2"></i>กรอกเอง </button>
+      </div>
+      <div id="gps-current-mode"><button type="button" onclick="getCurrentLocation()" class="btn-secondary"> <i class="fas fa-map-marker-alt mr-2"></i>ระบุตำแหน่งปัจจุบัน </button>
+      </div>
+      <div id="gps-manual-mode" class="hidden">
+       <div class="grid grid-cols-2 gap-4">
+        <div><input type="text" id="manual-lat" class="form-input" placeholder="Latitude">
+        </div>
+        <div><input type="text" id="manual-lng" class="form-input" placeholder="Longitude">
+        </div>
+       </div><button type="button" onclick="setManualLocation()" class="btn-secondary mt-2"> <i class="fas fa-check mr-2"></i>ยืนยันตำแหน่ง </button>
+      </div>
       <div id="location-display" class="mt-2 text-sm text-gray-600 hidden"></div>
      </div><!-- Additional Details -->
      <div><label class="block text-sm font-medium text-gray-700 mb-2">รายละเอียดเพิ่มเติม</label> <textarea id="additional-details" rows="4" class="form-input" placeholder="ระบุรายละเอียดเพิ่มเติม..."></textarea>
-     </div><!-- Submit Button --> <button type="submit" id="submit-btn" class="btn-primary"> <i class="fas fa-paper-plane mr-2"></i>บันทึกข้อมูล </button>
+     </div><!-- Submit Button --> <button type="submit" id="submit-btn" class="btn-primary"> <i class="fas fa-paper-plane mr-2"></i>ส่งรายงาน </button>
     </form>
    </div><!-- Cases Page -->
    <div id="cases-page" class="page">
     <h2 class="text-2xl font-bold text-gray-800 mb-4">คดีทั้งหมด</h2><!-- Search -->
     <div class="mb-4"><input type="text" id="search-input" class="form-input" placeholder="ค้นหาทะเบียน, ยี่ห้อ...">
     </div><!-- Filter Tabs -->
-    <div class="flex gap-2 mb-4 overflow-x-auto pb-2"><button onclick="filterCases('all')" class="status-badge status-investigating whitespace-nowrap">ทั้งหมด</button> <button onclick="filterCases('pending')" class="status-badge status-pending whitespace-nowrap">รอดำเนินการ</button> <button onclick="filterCases('investigating')" class="status-badge status-investigating whitespace-nowrap">สืบสวน</button> <button onclick="filterCases('arrested')" class="status-badge status-arrested whitespace-nowrap">จับกุม</button>
+    <div class="flex gap-2 mb-4 overflow-x-auto pb-2"><button onclick="filterCases('all')" class="status-badge status-investigating whitespace-nowrap">ทั้งหมด</button> <button onclick="filterCases('pending')" class="status-badge status-pending whitespace-nowrap">รอดำเนินการ</button> <button onclick="filterCases('investigating')" class="status-badge status-investigating whitespace-nowrap">สืบสวน</button> <button onclick="filterCases('arrested')" class="status-badge status-arrested whitespace-nowrap">จับกุม</button> <button onclick="filterCases('closed')" class="status-badge status-closed whitespace-nowrap">ปิดคดี</button>
     </div><!-- Cases List -->
     <div id="cases-list"><!-- Cases will be populated here -->
     </div>
@@ -763,8 +772,8 @@
      </div>
     </div><!-- Version -->
     <div class="text-center text-sm text-gray-500">
-     <p>เวอร์ชัน 3.3.0 - พัฒนาโดย San Kunakorn</p>
-     <p class="mt-1">'งานสืบสวน สภ.นิคมพัฒนา'</p>
+     <p>เวอร์ชัน 5.0.0 - Fixed Login + Monthly Chart</p>
+     <p class="mt-1">กองบังคับการตำรวจ</p>
     </div>
    </div><!-- Floating Action Button --> <button class="floating-button" onclick="showPage('report')"> <i class="fas fa-plus"></i> </button> <!-- Bottom Navigation -->
    <nav class="bottom-nav">
@@ -797,7 +806,7 @@
   </div><!-- Toast Container -->
   <div id="toast-container"></div>
   <script>
-        // ⚙️ CONFIGURATION - เปลี่ยน URL ด้านล่างนี้เป็น Apps Script Web App URL ของคุณ
+        // ⚙️ CONFIGURATION
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxs3oWfi4tNCbO4nZ5q0aVIg5sTrdbWVcxkVGpWTuBYR87GcqBkm0BoUrnui0Ybsz1v/exec';
         
         // Global Variables
@@ -806,41 +815,50 @@
         let currentFilter = 'all';
         let shiftOptions = [];
         let areaOptions = [];
+        let vehicleChart = null;
+        let statusChart = null;
+        let timeChart = null;
+        let shiftChart = null;
+        let gpsMode = 'current';
 
-        // Initialize LIFF
+        // Initialize LIFF - แก้ไขให้ไม่บังคับ Login
         async function initializeLiff() {
             try {
-                //await liff.init({ liffId: '2006258135-xRQEYk7W' }); // Replace with your LIFF ID
+                //await liff.init({ liffId: '2006258135-xRQEYk7W' });
                 await liff.init({ liffId: '2004593216-crBLYgWK' }); // ไอดีจริง
                 
-                if (!liff.isLoggedIn()) {
-                    liff.login();
-                    return;
+                if (liff.isLoggedIn()) {
+                    // ถ้า login แล้วใช้ข้อมูลจริง
+                    liffProfile = await liff.getProfile();
+                    updateProfileUI();
+                    
+                    const context = liff.getContext();
+                    updateLineInfo(context);
+                    
+                    showToast('เชื่อมต่อ LINE สำเร็จ', 'success');
+                } else {
+                    // ถ้ายัง ไม่ login ใช้ข้อมูลเริ่มต้น (ไม่บังคับให้ login)
+                    useMockProfile();
+                    showToast('ใช้งานในโหมดทดสอบ', 'info');
                 }
-                
-                // Get profile
-                liffProfile = await liff.getProfile();
-                updateProfileUI();
-                
-                // Get LINE context
-                const context = liff.getContext();
-                updateLineInfo(context);
-                
-                showToast('เชื่อมต่อ LINE สำเร็จ', 'success');
                 
             } catch (error) {
                 console.error('LIFF initialization failed', error);
-                showToast('เกิดข้อผิดพลาดในการเชื่อมต่อ LINE', 'error');
-                
-                // Use mock data for testing
-                liffProfile = {
-                    userId: 'U1234567890',
-                    displayName: 'ผู้ใช้ทดสอบ',
-                    pictureUrl: 'https://via.placeholder.com/120',
-                    statusMessage: 'Hello LINE!'
-                };
-                updateProfileUI();
+                // ถ้า LIFF error ใช้ข้อมูลเริ่มต้น
+                useMockProfile();
+                showToast('ใช้งานในโหมดทดสอบ', 'info');
             }
+        }
+        
+        // ใช้ข้อมูลเริ่มต้นสำหรับทดสอบ
+        function useMockProfile() {
+            liffProfile = {
+                userId: 'U' + Date.now(),
+                displayName: 'ผู้ใช้ทดสอบ',
+                pictureUrl: 'https://via.placeholder.com/120',
+                statusMessage: 'ทดสอบระบบ'
+            };
+            updateProfileUI();
         }
 
         // Update Profile UI
@@ -857,32 +875,88 @@
 
         // Update LINE Info
         function updateLineInfo(context) {
-            document.getElementById('line-os').textContent = liff.getOS();
-            document.getElementById('line-language').textContent = liff.getLanguage();
+            try {
+                document.getElementById('line-os').textContent = liff.getOS();
+                document.getElementById('line-language').textContent = liff.getLanguage();
+            } catch (e) {
+                document.getElementById('line-os').textContent = 'Web';
+                document.getElementById('line-language').textContent = 'th';
+            }
         }
 
         // Initialize Application
         document.addEventListener('DOMContentLoaded', function() {
             initializeLiff();
             loadDefaultSettings();
-            loadFromGoogleSheets(); // จะโหลดทั้งข้อมูลหลักและสถานที่จาก Sheet
+            loadFromGoogleSheets();
             
-            // Set default date/time
             const today = new Date().toISOString().split('T')[0];
             const timeNow = new Date().toTimeString().split(' ')[0].substring(0, 5);
             document.getElementById('incident-date').value = today;
             document.getElementById('incident-time').value = timeNow;
             
-            // Setup form
             document.getElementById('report-form').addEventListener('submit', handleFormSubmit);
             document.getElementById('search-input').addEventListener('input', debounce(searchCases, 300));
         });
 
-        // Save to Google Sheets via Apps Script
+        // GPS Mode Functions
+        function setGpsMode(mode) {
+            gpsMode = mode;
+            
+            const currentBtn = document.getElementById('gps-current-btn');
+            const manualBtn = document.getElementById('gps-manual-btn');
+            const currentMode = document.getElementById('gps-current-mode');
+            const manualMode = document.getElementById('gps-manual-mode');
+            
+            if (mode === 'current') {
+                currentBtn.classList.add('active');
+                manualBtn.classList.remove('active');
+                currentMode.classList.remove('hidden');
+                manualMode.classList.add('hidden');
+            } else {
+                manualBtn.classList.add('active');
+                currentBtn.classList.remove('active');
+                manualMode.classList.remove('hidden');
+                currentMode.classList.add('hidden');
+            }
+        }
+
+        function setManualLocation() {
+            const lat = document.getElementById('manual-lat').value.trim();
+            const lng = document.getElementById('manual-lng').value.trim();
+            
+            if (!lat || !lng) {
+                showToast('กรุณากรอก Latitude และ Longitude', 'warning');
+                return;
+            }
+            
+            const latNum = parseFloat(lat);
+            const lngNum = parseFloat(lng);
+            
+            if (isNaN(latNum) || isNaN(lngNum)) {
+                showToast('กรุณากรอกตัวเลขที่ถูกต้อง', 'error');
+                return;
+            }
+            
+            if (latNum < -90 || latNum > 90 || lngNum < -180 || lngNum > 180) {
+                showToast('ค่า GPS ไม่ถูกต้อง', 'error');
+                return;
+            }
+            
+            const display = document.getElementById('location-display');
+            display.textContent = `📍 ${latNum.toFixed(6)}, ${lngNum.toFixed(6)}`;
+            display.dataset.lat = latNum.toFixed(6);
+            display.dataset.lng = lngNum.toFixed(6);
+            display.classList.remove('hidden');
+            showToast('ระบุตำแหน่งสำเร็จ', 'success');
+        }
+
+        // CRUD Operations
         async function saveToGoogleSheets(data) {
             if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_WEB_APP_URL_HERE') {
-                showToast('กรุณาตั้งค่า Apps Script URL ในโค้ด', 'warning');
-                return false;
+                console.log('Demo mode: Data saved locally');
+                showToast('บันทึกสำเร็จ (โหมดทดสอบ)', 'success');
+                return true;
             }
 
             try {
@@ -890,34 +964,133 @@
                 
                 const response = await fetch(APPS_SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'no-cors',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        action: 'create',
-                        data: data
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'create', data: data })
                 });
 
-                // Note: no-cors mode doesn't allow reading response
-                // We assume success if no error is thrown
+                const result = await response.json();
                 showLoading(false);
-                showToast('บันทึกลง Google Sheets สำเร็จ', 'success');
-                return true;
-
+                
+                if (result.status === 'success') {
+                    showToast('บันทึกสำเร็จ', 'success');
+                    return true;
+                } else {
+                    showToast('เกิดข้อผิดพลาด: ' + result.message, 'error');
+                    return false;
+                }
             } catch (error) {
-                console.error('Error saving to Google Sheets:', error);
+                console.error('Error:', error);
                 showLoading(false);
-                showToast('เกิดข้อผิดพลาดในการบันทึก', 'error');
+                showToast('เกิดข้อผิดพลาด', 'error');
                 return false;
             }
         }
 
-        // Load from Google Sheets via Apps Script
+        async function updateToGoogleSheets(data) {
+            if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_WEB_APP_URL_HERE') {
+                console.log('Demo mode: Data updated locally');
+                showToast('อัพเดทสำเร็จ (โหมดทดสอบ)', 'success');
+                return true;
+            }
+
+            try {
+                showLoading(true);
+                
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'update', data: data })
+                });
+
+                const result = await response.json();
+                showLoading(false);
+                
+                if (result.status === 'success') {
+                    showToast('อัพเดทสำเร็จ', 'success');
+                    return true;
+                } else {
+                    showToast('เกิดข้อผิดพลาด: ' + result.message, 'error');
+                    return false;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showLoading(false);
+                showToast('เกิดข้อผิดพลาด', 'error');
+                return false;
+            }
+        }
+
+        async function deleteFromGoogleSheets(id) {
+            if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_WEB_APP_URL_HERE') {
+                console.log('Demo mode: Data deleted locally');
+                showToast('ลบข้อมูลสำเร็จ (โหมดทดสอบ)', 'success');
+                return true;
+            }
+
+            try {
+                showLoading(true);
+                
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'delete', id: id })
+                });
+
+                const result = await response.json();
+                showLoading(false);
+                
+                if (result.status === 'success') {
+                    showToast('ลบข้อมูลสำเร็จ', 'success');
+                    return true;
+                } else {
+                    showToast('เกิดข้อผิดพลาด: ' + result.message, 'error');
+                    return false;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showLoading(false);
+                showToast('เกิดข้อผิดพลาด', 'error');
+                return false;
+            }
+        }
+
+        async function updateStatusInGoogleSheets(id, newStatus) {
+            if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_WEB_APP_URL_HERE') {
+                console.log('Demo mode: Status updated locally');
+                showToast('เปลี่ยนสถานะสำเร็จ (โหมดทดสอบ)', 'success');
+                return true;
+            }
+
+            try {
+                showLoading(true);
+                
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'updateStatus', id: id, status: newStatus })
+                });
+
+                const result = await response.json();
+                showLoading(false);
+                
+                if (result.status === 'success') {
+                    showToast('เปลี่ยนสถานะสำเร็จ', 'success');
+                    return true;
+                } else {
+                    showToast('เกิดข้อผิดพลาด: ' + result.message, 'error');
+                    return false;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showLoading(false);
+                showToast('เกิดข้อผิดพลาด', 'error');
+                return false;
+            }
+        }
+
         async function loadFromGoogleSheets() {
             if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_WEB_APP_URL_HERE') {
-                showToast('กรุณาตั้งค่า Apps Script URL ในโค้ด', 'warning');
+                console.log('Demo mode: No URL configured');
                 loadDefaultSettings();
                 updateDashboard();
                 return;
@@ -926,95 +1099,78 @@
             try {
                 showLoading(true);
                 
-                // ดึงข้อมูล Settings (เวร และ พื้นที่) ก่อน
+                // Load Settings
                 try {
-                    const settingsResponse = await fetch(`${APPS_SCRIPT_URL}?action=readSettings`, {
-                        method: 'GET',
-                    });
+                    const settingsResponse = await fetch(`${APPS_SCRIPT_URL}?action=readSettings&t=${Date.now()}`);
                     
                     if (settingsResponse.ok) {
                         const settingsResult = await settingsResponse.json();
+                        console.log('Settings loaded:', settingsResult);
                         if (settingsResult.status === 'success' && settingsResult.data) {
                             shiftOptions = settingsResult.data.shifts || [];
                             areaOptions = settingsResult.data.areas || [];
-                            localStorage.setItem('shiftOptions', JSON.stringify(shiftOptions));
-                            localStorage.setItem('areaOptions', JSON.stringify(areaOptions));
                             updateShiftDropdown();
                             updateAreaDropdown();
-                            console.log('โหลดเวร:', shiftOptions);
-                            console.log('โหลดพื้นที่:', areaOptions);
                         }
                     }
                 } catch (settingsError) {
                     console.error('Error loading settings:', settingsError);
-                    // โหลดจาก localStorage หรือ default
-                    const savedShifts = localStorage.getItem('shiftOptions');
-                    const savedAreas = localStorage.getItem('areaOptions');
-                    
-                    if (savedShifts) {
-                        shiftOptions = JSON.parse(savedShifts);
-                        updateShiftDropdown();
-                    }
-                    
-                    if (savedAreas) {
-                        areaOptions = JSON.parse(savedAreas);
-                        updateAreaDropdown();
-                    } else {
-                        loadDefaultSettings();
-                    }
-                }
-                
-                // ดึงข้อมูลหลัก
-                const dataResponse = await fetch(`${APPS_SCRIPT_URL}?action=read`, {
-                    method: 'GET',
-                });
-                
-                if (!dataResponse.ok) {
-                    throw new Error('Failed to load from Google Sheets');
-                }
-
-                const dataResult = await dataResponse.json();
-                
-                if (dataResult.status === 'success' && dataResult.data) {
-                    theftData = dataResult.data;
-                    localStorage.setItem('theftData', JSON.stringify(theftData));
-                }
-                
-                updateDashboard();
-                showLoading(false);
-                showToast(`โหลดข้อมูล ${theftData.length} รายการสำเร็จ`, 'success');
-
-            } catch (error) {
-                console.error('Error loading from Google Sheets:', error);
-                showLoading(false);
-                
-                // Load from local storage as fallback
-                const saved = localStorage.getItem('theftData');
-                const savedShifts = localStorage.getItem('shiftOptions');
-                const savedAreas = localStorage.getItem('areaOptions');
-                
-                if (saved) {
-                    theftData = JSON.parse(saved);
-                }
-                
-                if (savedShifts) {
-                    shiftOptions = JSON.parse(savedShifts);
-                    updateShiftDropdown();
-                } else {
                     loadDefaultSettings();
                 }
                 
-                if (savedAreas) {
-                    areaOptions = JSON.parse(savedAreas);
-                    updateAreaDropdown();
+                // Load Data
+                try {
+                    console.log('Fetching data from:', APPS_SCRIPT_URL);
+                    const dataResponse = await fetch(`${APPS_SCRIPT_URL}?action=read&t=${Date.now()}`);
+                    
+                    console.log('Response status:', dataResponse.status);
+                    
+                    const dataText = await dataResponse.text();
+                    console.log('Raw response:', dataText);
+                    
+                    let dataResult;
+                    try {
+                        dataResult = JSON.parse(dataText);
+                    } catch (parseError) {
+                        console.error('JSON parse error:', parseError);
+                        throw new Error('Invalid JSON response from server');
+                    }
+                    
+                    console.log('Parsed data result:', dataResult);
+                    
+                    if (dataResult.status === 'success') {
+                        if (Array.isArray(dataResult.data)) {
+                            theftData = dataResult.data;
+                        } else if (dataResult.data && typeof dataResult.data === 'object') {
+                            theftData = Object.values(dataResult.data);
+                        } else {
+                            theftData = [];
+                        }
+                        
+                        console.log('Loaded theft data:', theftData);
+                        showToast(`โหลด ${theftData.length} รายการ`, 'success');
+                    } else {
+                        console.error('Server returned error:', dataResult.message);
+                        throw new Error(dataResult.message || 'Failed to load data');
+                    }
+                } catch (dataError) {
+                    console.error('Error loading theft data:', dataError);
+                    throw dataError;
                 }
                 
                 updateDashboard();
-                showToast('โหลดข้อมูลจากเครื่องนี้', 'info');
+                showLoading(false);
+
+            } catch (error) {
+                console.error('Error in loadFromGoogleSheets:', error);
+                showLoading(false);
+                loadDefaultSettings();
+                theftData = [];
+                updateDashboard();
+                showToast('ไม่สามารถโหลดข้อมูลได้: ' + error.message, 'error');
             }
         }
 
-        // Load Default Settings
         function loadDefaultSettings() {
             shiftOptions = [
                 'เวรเช้า (06:00-14:00)',
@@ -1022,20 +1178,16 @@
                 'เวรดึก (22:00-06:00)'
             ];
             updateShiftDropdown();
-            
-            // ไม่ตั้งค่า default สำหรับพื้นที่ - รอโหลดจาก Sheet เท่านั้น
             areaOptions = [];
             updateAreaDropdown();
         }
 
-        // Update Shift Dropdown
         function updateShiftDropdown() {
             const shiftSelect = document.getElementById('shift');
             if (!shiftSelect) return;
             
             const currentValue = shiftSelect.value;
-            
-            shiftSelect.innerHTML = '<option value="">เลือกเวรผู้รับผิดชอบ</option>';
+            shiftSelect.innerHTML = '<option value="">เลือกเวร</option>';
             
             shiftOptions.forEach(shift => {
                 const option = document.createElement('option');
@@ -1049,13 +1201,11 @@
             }
         }
 
-        // Update Area Datalist
         function updateAreaDropdown() {
             const areaDatalist = document.getElementById('area-list');
             if (!areaDatalist) return;
             
             areaDatalist.innerHTML = '';
-            
             areaOptions.forEach(area => {
                 const option = document.createElement('option');
                 option.value = area;
@@ -1063,7 +1213,6 @@
             });
         }
 
-        // Show/Hide Loading
         function showLoading(show) {
             const overlay = document.getElementById('loading-overlay');
             if (show) {
@@ -1073,7 +1222,7 @@
             }
         }
 
-        // Update Dashboard
+        // Update Dashboard with Charts
         function updateDashboard() {
             const total = theftData.length;
             const investigating = theftData.filter(d => d.status === 'investigating').length;
@@ -1086,113 +1235,205 @@
             document.getElementById('arrested-cases').textContent = arrested;
             document.getElementById('solve-rate').textContent = solveRate + '%';
             
-            updateShiftStats();
-            updateAreaStats();
-            updateBrandStats();
+            updateVehicleChart();
+            updateStatusChart();
+            updateTimeChartMonthly(); // เปลี่ยนเป็นแบบรายเดือน
+            updateShiftChart();
             updateIncidentMap();
             updateRecentCases();
             updateCasesList();
         }
 
-        // Update Shift Statistics
-        function updateShiftStats() {
+        function updateVehicleChart() {
+            const ctx = document.getElementById('vehicleChart');
+            if (!ctx) return;
+            
+            const brandModelCounts = {};
+            theftData.forEach(item => {
+                const brandModel = `${item.brand || 'ไม่ระบุ'} ${item.model || ''}`.trim();
+                brandModelCounts[brandModel] = (brandModelCounts[brandModel] || 0) + 1;
+            });
+            
+            const sorted = Object.entries(brandModelCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10);
+            
+            if (vehicleChart) vehicleChart.destroy();
+            
+            vehicleChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: sorted.map(([label]) => label),
+                    datasets: [{
+                        data: sorted.map(([, count]) => count),
+                        backgroundColor: [
+                            '#ef4444', '#f59e0b', '#3b82f6', '#10b981', '#8b5cf6',
+                            '#ec4899', '#14b8a6', '#f97316', '#06b6d4', '#84cc16'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { 
+                            position: 'bottom',
+                            labels: {
+                                font: { size: 11 },
+                                padding: 8
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateStatusChart() {
+            const ctx = document.getElementById('statusChart');
+            if (!ctx) return;
+            
+            const statusCounts = {
+                'pending': 0,
+                'investigating': 0,
+                'arrested': 0,
+                'closed': 0
+            };
+            
+            theftData.forEach(item => {
+                const status = item.status || 'pending';
+                statusCounts[status] = (statusCounts[status] || 0) + 1;
+            });
+            
+            if (statusChart) statusChart.destroy();
+            
+            statusChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['รอดำเนินการ', 'สืบสวน', 'จับกุม', 'ปิดคดี'],
+                    datasets: [{
+                        label: 'จำนวนคดี',
+                        data: [statusCounts.pending, statusCounts.investigating, statusCounts.arrested, statusCounts.closed],
+                        backgroundColor: ['#f59e0b', '#3b82f6', '#10b981', '#6b7280']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        // ✨ แก้ไข: สถิติตามเดือน (แทนที่แบบรายชั่วโมง)
+        function updateTimeChartMonthly() {
+            const ctx = document.getElementById('timeChart');
+            if (!ctx) return;
+            
+            // นับจำนวนคดีแต่ละเดือน
+            const monthCounts = {};
+            const monthNames = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+            
+            theftData.forEach(item => {
+                if (item.incidentDate) {
+                    const date = new Date(item.incidentDate);
+                    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                    monthCounts[monthKey] = (monthCounts[monthKey] || 0) + 1;
+                }
+            });
+            
+            // เรียงลำดับเดือน
+            const sortedMonths = Object.keys(monthCounts).sort();
+            const labels = sortedMonths.map(key => {
+                const [year, month] = key.split('-');
+                return `${monthNames[parseInt(month) - 1]} ${parseInt(year) + 543}`;
+            });
+            const data = sortedMonths.map(key => monthCounts[key]);
+            
+            if (timeChart) timeChart.destroy();
+            
+            timeChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'จำนวนคดี',
+                        data: data,
+                        borderColor: '#06C755',
+                        backgroundColor: 'rgba(6, 199, 85, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateShiftChart() {
+            const ctx = document.getElementById('shiftChart');
+            if (!ctx) return;
+            
             const shiftCounts = {};
             theftData.forEach(item => {
                 const shift = item.shift || 'ไม่ระบุ';
                 shiftCounts[shift] = (shiftCounts[shift] || 0) + 1;
             });
-
-            const sorted = Object.entries(shiftCounts).sort((a, b) => b[1] - a[1]);
-            const max = sorted[0]?.[1] || 1;
-
-            const container = document.getElementById('shift-stats');
-            container.innerHTML = sorted.slice(0, 5).map(([shift, count]) => {
-                const percentage = (count / max) * 100;
-                return `
-                    <div class="chart-item">
-                        <div class="chart-label">
-                            <span class="text-gray-700 font-medium">${shift}</span>
-                            <span class="text-gray-600">${count} คดี</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-6">
-                            <div class="chart-bar" style="width: ${percentage}%"></div>
-                        </div>
-                    </div>
-                `;
-            }).join('') || '<p class="text-gray-500 text-sm text-center">ยังไม่มีข้อมูล</p>';
-        }
-
-        // Update Area Statistics
-        function updateAreaStats() {
-            const areaCounts = {};
-            theftData.forEach(item => {
-                const area = item.incidentArea;
-                areaCounts[area] = (areaCounts[area] || 0) + 1;
+            
+            if (shiftChart) shiftChart.destroy();
+            
+            shiftChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(shiftCounts),
+                    datasets: [{
+                        label: 'จำนวนคดี',
+                        data: Object.values(shiftCounts),
+                        backgroundColor: ['#3b82f6', '#f59e0b', '#8b5cf6']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: { beginAtZero: true }
+                    }
+                }
             });
-
-            const sorted = Object.entries(areaCounts).sort((a, b) => b[1] - a[1]);
-            const max = sorted[0]?.[1] || 1;
-
-            const container = document.getElementById('area-stats');
-            container.innerHTML = sorted.slice(0, 5).map(([area, count]) => {
-                const percentage = (count / max) * 100;
-                return `
-                    <div class="chart-item">
-                        <div class="chart-label">
-                            <span class="text-gray-700 font-medium">${area}</span>
-                            <span class="text-gray-600">${count} คดี</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-6">
-                            <div class="chart-bar" style="width: ${percentage}%"></div>
-                        </div>
-                    </div>
-                `;
-            }).join('') || '<p class="text-gray-500 text-sm text-center">ยังไม่มีข้อมูล</p>';
         }
 
-        // Update Brand Statistics
-        function updateBrandStats() {
-            const brandModelCounts = {};
-            theftData.forEach(item => {
-                const key = `${item.brand} ${item.model}`;
-                brandModelCounts[key] = (brandModelCounts[key] || 0) + 1;
-            });
-
-            const sorted = Object.entries(brandModelCounts).sort((a, b) => b[1] - a[1]);
-            const max = sorted[0]?.[1] || 1;
-
-            const container = document.getElementById('brand-stats');
-            container.innerHTML = sorted.slice(0, 5).map(([brandModel, count]) => {
-                const percentage = (count / max) * 100;
-                return `
-                    <div class="chart-item">
-                        <div class="chart-label">
-                            <span class="text-gray-700 font-medium">${brandModel}</span>
-                            <span class="text-gray-600">${count} คดี</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-6">
-                            <div class="chart-bar" style="width: ${percentage}%"></div>
-                        </div>
-                    </div>
-                `;
-            }).join('') || '<p class="text-gray-500 text-sm text-center">ยังไม่มีข้อมูล</p>';
-        }
-
-        // Update Incident Map
         function updateIncidentMap() {
             const container = document.getElementById('incident-map');
-            
-            // Filter only items with GPS coordinates
             const locatedItems = theftData.filter(item => item.latitude && item.longitude);
             
             if (locatedItems.length === 0) {
                 container.innerHTML = `
                     <div class="map-container">
-                        <div class="map-grid"></div>
                         <div class="flex items-center justify-center h-full">
                             <div class="text-center">
                                 <i class="fas fa-map-marked-alt text-5xl text-gray-300 mb-2"></i>
-                                <p class="text-gray-500 text-sm">ยังไม่มีข้อมูลตำแหน่ง GPS</p>
+                                <p class="text-gray-500 text-sm">ยังไม่มีข้อมูล GPS</p>
                             </div>
                         </div>
                     </div>
@@ -1200,108 +1441,39 @@
                 return;
             }
             
-            // Calculate bounds
             const lats = locatedItems.map(item => parseFloat(item.latitude));
             const lngs = locatedItems.map(item => parseFloat(item.longitude));
+            
             const minLat = Math.min(...lats);
             const maxLat = Math.max(...lats);
             const minLng = Math.min(...lngs);
             const maxLng = Math.max(...lngs);
             
-            const latRange = maxLat - minLat || 0.01;
-            const lngRange = maxLng - minLng || 0.01;
+            const centerLat = (minLat + maxLat) / 2;
+            const centerLng = (minLng + maxLng) / 2;
             
-            // Create map HTML
-            let mapHTML = `
-                <div class="map-container">
-                    <div class="map-grid"></div>
-            `;
+            const latRange = (maxLat - minLat) || 0.01;
+            const lngRange = (maxLng - minLng) || 0.01;
             
-            // Add markers
+            let mapHTML = '<div class="map-container">';
+            
             locatedItems.forEach(item => {
-                const x = ((parseFloat(item.longitude) - minLng) / lngRange) * 100;
-                const y = ((maxLat - parseFloat(item.latitude)) / latRange) * 100;
-                const priority = getVehicleTypePriority(item.vehicleType);
+                const x = ((parseFloat(item.longitude) - centerLng) / lngRange) * 50 + 50;
+                const y = ((centerLat - parseFloat(item.latitude)) / latRange) * 50 + 50;
                 
                 mapHTML += `
-                    <div class="map-marker priority-${priority}" 
+                    <div class="map-marker" 
                          style="left: ${x}%; top: ${y}%;"
-                         onclick="showDetail(${item.id})"
-                         onmouseenter="showMapTooltip(event, ${item.id})"
-                         onmouseleave="hideMapTooltip()">
+                         onclick="showDetail(${item.id})">
                         <i class="fas fa-map-marker-alt"></i>
                     </div>
                 `;
             });
             
-            mapHTML += `
-                    <div id="map-tooltip" class="map-tooltip"></div>
-                </div>
-            `;
-            
+            mapHTML += '</div>';
             container.innerHTML = mapHTML;
         }
 
-        // Get Vehicle Type Priority for Map Color
-        function getVehicleTypePriority(vehicleType) {
-            if (vehicleType === 'รถยนต์') return 'high';
-            if (vehicleType === 'รถจักรยานยนต์') return 'medium';
-            return 'low';
-        }
-
-        // Show Map Tooltip
-        function showMapTooltip(event, id) {
-            const item = theftData.find(d => d.id === id);
-            if (!item) return;
-            
-            const tooltip = document.getElementById('map-tooltip');
-            tooltip.innerHTML = `
-                <div class="font-bold text-gray-800">${item.licensePlate}</div>
-                <div class="text-xs text-gray-600">${item.incidentArea}</div>
-            `;
-            tooltip.classList.add('active');
-            
-            const rect = event.target.getBoundingClientRect();
-            const container = document.getElementById('incident-map').getBoundingClientRect();
-            
-            tooltip.style.left = (rect.left - container.left) + 'px';
-            tooltip.style.top = (rect.top - container.top - 50) + 'px';
-        }
-
-        // Hide Map Tooltip
-        function hideMapTooltip() {
-            const tooltip = document.getElementById('map-tooltip');
-            tooltip.classList.remove('active');
-        }
-
-        // Open Full Map
-        function openFullMap() {
-            const locatedItems = theftData.filter(item => item.latitude && item.longitude);
-            
-            if (locatedItems.length === 0) {
-                showToast('ยังไม่มีข้อมูลตำแหน่ง GPS', 'warning');
-                return;
-            }
-            
-            // Get first item with coordinates
-            const firstItem = locatedItems[0];
-            const lat = firstItem.latitude;
-            const lng = firstItem.longitude;
-            
-            // Open Google Maps
-            const url = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
-            
-            if (liff.isInClient()) {
-                liff.openWindow({
-                    url: url,
-                    external: true
-                });
-            } else {
-                window.open(url, '_blank', 'noopener,noreferrer');
-            }
-        }
-
-        // Update Recent Cases
         function updateRecentCases() {
             const container = document.getElementById('recent-cases');
             const recent = theftData.slice(0, 5);
@@ -1334,7 +1506,6 @@
             `).join('');
         }
 
-        // Update Cases List
         function updateCasesList() {
             const container = document.getElementById('cases-list');
             const filtered = currentFilter === 'all' 
@@ -1375,14 +1546,13 @@
                             <i class="fas fa-map-marker-alt mr-1"></i>${item.incidentArea}
                         </div>
                         <div class="text-xs text-gray-500">
-                            <i class="fas fa-calendar mr-1"></i>${formatDate(item.incidentDate)}
+                            <i class="fas fa-calendar mr-1"></i>${formatDate(item.incidentDate)} ${item.incidentTime}
                         </div>
                     </div>
                 </div>
             `).join('');
         }
 
-        // Show Page
         function showPage(pageName) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(`${pageName}-page`).classList.add('active');
@@ -1397,9 +1567,12 @@
             if (pageName === 'cases') {
                 updateCasesList();
             }
+            
+            if (pageName === 'report') {
+                resetForm();
+            }
         }
 
-        // Handle Form Submit
         async function handleFormSubmit(e) {
             e.preventDefault();
             
@@ -1407,8 +1580,11 @@
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>กำลังส่ง...';
             
+            const editId = document.getElementById('edit-id').value;
+            const isEdit = editId !== '';
+            
             const formData = {
-                id: Date.now(),
+                id: isEdit ? parseInt(editId) : Date.now(),
                 timestamp: new Date().toISOString(),
                 shift: document.getElementById('shift').value,
                 vehicleType: document.querySelector('input[name="vehicleType"]:checked').value,
@@ -1420,66 +1596,76 @@
                 incidentDate: document.getElementById('incident-date').value,
                 incidentTime: document.getElementById('incident-time').value,
                 additionalDetails: document.getElementById('additional-details').value,
-                status: 'pending',
+                status: isEdit ? (theftData.find(d => d.id === parseInt(editId))?.status || 'pending') : 'pending',
                 photo: document.getElementById('preview-image')?.src || null,
                 latitude: document.getElementById('location-display')?.dataset.lat || null,
                 longitude: document.getElementById('location-display')?.dataset.lng || null,
-                reportedBy: liffProfile ? liffProfile.displayName : 'ผู้ใช้'
+                reportedBy: liffProfile ? liffProfile.displayName : 'ผู้ใช้',
+                reporterUserId: liffProfile ? liffProfile.userId : 'unknown'
             };
             
-            // Save to local storage first
-            theftData.unshift(formData);
-            localStorage.setItem('theftData', JSON.stringify(theftData));
+            let success = false;
+            if (isEdit) {
+                success = await updateToGoogleSheets(formData);
+                if (success) {
+                    const index = theftData.findIndex(d => d.id === parseInt(editId));
+                    if (index !== -1) theftData[index] = formData;
+                }
+            } else {
+                success = await saveToGoogleSheets(formData);
+                if (success) {
+                    theftData.unshift(formData);
+                }
+            }
             
-            // Save to Google Sheets
-            await saveToGoogleSheets(formData);
-            
-            updateDashboard();
-            
-            // Send to LINE chat
-            if (liff.isInClient()) {
-                const message = `📢 รายงานรถหายใหม่\n\n` +
-                    `เวร: ${formData.shift}\n` +
-                    `ประเภท: ${formData.vehicleType}\n` +
-                    `ทะเบียน: ${formData.licensePlate}\n` +
-                    `รถ: ${formData.brand} ${formData.model}\n` +
-                    `สี: ${formData.color}\n` +
-                    `สถานที่: ${formData.incidentArea}\n` +
-                    `วันที่: ${formatDate(formData.incidentDate)} ${formData.incidentTime}\n\n` +
-                    `${formData.additionalDetails ? '📝 รายละเอียดเพิ่มเติม:\n' + formData.additionalDetails : ''}`;
+            if (success) {
+                updateDashboard();
                 
-                liff.sendMessages([{
-                    type: 'text',
-                    text: message
-                }]).catch((err) => {
-                    console.error('Error sending message', err);
-                });
+                if (typeof liff !== 'undefined' && liff.isInClient && liff.isInClient() && !isEdit) {
+                    const message = `📢 รายงานรถหายใหม่\n\n` +
+                        `เวร: ${formData.shift}\n` +
+                        `ประเภท: ${formData.vehicleType}\n` +
+                        `ทะเบียน: ${formData.licensePlate}\n` +
+                        `รถ: ${formData.brand} ${formData.model}\n` +
+                        `สี: ${formData.color}\n` +
+                        `สถานที่: ${formData.incidentArea}\n` +
+                        `วันที่: ${formatDate(formData.incidentDate)} ${formData.incidentTime}\n\n` +
+                        `${formData.additionalDetails ? '📝 รายละเอียด:\n' + formData.additionalDetails : ''}`;
+                    
+                    liff.sendMessages([{ type: 'text', text: message }]).catch((err) => {
+                        console.error('Error sending message', err);
+                    });
+                }
+                
+                resetForm();
+                showPage('dashboard');
             }
             
             submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>บันทึกข้อมูล';
-            
-            showToast('บันทึกรายงานสำเร็จ', 'success');
-            resetForm();
-            showPage('dashboard');
+            submitBtn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>ส่งรายงาน';
         }
 
-        // Reset Form
         function resetForm() {
             document.getElementById('report-form').reset();
+            document.getElementById('edit-id').value = '';
             document.getElementById('photo-preview').classList.add('hidden');
             document.getElementById('camera-button').classList.remove('hidden');
             document.getElementById('location-display').classList.add('hidden');
+            document.getElementById('manual-lat').value = '';
+            document.getElementById('manual-lng').value = '';
+            
+            setGpsMode('current');
             
             const today = new Date().toISOString().split('T')[0];
             const timeNow = new Date().toTimeString().split(' ')[0].substring(0, 5);
             document.getElementById('incident-date').value = today;
             document.getElementById('incident-time').value = timeNow;
+            
+            document.getElementById('submit-btn').innerHTML = '<i class="fas fa-paper-plane mr-2"></i>ส่งรายงาน';
         }
 
-        // Take Photo
         function takePhoto() {
-            if (liff.isInClient()) {
+            if (typeof liff !== 'undefined' && liff.isInClient && liff.isInClient()) {
                 liff.openWindow({
                     url: `https://line.me/R/nv/camera/`,
                     external: false
@@ -1505,14 +1691,12 @@
             }
         }
 
-        // Remove Photo
         function removePhoto() {
             document.getElementById('photo-preview').classList.add('hidden');
             document.getElementById('camera-button').classList.remove('hidden');
             document.getElementById('preview-image').src = '';
         }
 
-        // Get Current Location
         function getCurrentLocation() {
             if (navigator.geolocation) {
                 showToast('กำลังระบุตำแหน่ง...', 'info');
@@ -1536,21 +1720,20 @@
             }
         }
 
-        // Filter Cases
         function filterCases(status) {
             currentFilter = status;
             updateCasesList();
         }
 
-        // Search Cases
         function searchCases() {
             updateCasesList();
         }
 
-        // Show Detail
         function showDetail(id) {
             const item = theftData.find(d => d.id === id);
             if (!item) return;
+            
+            const canEdit = liffProfile && item.reporterUserId === liffProfile.userId;
             
             const modal = document.getElementById('detail-modal');
             const body = document.getElementById('modal-body');
@@ -1563,6 +1746,26 @@
                         <div class="text-sm text-gray-600 mb-1">ทะเบียนรถ</div>
                         <div class="font-bold text-xl">${item.licensePlate}</div>
                     </div>
+                    
+                    <div>
+                        <div class="text-sm text-gray-600 mb-1">สถานะ</div>
+                        <span class="status-badge status-${item.status}">${getStatusText(item.status)}</span>
+                    </div>
+                    
+                    ${canEdit ? `
+                    <div>
+                        <div class="text-sm text-gray-600 mb-2">เปลี่ยนสถานะ</div>
+                        <select id="status-select-${item.id}" class="form-input">
+                            <option value="pending" ${item.status === 'pending' ? 'selected' : ''}>รอดำเนินการ</option>
+                            <option value="investigating" ${item.status === 'investigating' ? 'selected' : ''}>สืบสวน</option>
+                            <option value="arrested" ${item.status === 'arrested' ? 'selected' : ''}>จับกุม</option>
+                            <option value="closed" ${item.status === 'closed' ? 'selected' : ''}>ปิดคดี</option>
+                        </select>
+                        <button onclick="changeStatus(${item.id})" class="btn-primary mt-2">
+                            <i class="fas fa-save mr-2"></i>บันทึกสถานะ
+                        </button>
+                    </div>
+                    ` : ''}
                     
                     ${item.shift ? `
                     <div>
@@ -1620,7 +1823,7 @@
                     <div>
                         <div class="text-sm text-gray-600 mb-2">ตำแหน่ง GPS</div>
                         <div class="font-mono text-sm text-gray-700 mb-2">${item.latitude}, ${item.longitude}</div>
-                        <button onclick="openGoogleMaps(${item.latitude}, ${item.longitude})" class="share-button w-full mb-3">
+                        <button onclick="openGoogleMaps(${item.latitude}, ${item.longitude})" class="share-button w-full">
                             <i class="fas fa-map-marked-alt"></i>
                             เปิดใน Google Maps
                         </button>
@@ -1628,45 +1831,151 @@
                     ` : ''}
                     
                     <div>
-                        <div class="text-sm text-gray-600 mb-1">สถานะ</div>
-                        <span class="status-badge status-${item.status}">${getStatusText(item.status)}</span>
-                    </div>
-                    
-                    <div>
                         <div class="text-sm text-gray-600 mb-1">รายงานโดย</div>
                         <div class="font-medium">${item.reportedBy}</div>
                     </div>
                     
-                    <button onclick="shareCase(${item.id})" class="share-button w-full">
-                        <i class="fas fa-share-alt"></i>
-                        แชร์ข้อมูลคดีนี้
-                    </button>
+                    <div class="action-buttons">
+                        <button onclick="shareCase(${item.id})" class="share-button">
+                            <i class="fas fa-share-alt"></i>
+                            แชร์
+                        </button>
+                        ${canEdit ? `
+                        <button onclick="editCase(${item.id})" class="btn-secondary">
+                            <i class="fas fa-edit"></i>
+                            แก้ไข
+                        </button>
+                        <button onclick="deleteCase(${item.id})" class="btn-danger">
+                            <i class="fas fa-trash"></i>
+                            ลบ
+                        </button>
+                        ` : ''}
+                    </div>
                 </div>
             `;
             
             modal.classList.add('active');
         }
 
-        // Open Google Maps
+        async function changeStatus(id) {
+            const item = theftData.find(d => d.id === id);
+            if (!item) return;
+            
+            const newStatus = document.getElementById(`status-select-${id}`).value;
+            
+            const success = await updateStatusInGoogleSheets(id, newStatus);
+            if (success) {
+                item.status = newStatus;
+                updateDashboard();
+                closeModal();
+            }
+        }
+
+        function editCase(id) {
+            const item = theftData.find(d => d.id === id);
+            if (!item) return;
+            
+            if (liffProfile && item.reporterUserId !== liffProfile.userId) {
+                showToast('คุณไม่สามารถแก้ไขรายงานนี้ได้', 'error');
+                return;
+            }
+            
+            document.getElementById('edit-id').value = item.id;
+            document.getElementById('shift').value = item.shift;
+            document.querySelector(`input[name="vehicleType"][value="${item.vehicleType}"]`).checked = true;
+            document.getElementById('car-brand').value = item.brand;
+            document.getElementById('car-model').value = item.model;
+            document.getElementById('car-color').value = item.color;
+            document.getElementById('license-plate').value = item.licensePlate;
+            document.getElementById('incident-area').value = item.incidentArea;
+            document.getElementById('incident-date').value = item.incidentDate;
+            document.getElementById('incident-time').value = item.incidentTime;
+            document.getElementById('additional-details').value = item.additionalDetails || '';
+            
+            if (item.photo) {
+                document.getElementById('preview-image').src = item.photo;
+                document.getElementById('photo-preview').classList.remove('hidden');
+                document.getElementById('camera-button').classList.add('hidden');
+            }
+            
+            if (item.latitude && item.longitude) {
+                const display = document.getElementById('location-display');
+                display.textContent = `📍 ${item.latitude}, ${item.longitude}`;
+                display.dataset.lat = item.latitude;
+                display.dataset.lng = item.longitude;
+                display.classList.remove('hidden');
+            }
+            
+            document.getElementById('submit-btn').innerHTML = '<i class="fas fa-save mr-2"></i>บันทึกการแก้ไข';
+            
+            closeModal();
+            showPage('report');
+        }
+
+        async function deleteCase(id) {
+            const item = theftData.find(d => d.id === id);
+            if (!item) return;
+            
+            if (liffProfile && item.reporterUserId !== liffProfile.userId) {
+                showToast('คุณไม่สามารถลบรายงานนี้ได้', 'error');
+                return;
+            }
+            
+            const confirmDelete = await showConfirmDialog('คุณต้องการลบรายงานนี้ใช่หรือไม่?');
+            if (!confirmDelete) return;
+            
+            const success = await deleteFromGoogleSheets(id);
+            if (success) {
+                theftData = theftData.filter(d => d.id !== id);
+                updateDashboard();
+                closeModal();
+            }
+        }
+
+        function showConfirmDialog(message) {
+            return new Promise((resolve) => {
+                const overlay = document.createElement('div');
+                overlay.className = 'modal-overlay active';
+                overlay.innerHTML = `
+                    <div class="modal-content" style="max-height: 250px;">
+                        <div class="modal-body text-center">
+                            <i class="fas fa-exclamation-triangle text-5xl text-yellow-500 mb-4"></i>
+                            <p class="text-lg mb-6">${message}</p>
+                            <div class="flex gap-3">
+                                <button id="confirm-no" class="btn-secondary">ยกเลิก</button>
+                                <button id="confirm-yes" class="btn-danger">ยืนยัน</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(overlay);
+                
+                document.getElementById('confirm-yes').onclick = () => {
+                    document.body.removeChild(overlay);
+                    resolve(true);
+                };
+                
+                document.getElementById('confirm-no').onclick = () => {
+                    document.body.removeChild(overlay);
+                    resolve(false);
+                };
+            });
+        }
+
         function openGoogleMaps(lat, lng) {
             const url = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
             
-            if (liff.isInClient()) {
-                liff.openWindow({
-                    url: url,
-                    external: true
-                });
+            if (typeof liff !== 'undefined' && liff.isInClient && liff.isInClient()) {
+                liff.openWindow({ url: url, external: true });
             } else {
                 window.open(url, '_blank', 'noopener,noreferrer');
             }
         }
 
-        // Close Modal
         function closeModal() {
             document.getElementById('detail-modal').classList.remove('active');
         }
 
-        // Share Case
         function shareCase(id) {
             const item = theftData.find(d => d.id === id);
             if (!item) return;
@@ -1681,74 +1990,73 @@
                 `สถานะ: ${getStatusText(item.status)}\n\n` +
                 `${item.additionalDetails ? '📝 รายละเอียด:\n' + item.additionalDetails : ''}`;
             
-            if (liff.isApiAvailable('shareTargetPicker')) {
-                liff.shareTargetPicker([{
-                    type: 'text',
-                    text: message
-                }]).then(() => {
-                    showToast('แชร์ข้อมูลสำเร็จ', 'success');
-                }).catch((err) => {
-                    console.error('Error sharing', err);
-                });
+            if (typeof liff !== 'undefined' && liff.isApiAvailable && liff.isApiAvailable('shareTargetPicker')) {
+                liff.shareTargetPicker([{ type: 'text', text: message }])
+                    .then(() => showToast('แชร์สำเร็จ', 'success'))
+                    .catch((err) => console.error('Error', err));
             } else {
                 showToast('ไม่สามารถแชร์ได้ในเบราว์เซอร์', 'warning');
             }
         }
 
-        // Share App
         function shareApp() {
             const message = '🚗 ระบบรายงานรถหาย\n\nใช้งานผ่าน LINE LIFF เพื่อรายงานและติดตามคดีรถหาย';
             
-            if (liff.isApiAvailable('shareTargetPicker')) {
-                liff.shareTargetPicker([{
-                    type: 'text',
-                    text: message
-                }]).then(() => {
-                    showToast('แชร์แอปสำเร็จ', 'success');
-                }).catch((err) => {
-                    console.error('Error sharing', err);
-                });
+            if (typeof liff !== 'undefined' && liff.isApiAvailable && liff.isApiAvailable('shareTargetPicker')) {
+                liff.shareTargetPicker([{ type: 'text', text: message }])
+                    .then(() => showToast('แชร์สำเร็จ', 'success'))
+                    .catch((err) => console.error('Error', err));
             } else {
                 showToast('ไม่สามารถแชร์ได้ในเบราว์เซอร์', 'warning');
             }
         }
 
-        // Call Police
         function callPolice() {
-            if (liff.isInClient()) {
-                liff.openWindow({
-                    url: 'tel:191',
-                    external: true
-                });
+            if (typeof liff !== 'undefined' && liff.isInClient && liff.isInClient()) {
+                liff.openWindow({ url: 'tel:191', external: true });
             } else {
                 window.location.href = 'tel:191';
             }
         }
 
-        // Open Chat
         function openChat() {
-            if (liff.isInClient()) {
+            if (typeof liff !== 'undefined' && liff.isInClient && liff.isInClient()) {
                 liff.closeWindow();
             } else {
                 showToast('เปิดใน LINE เพื่อส่งข้อความ', 'info');
             }
         }
 
-        // Show Profile
         function showProfile() {
             showPage('profile');
         }
 
-        // Close LIFF
         function closeLiff() {
-            if (liff.isInClient()) {
+            if (typeof liff !== 'undefined' && liff.isInClient && liff.isInClient()) {
                 liff.closeWindow();
             } else {
                 showToast('เปิดใน LINE เพื่อปิดแอป', 'info');
             }
         }
 
-        // Utility Functions
+        function openFullMap() {
+            const locatedItems = theftData.filter(item => item.latitude && item.longitude);
+            
+            if (locatedItems.length === 0) {
+                showToast('ยังไม่มีข้อมูล GPS', 'warning');
+                return;
+            }
+            
+            const firstItem = locatedItems[0];
+            const url = `https://www.google.com/maps/search/?api=1&query=${firstItem.latitude},${firstItem.longitude}`;
+            
+            if (typeof liff !== 'undefined' && liff.isInClient && liff.isInClient()) {
+                liff.openWindow({ url: url, external: true });
+            } else {
+                window.open(url, '_blank', 'noopener,noreferrer');
+            }
+        }
+
         function formatDate(dateString) {
             const date = new Date(dateString);
             return date.toLocaleDateString('th-TH', { 
@@ -1801,6 +2109,5 @@
             };
         }
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b59d9e9533e8e13',t:'MTc2NzAxNzExNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
-
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b6fe69d6255189b',t:'MTc2NzI0ODMyMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
