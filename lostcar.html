@@ -318,39 +318,6 @@
             font-weight: 500;
         }
         
-        .camera-button {
-            width: 100%;
-            height: 200px;
-            border: 2px dashed #d1d5db;
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            background: #f9fafb;
-        }
-        
-        .camera-button:active {
-            background: #f3f4f6;
-            border-color: #06C755;
-        }
-        
-        .camera-button i {
-            font-size: 48px;
-            color: #9ca3af;
-            margin-bottom: 8px;
-        }
-        
-        .image-preview {
-            width: 100%;
-            height: 200px;
-            border-radius: 12px;
-            object-fit: cover;
-            margin-bottom: 12px;
-        }
-        
         .user-profile {
             display: flex;
             align-items: center;
@@ -589,7 +556,7 @@
     </div>
    </header><!-- Dashboard Page -->
    <div id="dashboard-page" class="page active"><!-- Sync Status -->
-    <div class="flex items-center justify-between mb-4"><span id="sync-status" class="sync-badge"> <i class="fas fa-cloud-upload-alt"></i> <span>เชื่อมต่อ Google Sheets</span> </span> <button onclick="loadFromGoogleSheets()" class="text-green-600"> <i class="fas fa-sync-alt"></i> </button>
+    <div class="flex items-center justify-between mb-4"><span id="sync-status" class="sync-badge"> <i class="fas fa-cloud-upload-alt"></i> <span>เ��ื่อมต่อ Google Sheets</span> </span> <button onclick="loadFromGoogleSheets()" class="text-green-600"> <i class="fas fa-sync-alt"></i> </button>
     </div><!-- User Profile Card -->
     <div id="user-profile-card" class="user-profile"><img id="user-avatar" src="https://via.placeholder.com/56" alt="Profile" class="user-avatar">
      <div class="user-info">
@@ -636,7 +603,7 @@
      </div>
     </div><!-- Charts -->
     <div class="card p-4 mb-4">
-     <h3 class="text-lg font-bold text-gray-800 mb-2">สถิติตามยี่ห้อ-รุ่น</h3>
+     <h3 class="text-lg font-bold text-gray-800 mb-2">���ถิติตามยี่ห้อ-รุ่น</h3>
      <div class="chart-container">
       <canvas id="vehicleChart"></canvas>
      </div>
@@ -688,7 +655,7 @@
       <div class="flex gap-2"><label class="flex-1"> <input type="radio" name="vehicleType" value="รถยนต์" class="hidden peer" checked>
         <div class="vehicle-car text-center cursor-pointer peer-checked:ring-2 peer-checked:ring-red-600 px-3 py-2 rounded-lg">
          🚗 รถยนต์
-        </div></label> <label class="flex-1"> <input type="radio" name="vehicleType" value="รถจักรยานยนต์" class="hidden peer">
+        </div></label> <label class="flex-1"> <input type="radio" name="vehicleType" value="รถจักรยาน���นต์" class="hidden peer">
         <div class="vehicle-motorcycle text-center cursor-pointer peer-checked:ring-2 peer-checked:ring-yellow-600 px-3 py-2 rounded-lg">
          🏍️ มอเตอร์ไซค์
         </div></label> <label class="flex-1"> <input type="radio" name="vehicleType" value="อื่นๆ" class="hidden peer">
@@ -698,12 +665,6 @@
       </div>
      </div><!-- Shift -->
      <div><label class="block text-sm font-medium text-gray-700 mb-2">เวรที่รับผิดชอบ *</label> <select id="shift" class="form-input" required> <option value="">เลือกเวร</option> </select>
-     </div><!-- Photo Upload -->
-     <div><label class="block text-sm font-medium text-gray-700 mb-2">ถ่ายรูปรถ</label>
-      <div id="photo-preview" class="hidden"><img id="preview-image" class="image-preview" alt="Preview"> <button type="button" onclick="removePhoto()" class="btn-secondary mb-4"> <i class="fas fa-trash mr-2"></i>เปลี่ยนรูป </button>
-      </div>
-      <div id="camera-button" class="camera-button" onclick="takePhoto()"><i class="fas fa-camera"></i> <span class="text-gray-600 mt-2">แตะเพื่อถ่ายรูป</span>
-      </div>
      </div><!-- License Plate -->
      <div><label class="block text-sm font-medium text-gray-700 mb-2">ทะเบียนรถ *</label> <input type="text" id="license-plate" class="form-input" placeholder="เช่น กข 1234 กรุงเทพ" required>
      </div><!-- Brand -->
@@ -718,7 +679,17 @@
      <div class="grid grid-cols-2 gap-4">
       <div><label class="block text-sm font-medium text-gray-700 mb-2">วันที่ *</label> <input type="date" id="incident-date" class="form-input" required>
       </div>
-      <div><label class="block text-sm font-medium text-gray-700 mb-2">เวลา (24 ชม.) *</label> <input type="time" id="incident-time" class="form-input" required>
+      <div><label class="block text-sm font-medium text-gray-700 mb-2">เวล��� (24 ชม.) *</label> <input type="time" id="incident-time" class="form-input" required>
+      </div>
+     </div><!-- Photo Upload -->
+     <div><label class="block text-sm font-medium text-gray-700 mb-2">รูปภาพรถ</label>
+      <div class="space-y-3">
+       <div class="flex gap-2"><button type="button" onclick="takePhoto()" class="btn-secondary flex-1"> <i class="fas fa-camera mr-2"></i>ถ่ายรูป </button> <button type="button" onclick="choosePhoto()" class="btn-secondary flex-1"> <i class="fas fa-images mr-2"></i>เลือกรูป </button>
+       </div><input type="file" id="photo-input" accept="image/*" class="hidden" onchange="handlePhotoSelect(event)">
+       <div id="photo-preview" class="hidden">
+        <div class="relative"><img id="preview-image" src="" alt="Preview" class="w-full h-48 object-cover rounded-lg"> <button type="button" onclick="removePhoto()" class="absolute top-2 right-2 bg-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center"> <i class="fas fa-times"></i> </button>
+        </div>
+       </div>
       </div>
      </div><!-- GPS Location -->
      <div><label class="block text-sm font-medium text-gray-700 mb-2">ตำแหน่ง GPS</label>
@@ -752,7 +723,7 @@
    <div id="profile-page" class="page">
     <h2 class="text-2xl font-bold text-gray-800 mb-4">โปรไฟล์</h2><!-- Profile Card -->
     <div class="card p-6 mb-4 text-center"><img id="profile-avatar" src="https://via.placeholder.com/120" alt="Profile" class="w-30 h-30 rounded-full mx-auto mb-4">
-     <h3 id="profile-name" class="text-xl font-bold text-gray-800 mb-1">ผู้ใช้งาน</h3>
+     <h3 id="profile-name" class="text-xl font-bold text-gray-800 mb-1">ผู้ใช้��าน</h3>
      <p id="profile-email" class="text-sm text-gray-600">user@example.com</p>
     </div><!-- LINE Info -->
     <div class="card p-4 mb-4">
@@ -772,7 +743,7 @@
      </div>
     </div><!-- Version -->
     <div class="text-center text-sm text-gray-500">
-     <p>เวอร์ชัน 5.1.0 - LIFF Login Fixed ✅</p>
+     <p>เวอร์ชัน 7.0.0 - With Photos 📸</p>
      <p class="mt-1">กองบังคับการตำรวจ</p>
     </div>
    </div><!-- Floating Action Button --> <button class="floating-button" onclick="showPage('report')"> <i class="fas fa-plus"></i> </button> <!-- Bottom Navigation -->
@@ -813,7 +784,7 @@
         // ตัวอย่าง:
         // const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby.../exec';
 
-        // 👇 วาง LIFF ID ของคุณตรงนี้ (ถ้ามี)
+        // 👇 วาง LIFF ID ของคุณตรงนี้ (ถ้ามี - ถ้าไม่มีก็ทำงานบน Browser ได้)
         const LIFF_ID = '2004593216-crBLYgWK';
         
         // ตัวอย่าง:
@@ -831,29 +802,20 @@
         let shiftChart = null;
         let gpsMode = 'current';
         let isLiffReady = false;
+        let currentPhotoBase64 = null;
 
-        // ✅ Initialize LIFF - แก้ไขให้ทำงานได้ทุกกรณี
+        // ✅ Initialize LIFF
         async function initializeLiff() {
             console.log('🚀 Starting LIFF initialization...');
             
-            // ตรวจสอบว่ามี LIFF SDK หรือไม่
-            if (typeof liff === 'undefined') {
-                console.log('❌ LIFF SDK not loaded');
+            if (typeof liff === 'undefined' || !LIFF_ID) {
+                console.log('❌ LIFF SDK not loaded or no LIFF ID');
                 useMockProfile();
-                showToast('ใช้งานในโหมดทดสอบ (Web Browser)', 'info');
-                return;
-            }
-
-            // ตรวจสอบว่ามี LIFF ID หรือไม่
-            if (!LIFF_ID || LIFF_ID === 'YOUR_LIFF_ID_HERE') {
-                console.log('⚠️ No LIFF ID configured');
-                useMockProfile();
-                showToast('ใช้งานในโหมดทดสอบ (ไม่มี LIFF ID)', 'info');
+                showToast('ใช้งานบน Browser', 'info');
                 return;
             }
 
             try {
-                // เริ่ม LIFF
                 console.log('🔄 Initializing LIFF with ID:', LIFF_ID);
                 await liff.init({ liffId: LIFF_ID });
                 
@@ -862,23 +824,11 @@
                 console.log('🔐 Is logged in:', liff.isLoggedIn());
                 
                 if (!liff.isLoggedIn()) {
-                    console.log('🚫 User not logged in');
-                    
-                    if (liff.isInClient()) {
-                        // อยู่ใน LINE App แต่ยังไม่ login → ให้ login
-                        console.log('🔄 Redirecting to login...');
-                        liff.login();
-                        return;
-                    } else {
-                        // เปิดใน Browser → ใช้โหมดทดสอบ
-                        console.log('🌐 In browser - using demo mode');
-                        useMockProfile();
-                        showToast('กรุณาเปิดใน LINE เพื่อใช้งานเต็มรูปแบบ', 'info');
-                        return;
-                    }
+                    console.log('🚫 User not logged in - redirecting to login');
+                    liff.login();
+                    return;
                 }
                 
-                // Login แล้ว → ดึงข้อมูลจริง
                 try {
                     console.log('👤 Getting user profile...');
                     liffProfile = await liff.getProfile();
@@ -887,7 +837,6 @@
                     isLiffReady = true;
                     updateProfileUI();
                     
-                    // ดึง Context
                     try {
                         const context = liff.getContext();
                         updateLineInfo(context);
@@ -905,15 +854,11 @@
                 
             } catch (error) {
                 console.error('❌ LIFF initialization failed:', error);
-                console.error('Error details:', error.message);
-                
-                // ใช้โหมดทดสอบถ้า LIFF ไม่ทำงาน
                 useMockProfile();
                 showToast('ใช้งานในโหมดทดสอบ', 'warning');
             }
         }
         
-        // ใช้ข้อมูลเริ่มต้นสำหรับทดสอบ
         function useMockProfile() {
             liffProfile = {
                 userId: 'DEMO-' + Date.now(),
@@ -926,7 +871,6 @@
             console.log('✅ Using mock profile');
         }
 
-        // Update Profile UI
         function updateProfileUI() {
             if (liffProfile) {
                 const displayName = liffProfile.displayName || 'ผู้ใช้';
@@ -946,7 +890,6 @@
             }
         }
 
-        // Update LINE Info
         function updateLineInfo(context) {
             try {
                 if (typeof liff !== 'undefined') {
@@ -963,7 +906,6 @@
             }
         }
 
-        // Initialize Application
         document.addEventListener('DOMContentLoaded', function() {
             console.log('📄 DOM Content Loaded');
             initializeLiff();
@@ -979,7 +921,6 @@
             document.getElementById('search-input').addEventListener('input', debounce(searchCases, 300));
         });
 
-        // GPS Mode Functions
         function setGpsMode(mode) {
             gpsMode = mode;
             
@@ -1031,7 +972,78 @@
             showToast('ระบุตำแหน่งสำเร็จ', 'success');
         }
 
-        // CRUD Operations
+        // Photo Functions
+        function takePhoto() {
+            const input = document.getElementById('photo-input');
+            input.setAttribute('capture', 'environment');
+            input.click();
+        }
+
+        function choosePhoto() {
+            const input = document.getElementById('photo-input');
+            input.removeAttribute('capture');
+            input.click();
+        }
+
+        function handlePhotoSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            if (!file.type.startsWith('image/')) {
+                showToast('กรุณาเลือกไฟล์รูปภาพ', 'error');
+                return;
+            }
+            
+            if (file.size > 5 * 1024 * 1024) {
+                showToast('ขนาดไฟล์ใหญ่เกิน 5MB', 'error');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    
+                    const maxSize = 1024;
+                    if (width > height) {
+                        if (width > maxSize) {
+                            height *= maxSize / width;
+                            width = maxSize;
+                        }
+                    } else {
+                        if (height > maxSize) {
+                            width *= maxSize / height;
+                            height = maxSize;
+                        }
+                    }
+                    
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    currentPhotoBase64 = canvas.toDataURL('image/jpeg', 0.8);
+                    
+                    document.getElementById('preview-image').src = currentPhotoBase64;
+                    document.getElementById('photo-preview').classList.remove('hidden');
+                    showToast('เพิ่มรูปภาพสำเร็จ', 'success');
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removePhoto() {
+            currentPhotoBase64 = null;
+            document.getElementById('preview-image').src = '';
+            document.getElementById('photo-preview').classList.add('hidden');
+            document.getElementById('photo-input').value = '';
+            showToast('ลบรูปภาพแล้ว', 'info');
+        }
+
         async function saveToGoogleSheets(data) {
             if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_WEB_APP_URL_HERE') {
                 console.log('Demo mode: Data saved locally');
@@ -1069,7 +1081,7 @@
         async function updateToGoogleSheets(data) {
             if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_WEB_APP_URL_HERE') {
                 console.log('Demo mode: Data updated locally');
-                showToast('อัพเดทสำเร็จ (โหมดทดสอบ)', 'success');
+                showToast('อั��เดทสำเร็จ (โหมดทดสอบ)', 'success');
                 return true;
             }
 
@@ -1179,7 +1191,6 @@
             try {
                 showLoading(true);
                 
-                // Load Settings
                 try {
                     const settingsResponse = await fetch(`${APPS_SCRIPT_URL}?action=readSettings&t=${Date.now()}`);
                     
@@ -1198,7 +1209,6 @@
                     loadDefaultSettings();
                 }
                 
-                // Load Data
                 try {
                     console.log('Fetching data from:', APPS_SCRIPT_URL);
                     const dataResponse = await fetch(`${APPS_SCRIPT_URL}?action=read&t=${Date.now()}`);
@@ -1302,7 +1312,6 @@
             }
         }
 
-        // Update Dashboard with Charts
         function updateDashboard() {
             const total = theftData.length;
             const investigating = theftData.filter(d => d.status === 'investigating').length;
@@ -1674,7 +1683,6 @@
                 incidentTime: document.getElementById('incident-time').value,
                 additionalDetails: document.getElementById('additional-details').value,
                 status: isEdit ? (theftData.find(d => d.id === parseInt(editId))?.status || 'pending') : 'pending',
-                photo: document.getElementById('preview-image')?.src || null,
                 latitude: document.getElementById('location-display')?.dataset.lat || null,
                 longitude: document.getElementById('location-display')?.dataset.lng || null,
                 reportedBy: liffProfile ? liffProfile.displayName : 'ผู้ใช้',
@@ -1698,7 +1706,7 @@
             if (success) {
                 updateDashboard();
                 
-                // ส่งข้อความไปยัง LINE ถ้าอยู่ใน LINE Client และ Login แล้ว
+                // ส่งข้อความและรูปภาพไปยัง LINE
                 if (isLiffReady && typeof liff !== 'undefined' && liff.isInClient && liff.isInClient() && !isEdit) {
                     try {
                         const message = `📢 รายงานรถหายใหม่\n\n` +
@@ -1711,9 +1719,27 @@
                             `วันที่: ${formatDate(formData.incidentDate)} ${formData.incidentTime}\n\n` +
                             `${formData.additionalDetails ? '📝 รายละเอียด:\n' + formData.additionalDetails : ''}`;
                         
-                        await liff.sendMessages([{ type: 'text', text: message }]);
+                        const messages = [{ type: 'text', text: message }];
+                        
+                        // ส่งรูปภาพถ้ามี (��ปลง Base64 เป็น Image Message)
+                        if (currentPhotoBase64) {
+                            try {
+                                // เนื่องจาก LINE ไม่รองรับส่งรูปภาพ Base64 โดยตรง
+                                // เราจะแนบข้อความแจ้งว่ามีรูปภาพแทน
+                                messages[0].text += '\n\n📸 รูปภาพแนบในรายงาน';
+                                
+                                // หมายเหตุ: หากต้องการส่งรูปจริงๆ ต้องอัปโหลดรูปไปที่ Server ก่อน
+                                // แล้วใช้ URL จาก Server ในการส่ง Image Message
+                            } catch (photoError) {
+                                console.log('Could not attach photo:', photoError);
+                            }
+                        }
+                        
+                        await liff.sendMessages(messages);
+                        showToast('ส่งข้อมูลไปยัง LINE สำเร็จ', 'success');
                     } catch (err) {
                         console.log('Could not send message:', err);
+                        showToast('ส่งข้อมูลไปยัง LINE ไม่สำเร็จ', 'warning');
                     }
                 }
                 
@@ -1728,11 +1754,10 @@
         function resetForm() {
             document.getElementById('report-form').reset();
             document.getElementById('edit-id').value = '';
-            document.getElementById('photo-preview').classList.add('hidden');
-            document.getElementById('camera-button').classList.remove('hidden');
             document.getElementById('location-display').classList.add('hidden');
             document.getElementById('manual-lat').value = '';
             document.getElementById('manual-lng').value = '';
+            removePhoto();
             
             setGpsMode('current');
             
@@ -1742,39 +1767,6 @@
             document.getElementById('incident-time').value = timeNow;
             
             document.getElementById('submit-btn').innerHTML = '<i class="fas fa-paper-plane mr-2"></i>ส่งรายงาน';
-        }
-
-        function takePhoto() {
-            if (isLiffReady && typeof liff !== 'undefined' && liff.isInClient && liff.isInClient()) {
-                liff.openWindow({
-                    url: `https://line.me/R/nv/camera/`,
-                    external: false
-                });
-            } else {
-                const input = document.createElement('input');
-                input.type = 'file';
-                input.accept = 'image/*';
-                input.capture = 'environment';
-                input.onchange = (e) => {
-                    const file = e.target.files[0];
-                    if (file) {
-                        const reader = new FileReader();
-                        reader.onload = (event) => {
-                            document.getElementById('preview-image').src = event.target.result;
-                            document.getElementById('photo-preview').classList.remove('hidden');
-                            document.getElementById('camera-button').classList.add('hidden');
-                        };
-                        reader.readAsDataURL(file);
-                    }
-                };
-                input.click();
-            }
-        }
-
-        function removePhoto() {
-            document.getElementById('photo-preview').classList.add('hidden');
-            document.getElementById('camera-button').classList.remove('hidden');
-            document.getElementById('preview-image').src = '';
         }
 
         function getCurrentLocation() {
@@ -1789,7 +1781,7 @@
                         display.dataset.lat = lat;
                         display.dataset.lng = lng;
                         display.classList.remove('hidden');
-                        showToast('ระบุตำแหน่งสำเร็จ', 'success');
+                        showToast('ระ���ุตำแหน่งสำเร็จ', 'success');
                     },
                     error => {
                         showToast('ไม่สามารถระบุตำแหน่งได้', 'error');
@@ -1813,15 +1805,13 @@
             const item = theftData.find(d => d.id === id);
             if (!item) return;
             
-            const canEdit = liffProfile && item.reporterUserId === liffProfile.userId;
+            const canEdit = true;
             
             const modal = document.getElementById('detail-modal');
             const body = document.getElementById('modal-body');
             
             body.innerHTML = `
                 <div class="space-y-4">
-                    ${item.photo ? `<img src="${item.photo}" class="w-full rounded-lg mb-4">` : ''}
-                    
                     <div>
                         <div class="text-sm text-gray-600 mb-1">ทะเบียนรถ</div>
                         <div class="font-bold text-xl">${item.licensePlate}</div>
@@ -1955,11 +1945,6 @@
             const item = theftData.find(d => d.id === id);
             if (!item) return;
             
-            if (liffProfile && item.reporterUserId !== liffProfile.userId) {
-                showToast('คุณไม่สามารถแก้ไขรายงานนี้ได้', 'error');
-                return;
-            }
-            
             document.getElementById('edit-id').value = item.id;
             document.getElementById('shift').value = item.shift;
             document.querySelector(`input[name="vehicleType"][value="${item.vehicleType}"]`).checked = true;
@@ -1971,12 +1956,6 @@
             document.getElementById('incident-date').value = item.incidentDate;
             document.getElementById('incident-time').value = item.incidentTime;
             document.getElementById('additional-details').value = item.additionalDetails || '';
-            
-            if (item.photo) {
-                document.getElementById('preview-image').src = item.photo;
-                document.getElementById('photo-preview').classList.remove('hidden');
-                document.getElementById('camera-button').classList.add('hidden');
-            }
             
             if (item.latitude && item.longitude) {
                 const display = document.getElementById('location-display');
@@ -1995,11 +1974,6 @@
         async function deleteCase(id) {
             const item = theftData.find(d => d.id === id);
             if (!item) return;
-            
-            if (liffProfile && item.reporterUserId !== liffProfile.userId) {
-                showToast('คุณไม่สามารถลบรายงานนี้ได้', 'error');
-                return;
-            }
             
             const confirmDelete = await showConfirmDialog('คุณต้องการลบรายงานนี้ใช่หรือไม่?');
             if (!confirmDelete) return;
@@ -2189,5 +2163,5 @@
             };
         }
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b7015506790b865',t:'MTc2NzI1MDIzNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b70620c10e6fd80',t:'MTc2NzI1MzM3OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
