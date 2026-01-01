@@ -772,7 +772,7 @@
      </div>
     </div><!-- Version -->
     <div class="text-center text-sm text-gray-500">
-     <p>เวอร์ชัน 5.0.0 - Fixed Login + Monthly Chart</p>
+     <p>เวอร์ชัน 5.1.0 - LIFF Login Fixed ✅</p>
      <p class="mt-1">กองบังคับการตำรวจ</p>
     </div>
    </div><!-- Floating Action Button --> <button class="floating-button" onclick="showPage('report')"> <i class="fas fa-plus"></i> </button> <!-- Bottom Navigation -->
@@ -807,7 +807,17 @@
   <div id="toast-container"></div>
   <script>
         // ⚙️ CONFIGURATION
+        // 👇 วาง URL ที่ได้จาก Apps Script Deploy ตรงนี้
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxs3oWfi4tNCbO4nZ5q0aVIg5sTrdbWVcxkVGpWTuBYR87GcqBkm0BoUrnui0Ybsz1v/exec';
+        
+        // ตัวอย่าง:
+        // const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby.../exec';
+
+        // 👇 วาง LIFF ID ของคุณตรงนี้ (ถ้ามี)
+        const LIFF_ID = '2004593216-crBLYgWK';
+        
+        // ตัวอย่าง:
+        // const LIFF_ID = '2006258135-xRQEYk7W';
         
         // Global Variables
         let liffProfile = null;
@@ -820,65 +830,134 @@
         let timeChart = null;
         let shiftChart = null;
         let gpsMode = 'current';
+        let isLiffReady = false;
 
-        // Initialize LIFF - แก้ไขให้ไม่บังคับ Login
+        // ✅ Initialize LIFF - แก้ไขให้ทำงานได้ทุกกรณี
         async function initializeLiff() {
+            console.log('🚀 Starting LIFF initialization...');
+            
+            // ตรวจสอบว่ามี LIFF SDK หรือไม่
+            if (typeof liff === 'undefined') {
+                console.log('❌ LIFF SDK not loaded');
+                useMockProfile();
+                showToast('ใช้งานในโหมดทดสอบ (Web Browser)', 'info');
+                return;
+            }
+
+            // ตรวจสอบว่ามี LIFF ID หรือไม่
+            if (!LIFF_ID || LIFF_ID === 'YOUR_LIFF_ID_HERE') {
+                console.log('⚠️ No LIFF ID configured');
+                useMockProfile();
+                showToast('ใช้งานในโหมดทดสอบ (ไม่มี LIFF ID)', 'info');
+                return;
+            }
+
             try {
-                //await liff.init({ liffId: '2006258135-xRQEYk7W' });
-                await liff.init({ liffId: '2004593216-crBLYgWK' }); // ไอดีจริง
+                // เริ่ม LIFF
+                console.log('🔄 Initializing LIFF with ID:', LIFF_ID);
+                await liff.init({ liffId: LIFF_ID });
                 
-                if (liff.isLoggedIn()) {
-                    // ถ้า login แล้วใช้ข้อมูลจริง
+                console.log('✅ LIFF initialized');
+                console.log('📱 Is in LINE client:', liff.isInClient());
+                console.log('🔐 Is logged in:', liff.isLoggedIn());
+                
+                if (!liff.isLoggedIn()) {
+                    console.log('🚫 User not logged in');
+                    
+                    if (liff.isInClient()) {
+                        // อยู่ใน LINE App แต่ยังไม่ login → ให้ login
+                        console.log('🔄 Redirecting to login...');
+                        liff.login();
+                        return;
+                    } else {
+                        // เปิดใน Browser → ใช้โหมดทดสอบ
+                        console.log('🌐 In browser - using demo mode');
+                        useMockProfile();
+                        showToast('กรุณาเปิดใน LINE เพื่อใช้งานเต็มรูปแบบ', 'info');
+                        return;
+                    }
+                }
+                
+                // Login แล้ว → ดึงข้อมูลจริง
+                try {
+                    console.log('👤 Getting user profile...');
                     liffProfile = await liff.getProfile();
+                    console.log('✅ Profile loaded:', liffProfile.displayName);
+                    
+                    isLiffReady = true;
                     updateProfileUI();
                     
-                    const context = liff.getContext();
-                    updateLineInfo(context);
+                    // ดึง Context
+                    try {
+                        const context = liff.getContext();
+                        updateLineInfo(context);
+                    } catch (contextError) {
+                        console.log('⚠️ Could not get context:', contextError.message);
+                    }
                     
-                    showToast('เชื่อมต่อ LINE สำเร็จ', 'success');
-                } else {
-                    // ถ้ายัง ไม่ login ใช้ข้อมูลเริ่มต้น (ไม่บังคับให้ login)
+                    showToast(`ยินดีต้อนรับ ${liffProfile.displayName}! 👋`, 'success');
+                    
+                } catch (profileError) {
+                    console.error('❌ Error getting profile:', profileError);
                     useMockProfile();
-                    showToast('ใช้งานในโหมดทดสอบ', 'info');
+                    showToast('ใช้ข้อมูลสำรอง', 'warning');
                 }
                 
             } catch (error) {
-                console.error('LIFF initialization failed', error);
-                // ถ้า LIFF error ใช้ข้อมูลเริ่มต้น
+                console.error('❌ LIFF initialization failed:', error);
+                console.error('Error details:', error.message);
+                
+                // ใช้โหมดทดสอบถ้า LIFF ไม่ทำงาน
                 useMockProfile();
-                showToast('ใช้งานในโหมดทดสอบ', 'info');
+                showToast('ใช้งานในโหมดทดสอบ', 'warning');
             }
         }
         
         // ใช้ข้อมูลเริ่มต้นสำหรับทดสอบ
         function useMockProfile() {
             liffProfile = {
-                userId: 'U' + Date.now(),
-                displayName: 'ผู้ใช้ทดสอบ',
-                pictureUrl: 'https://via.placeholder.com/120',
-                statusMessage: 'ทดสอบระบบ'
+                userId: 'DEMO-' + Date.now(),
+                displayName: '👤 ผู้ใช้ทดสอบ',
+                pictureUrl: 'https://ui-avatars.com/api/?name=Demo+User&background=06C755&color=fff&size=120',
+                statusMessage: '🔧 โหมดทดสอบระบบ'
             };
+            isLiffReady = false;
             updateProfileUI();
+            console.log('✅ Using mock profile');
         }
 
         // Update Profile UI
         function updateProfileUI() {
             if (liffProfile) {
-                document.getElementById('user-name').textContent = liffProfile.displayName;
-                document.getElementById('user-avatar').src = liffProfile.pictureUrl || 'https://via.placeholder.com/56';
-                document.getElementById('profile-name').textContent = liffProfile.displayName;
-                document.getElementById('profile-avatar').src = liffProfile.pictureUrl || 'https://via.placeholder.com/120';
-                document.getElementById('profile-email').textContent = liffProfile.statusMessage || 'สวัสดี!';
-                document.getElementById('line-userid').textContent = liffProfile.userId.substring(0, 20) + '...';
+                const displayName = liffProfile.displayName || 'ผู้ใช้';
+                const pictureUrl = liffProfile.pictureUrl || 'https://ui-avatars.com/api/?name=User&background=06C755&color=fff&size=120';
+                const statusMessage = liffProfile.statusMessage || 'พร้อมใช้งาน';
+                
+                document.getElementById('user-name').textContent = displayName;
+                document.getElementById('user-avatar').src = pictureUrl;
+                document.getElementById('profile-name').textContent = displayName;
+                document.getElementById('profile-avatar').src = pictureUrl;
+                document.getElementById('profile-email').textContent = statusMessage;
+                
+                const shortUserId = liffProfile.userId.length > 20 
+                    ? liffProfile.userId.substring(0, 20) + '...' 
+                    : liffProfile.userId;
+                document.getElementById('line-userid').textContent = shortUserId;
             }
         }
 
         // Update LINE Info
         function updateLineInfo(context) {
             try {
-                document.getElementById('line-os').textContent = liff.getOS();
-                document.getElementById('line-language').textContent = liff.getLanguage();
+                if (typeof liff !== 'undefined') {
+                    document.getElementById('line-os').textContent = liff.getOS() || 'Web';
+                    document.getElementById('line-language').textContent = liff.getLanguage() || 'th';
+                } else {
+                    document.getElementById('line-os').textContent = 'Web';
+                    document.getElementById('line-language').textContent = 'th';
+                }
             } catch (e) {
+                console.log('Could not update LINE info:', e);
                 document.getElementById('line-os').textContent = 'Web';
                 document.getElementById('line-language').textContent = 'th';
             }
@@ -886,6 +965,7 @@
 
         // Initialize Application
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('📄 DOM Content Loaded');
             initializeLiff();
             loadDefaultSettings();
             loadFromGoogleSheets();
@@ -1237,7 +1317,7 @@
             
             updateVehicleChart();
             updateStatusChart();
-            updateTimeChartMonthly(); // เปลี่ยนเป็นแบบรายเดือน
+            updateTimeChartMonthly();
             updateShiftChart();
             updateIncidentMap();
             updateRecentCases();
@@ -1329,12 +1409,10 @@
             });
         }
 
-        // ✨ แก้ไข: สถิติตามเดือน (แทนที่แบบรายชั่วโมง)
         function updateTimeChartMonthly() {
             const ctx = document.getElementById('timeChart');
             if (!ctx) return;
             
-            // นับจำนวนคดีแต่ละเดือน
             const monthCounts = {};
             const monthNames = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
             
@@ -1346,7 +1424,6 @@
                 }
             });
             
-            // เรียงลำดับเดือน
             const sortedMonths = Object.keys(monthCounts).sort();
             const labels = sortedMonths.map(key => {
                 const [year, month] = key.split('-');
@@ -1621,20 +1698,23 @@
             if (success) {
                 updateDashboard();
                 
-                if (typeof liff !== 'undefined' && liff.isInClient && liff.isInClient() && !isEdit) {
-                    const message = `📢 รายงานรถหายใหม่\n\n` +
-                        `เวร: ${formData.shift}\n` +
-                        `ประเภท: ${formData.vehicleType}\n` +
-                        `ทะเบียน: ${formData.licensePlate}\n` +
-                        `รถ: ${formData.brand} ${formData.model}\n` +
-                        `สี: ${formData.color}\n` +
-                        `สถานที่: ${formData.incidentArea}\n` +
-                        `วันที่: ${formatDate(formData.incidentDate)} ${formData.incidentTime}\n\n` +
-                        `${formData.additionalDetails ? '📝 รายละเอียด:\n' + formData.additionalDetails : ''}`;
-                    
-                    liff.sendMessages([{ type: 'text', text: message }]).catch((err) => {
-                        console.error('Error sending message', err);
-                    });
+                // ส่งข้อความไปยัง LINE ถ้าอยู่ใน LINE Client และ Login แล้ว
+                if (isLiffReady && typeof liff !== 'undefined' && liff.isInClient && liff.isInClient() && !isEdit) {
+                    try {
+                        const message = `📢 รายงานรถหายใหม่\n\n` +
+                            `เวร: ${formData.shift}\n` +
+                            `ประเภท: ${formData.vehicleType}\n` +
+                            `ทะเบียน: ${formData.licensePlate}\n` +
+                            `รถ: ${formData.brand} ${formData.model}\n` +
+                            `สี: ${formData.color}\n` +
+                            `สถานที่: ${formData.incidentArea}\n` +
+                            `วันที่: ${formatDate(formData.incidentDate)} ${formData.incidentTime}\n\n` +
+                            `${formData.additionalDetails ? '📝 รายละเอียด:\n' + formData.additionalDetails : ''}`;
+                        
+                        await liff.sendMessages([{ type: 'text', text: message }]);
+                    } catch (err) {
+                        console.log('Could not send message:', err);
+                    }
                 }
                 
                 resetForm();
@@ -1665,7 +1745,7 @@
         }
 
         function takePhoto() {
-            if (typeof liff !== 'undefined' && liff.isInClient && liff.isInClient()) {
+            if (isLiffReady && typeof liff !== 'undefined' && liff.isInClient && liff.isInClient()) {
                 liff.openWindow({
                     url: `https://line.me/R/nv/camera/`,
                     external: false
@@ -1965,7 +2045,7 @@
         function openGoogleMaps(lat, lng) {
             const url = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
             
-            if (typeof liff !== 'undefined' && liff.isInClient && liff.isInClient()) {
+            if (isLiffReady && typeof liff !== 'undefined' && liff.isInClient && liff.isInClient()) {
                 liff.openWindow({ url: url, external: true });
             } else {
                 window.open(url, '_blank', 'noopener,noreferrer');
@@ -1990,29 +2070,29 @@
                 `สถานะ: ${getStatusText(item.status)}\n\n` +
                 `${item.additionalDetails ? '📝 รายละเอียด:\n' + item.additionalDetails : ''}`;
             
-            if (typeof liff !== 'undefined' && liff.isApiAvailable && liff.isApiAvailable('shareTargetPicker')) {
+            if (isLiffReady && typeof liff !== 'undefined' && liff.isApiAvailable && liff.isApiAvailable('shareTargetPicker')) {
                 liff.shareTargetPicker([{ type: 'text', text: message }])
                     .then(() => showToast('แชร์สำเร็จ', 'success'))
                     .catch((err) => console.error('Error', err));
             } else {
-                showToast('ไม่สามารถแชร์ได้ในเบราว์เซอร์', 'warning');
+                showToast('เปิดใน LINE เพื่อแชร์', 'info');
             }
         }
 
         function shareApp() {
             const message = '🚗 ระบบรายงานรถหาย\n\nใช้งานผ่าน LINE LIFF เพื่อรายงานและติดตามคดีรถหาย';
             
-            if (typeof liff !== 'undefined' && liff.isApiAvailable && liff.isApiAvailable('shareTargetPicker')) {
+            if (isLiffReady && typeof liff !== 'undefined' && liff.isApiAvailable && liff.isApiAvailable('shareTargetPicker')) {
                 liff.shareTargetPicker([{ type: 'text', text: message }])
                     .then(() => showToast('แชร์สำเร็จ', 'success'))
                     .catch((err) => console.error('Error', err));
             } else {
-                showToast('ไม่สามารถแชร์ได้ในเบราว์เซอร์', 'warning');
+                showToast('เปิดใน LINE เพื่อแชร์', 'info');
             }
         }
 
         function callPolice() {
-            if (typeof liff !== 'undefined' && liff.isInClient && liff.isInClient()) {
+            if (isLiffReady && typeof liff !== 'undefined' && liff.isInClient && liff.isInClient()) {
                 liff.openWindow({ url: 'tel:191', external: true });
             } else {
                 window.location.href = 'tel:191';
@@ -2020,7 +2100,7 @@
         }
 
         function openChat() {
-            if (typeof liff !== 'undefined' && liff.isInClient && liff.isInClient()) {
+            if (isLiffReady && typeof liff !== 'undefined' && liff.isInClient && liff.isInClient()) {
                 liff.closeWindow();
             } else {
                 showToast('เปิดใน LINE เพื่อส่งข้อความ', 'info');
@@ -2032,7 +2112,7 @@
         }
 
         function closeLiff() {
-            if (typeof liff !== 'undefined' && liff.isInClient && liff.isInClient()) {
+            if (isLiffReady && typeof liff !== 'undefined' && liff.isInClient && liff.isInClient()) {
                 liff.closeWindow();
             } else {
                 showToast('เปิดใน LINE เพื่อปิดแอป', 'info');
@@ -2050,7 +2130,7 @@
             const firstItem = locatedItems[0];
             const url = `https://www.google.com/maps/search/?api=1&query=${firstItem.latitude},${firstItem.longitude}`;
             
-            if (typeof liff !== 'undefined' && liff.isInClient && liff.isInClient()) {
+            if (isLiffReady && typeof liff !== 'undefined' && liff.isInClient && liff.isInClient()) {
                 liff.openWindow({ url: url, external: true });
             } else {
                 window.open(url, '_blank', 'noopener,noreferrer');
@@ -2109,5 +2189,5 @@
             };
         }
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b6fe69d6255189b',t:'MTc2NzI0ODMyMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b7015506790b865',t:'MTc2NzI1MDIzNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
