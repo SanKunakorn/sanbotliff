@@ -37,7 +37,7 @@
         }
 
         .gradient-bg {
-            background: linear-gradient(135deg, #06C755 0%, #00B900 100%);
+            background: linear-gradient(135deg, #02471f 0%, #00B900 100%);
         }
 
         .line-green {
@@ -45,7 +45,7 @@
         }
 
         .line-green-dark {
-            background-color: #00B900;
+            background-color: #02471f;
         }
 
         .card {
@@ -123,6 +123,13 @@
             border-radius: 16px;
             font-size: 12px;
             font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .status-badge.active-filter {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            transform: scale(1.05);
         }
 
         .status-pending {
@@ -594,6 +601,155 @@
             background: #f0fdf4;
             color: #06C755;
         }
+
+        .alert-box {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .alert-box i {
+            color: #f59e0b;
+            margin-right: 8px;
+        }
+
+        .export-button {
+            background: #3b82f6;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .export-button:active {
+            background: #2563eb;
+        }
+
+        .heatmap-legend {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px;
+            background: white;
+            border-radius: 8px;
+            margin-top: 12px;
+        }
+
+        .heatmap-legend-item {
+            flex: 1;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .heatmap-color {
+            height: 20px;
+            border-radius: 4px;
+            margin-bottom: 4px;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .trend-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+
+        .trend-up {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .trend-down {
+            background: #d1fae5;
+            color: #059669;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 32px;
+            padding-bottom: 24px;
+        }
+
+        .timeline-item:before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 8px;
+            bottom: -8px;
+            width: 2px;
+            background: #e5e7eb;
+        }
+
+        .timeline-item:last-child:before {
+            display: none;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: 0;
+            top: 4px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: white;
+            border: 3px solid #06C755;
+        }
+
+        .dark-mode {
+            background: #1f2937;
+            color: #f3f4f6;
+        }
+
+        .dark-mode .card {
+            background: #374151;
+            color: #f3f4f6;
+        }
+
+        .dark-mode .form-input {
+            background: #374151;
+            border-color: #4b5563;
+            color: #f3f4f6;
+        }
+
+        .comparison-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .comparison-value {
+            font-size: 48px;
+            font-weight: 700;
+        }
+
+        .comparison-label {
+            opacity: 0.9;
+            margin-top: 8px;
+        }
     </style>
     <style>
         @view-transition {
@@ -617,16 +773,29 @@
                             <h1 class="text-lg font-bold">รายงานรถหาย</h1>
                             <p class="text-xs text-green-100">งานสืบสวน สภ.นิคมพัฒนา</p>
                         </div>
-                    </div><button onclick="showProfile()"
-                        class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center"> <i
-                            class="fas fa-user"></i> </button>
+                    </div>
+                    <div class="flex items-center gap-3"><button onclick="toggleDarkMode()"
+                            class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center relative">
+                            <i id="theme-icon" class="fas fa-moon"></i> </button> <button onclick="showNotifications()"
+                            class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center relative">
+                            <i class="fas fa-bell"></i> <span id="notification-count"
+                                class="notification-badge hidden">0</span> </button> <button onclick="showProfile()"
+                            class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center"> <i
+                                class="fas fa-user"></i> </button>
+                    </div>
                 </div>
             </div>
         </header><!-- Dashboard Page -->
-        <div id="dashboard-page" class="page active"><!-- Sync Status -->
+        <div id="dashboard-page" class="page active"><!-- Alert Box -->
+            <div id="alert-box" class="alert-box hidden"><i class="fas fa-exclamation-triangle"></i> <span
+                    id="alert-message"></span>
+            </div><!-- Sync Status -->
             <div class="flex items-center justify-between mb-4"><span id="sync-status" class="sync-badge"> <i
-                        class="fas fa-cloud-upload-alt"></i> <span>เชื่อมต่อ Google Sheets</span> </span> <button
-                    onclick="loadFromGoogleSheets()" class="text-green-600"> <i class="fas fa-sync-alt"></i> </button>
+                        class="fas fa-cloud-upload-alt"></i> <span>เชื่อมต่อ Google Sheets</span> </span>
+                <div class="flex gap-2"><button onclick="exportToExcel()" class="export-button"> <i
+                            class="fas fa-file-excel mr-2"></i>Excel </button> <button onclick="loadFromGoogleSheets()"
+                        class="text-green-600"> <i class="fas fa-sync-alt"></i> </button>
+                </div>
             </div><!-- User Profile Card -->
             <div id="user-profile-card" class="user-profile"><img id="user-avatar" src="https://via.placeholder.com/56"
                     alt="Profile" class="user-avatar">
@@ -647,6 +816,7 @@
                     <div class="stat-label">
                         คดีทั้งหมด
                     </div>
+                    <div id="total-trend" class="mt-2"></div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-number text-yellow-600" id="investigating-cases">
@@ -655,6 +825,7 @@
                     <div class="stat-label">
                         กำลังสืบสวน
                     </div>
+                    <div id="investigating-trend" class="mt-2"></div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-number text-green-600" id="arrested-cases">
@@ -663,6 +834,7 @@
                     <div class="stat-label">
                         จับกุมแล้ว
                     </div>
+                    <div id="arrested-trend" class="mt-2"></div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-number text-purple-600" id="solve-rate">
@@ -670,6 +842,44 @@
                     </div>
                     <div class="stat-label">
                         อัตราแก้ไข
+                    </div>
+                    <div id="solve-trend" class="mt-2"></div>
+                </div>
+            </div><!-- Comparison This Month vs Last Month -->
+            <div class="comparison-card">
+                <div class="text-sm opacity-90">
+                    เปรียบเทียบเดือนนี้ กับ เดือนที่แล้ว
+                </div>
+                <div class="comparison-value" id="comparison-value">
+                    +0%
+                </div>
+                <div class="comparison-label" id="comparison-label">
+                    การเปลี่ยนแปลง
+                </div>
+            </div><!-- Hot Zones -->
+            <div class="card p-4 mb-4">
+                <h3 class="text-lg font-bold text-gray-800 mb-2">พื้นที่เสี่ยง (Hot Zones)</h3>
+                <div class="chart-container">
+                    <canvas id="hotZoneChart"></canvas>
+                </div>
+                <div class="heatmap-legend">
+                    <div class="heatmap-legend-item">
+                        <div class="heatmap-color" style="background: #10b981;"></div>
+                        <div>
+                            ต่ำ
+                        </div>
+                    </div>
+                    <div class="heatmap-legend-item">
+                        <div class="heatmap-color" style="background: #f59e0b;"></div>
+                        <div>
+                            ปานกลาง
+                        </div>
+                    </div>
+                    <div class="heatmap-legend-item">
+                        <div class="heatmap-color" style="background: #ef4444;"></div>
+                        <div>
+                            สูง
+                        </div>
                     </div>
                 </div>
             </div><!-- Charts -->
@@ -696,6 +906,12 @@
                 <div class="chart-container">
                     <canvas id="shiftChart"></canvas>
                 </div>
+            </div>
+            <div class="card p-4 mb-4">
+                <h3 class="text-lg font-bold text-gray-800 mb-2">เวลาที่มักเกิดเหตุ</h3>
+                <div class="chart-container">
+                    <canvas id="hourChart"></canvas>
+                </div>
             </div><!-- Map Section -->
             <div class="card p-4 mb-4">
                 <div class="flex items-center justify-between mb-3">
@@ -710,9 +926,12 @@
                 </div>
             </div><!-- Quick Actions -->
             <h3 class="text-lg font-bold text-gray-800 mb-3">การดำเนินการด่วน</h3>
-            <div class="grid grid-cols-3 gap-3 mb-4">
+            <div class="grid grid-cols-4 gap-3 mb-4">
                 <div class="quick-action" onclick="showPage('report')"><i class="fas fa-plus-circle"></i>
                     <span>รายงานใหม่</span>
+                </div>
+                <div class="quick-action" onclick="showAnalytics()"><i class="fas fa-chart-line"></i>
+                    <span>วิเคราะห์</span>
                 </div>
                 <div class="quick-action" onclick="shareApp()"><i class="fas fa-share-alt"></i> <span>แชร์</span>
                 </div>
@@ -810,20 +1029,81 @@
         </div><!-- Cases Page -->
         <div id="cases-page" class="page">
             <h2 class="text-2xl font-bold text-gray-800 mb-4">คดีทั้งหมด</h2><!-- Search -->
-            <div class="mb-4"><input type="text" id="search-input" class="form-input"
-                    placeholder="ค้นหาทะเบียน, ยี่ห้อ...">
+            <div class="mb-4">
+                <div class="relative"><input type="text" id="search-input" class="form-input pl-10"
+                        placeholder="ค้นหาทะเบียน, ยี่ห้อ, สถานที่..."> <i
+                        class="fas fa-search absolute left-3 top-4 text-gray-400"></i>
+                </div>
+            </div><!-- Advanced Filter Toggle --> <button onclick="toggleAdvancedFilter()" class="btn-secondary mb-4">
+                <i class="fas fa-filter mr-2"></i>ตัวกรองขั้นสูง <i id="filter-arrow"
+                    class="fas fa-chevron-down ml-2"></i> </button> <!-- Advanced Filter Panel -->
+            <div id="advanced-filter" class="card p-4 mb-4 hidden">
+                <h4 class="font-semibold text-gray-800 mb-3">กรองข้อมูล</h4>
+                <div class="space-y-3">
+                    <div><label class="block text-sm font-medium text-gray-700 mb-2">ยี่ห้อรถ</label> <select
+                            id="filter-brand" class="form-input" onchange="applyAdvancedFilter()">
+                            <option value="">ทั้งหมด</option>
+                        </select>
+                    </div>
+                    <div><label class="block text-sm font-medium text-gray-700 mb-2">พื้นที่</label> <select
+                            id="filter-area" class="form-input" onchange="applyAdvancedFilter()">
+                            <option value="">ทั้งหมด</option>
+                        </select>
+                    </div>
+                    <div><label class="block text-sm font-medium text-gray-700 mb-2">ช่วงเวลา</label>
+                        <div class="grid grid-cols-2 gap-2"><input type="date" id="filter-date-start" class="form-input"
+                                onchange="applyAdvancedFilter()"> <input type="date" id="filter-date-end"
+                                class="form-input" onchange="applyAdvancedFilter()">
+                        </div>
+                    </div>
+                    <div><label class="block text-sm font-medium text-gray-700 mb-2">เวร</label> <select
+                            id="filter-shift" class="form-input" onchange="applyAdvancedFilter()">
+                            <option value="">ทั้งหมด</option>
+                        </select>
+                    </div><button onclick="clearAdvancedFilter()" class="btn-secondary w-full"> <i
+                            class="fas fa-times mr-2"></i>ล้างตัวกรอง </button>
+                </div>
             </div><!-- Filter Tabs -->
             <div class="flex gap-2 mb-4 overflow-x-auto pb-2"><button onclick="filterCases('all')"
-                    class="status-badge status-investigating whitespace-nowrap">ทั้งหมด</button> <button
-                    onclick="filterCases('pending')"
-                    class="status-badge status-pending whitespace-nowrap">รอดำเนินการ</button> <button
-                    onclick="filterCases('investigating')"
-                    class="status-badge status-investigating whitespace-nowrap">สืบสวน</button> <button
-                    onclick="filterCases('arrested')"
-                    class="status-badge status-arrested whitespace-nowrap">จับกุม</button> <button
-                    onclick="filterCases('closed')" class="status-badge status-closed whitespace-nowrap">ปิดคดี</button>
+                    class="status-badge status-investigating whitespace-nowrap active-filter"
+                    data-filter="all">ทั้งหมด</button> <button onclick="filterCases('pending')"
+                    class="status-badge status-pending whitespace-nowrap" data-filter="pending">รอดำเนินการ</button>
+                <button onclick="filterCases('investigating')"
+                    class="status-badge status-investigating whitespace-nowrap"
+                    data-filter="investigating">สืบสวน</button> <button onclick="filterCases('arrested')"
+                    class="status-badge status-arrested whitespace-nowrap" data-filter="arrested">จับกุม</button>
+                <button onclick="filterCases('closed')" class="status-badge status-closed whitespace-nowrap"
+                    data-filter="closed">ปิดคดี</button>
+            </div><!-- Sort Options -->
+            <div class="flex items-center justify-between mb-4"><span class="text-sm text-gray-600">เรียงตาม:</span>
+                <select id="sort-option" class="form-input w-auto" onchange="applySorting()">
+                    <option value="date-desc">วันที่ล่าสุด</option>
+                    <option value="date-asc">วันที่เก่าสุด</option>
+                    <option value="status">สถานะ</option>
+                    <option value="area">พื้นที่</option>
+                </select>
             </div><!-- Cases List -->
             <div id="cases-list"><!-- Cases will be populated here -->
+            </div>
+        </div><!-- Analytics Page -->
+        <div id="analytics-page" class="page">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">การวิเคราะห์ข้อมูล</h2><!-- Timeline -->
+            <div class="card p-4 mb-4">
+                <h3 class="text-lg font-bold text-gray-800 mb-4">Timeline กิจกรรม</h3>
+                <div id="timeline-container"><!-- Timeline items will be generated here -->
+                </div>
+            </div><!-- Performance Metrics -->
+            <div class="card p-4 mb-4">
+                <h3 class="text-lg font-bold text-gray-800 mb-2">ประสิทธิภาพการแก้ไขคดี</h3>
+                <div class="chart-container">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+            </div><!-- Predictive Analysis -->
+            <div class="card p-4 mb-4">
+                <h3 class="text-lg font-bold text-gray-800 mb-2">การพยากรณ์แนวโน้ม</h3>
+                <div class="chart-container">
+                    <canvas id="predictiveChart"></canvas>
+                </div>
             </div>
         </div><!-- Profile Page -->
         <div id="profile-page" class="page">
@@ -861,7 +1141,7 @@
                 </div>
             </div><!-- Version -->
             <div class="text-center text-sm text-gray-500">
-                <p>เวอร์ชัน 8.0.0 - San Kunakorn ⚡</p>
+                <p>เวอร์ชัน 9.0.0 - Advanced Analytics ⚡</p>
                 <p class="mt-1">งานสืบสวน สภ.นิคมพัฒนา</p>
             </div>
         </div><!-- Floating Action Button --> <button class="floating-button" onclick="showPage('report')"> <i
@@ -890,6 +1170,16 @@
             <div class="modal-body" id="modal-body"><!-- Detail content will be populated here -->
             </div>
         </div>
+    </div><!-- Notifications Modal -->
+    <div id="notifications-modal" class="modal-overlay" onclick="closeNotificationsModal(event)">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="text-lg font-bold">การแจ้งเตือน</h3><button onclick="closeNotificationsModal()"
+                    class="text-gray-400"> <i class="fas fa-times text-xl"></i> </button>
+            </div>
+            <div class="modal-body" id="notifications-body"><!-- Notifications will be populated here -->
+            </div>
+        </div>
     </div><!-- Loading Overlay -->
     <div id="loading-overlay" class="loading-overlay">
         <div class="loading-content">
@@ -900,17 +1190,10 @@
     <div id="toast-container"></div>
     <script>
         // ⚙️ CONFIGURATION
-        // 👇 วาง URL ที่ได้จาก Apps Script Deploy ตรงนี้
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxs3oWfi4tNCbO4nZ5q0aVIg5sTrdbWVcxkVGpWTuBYR87GcqBkm0BoUrnui0Ybsz1v/exec';
+        //const LIFF_ID = '';
+        const LIFF_ID = '2004593216-crBLYgWK'; // ไอดีจริง
 
-        // ตัวอย่าง:
-        // const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby.../exec';
-
-        // 👇 วาง LIFF ID ของคุณตรงนี้ (ถ้ามี - ถ้าไม่มีก็ทำงานบน Browser ได้)
-        const LIFF_ID = '2004593216-crBLYgWK';
-
-        // ตัวอย่าง:
-        // const LIFF_ID = '2006258135-xRQEYk7W';
 
         // Global Variables
         let liffProfile = null;
@@ -925,10 +1208,22 @@
         let statusChart = null;
         let timeChart = null;
         let shiftChart = null;
+        let hotZoneChart = null;
+        let hourChart = null;
+        let performanceChart = null;
+        let predictiveChart = null;
         let gpsMode = 'current';
         let isLiffReady = false;
+        let isDarkMode = false;
+        let advancedFilters = {
+            brand: '',
+            area: '',
+            dateStart: '',
+            dateEnd: '',
+            shift: ''
+        };
+        let notifications = [];
 
-        // ✅ Initialize LIFF
         async function initializeLiff() {
             console.log('🚀 Starting LIFF initialization...');
 
@@ -986,7 +1281,7 @@
         function useMockProfile() {
             liffProfile = {
                 userId: 'DEMO-' + Date.now(),
-                displayName: '👤 ผู้ใช้งาน',
+                displayName: '👤 ผู้ใช้ทดสอบ',
                 pictureUrl: 'https://ui-avatars.com/api/?name=Demo+User&background=06C755&color=fff&size=120',
                 statusMessage: '🔧 โหมดทดสอบระบบ'
             };
@@ -1035,6 +1330,8 @@
             initializeLiff();
             loadDefaultSettings();
             loadFromGoogleSheets();
+            loadDarkModePreference();
+            generateMockNotifications();
 
             const today = new Date().toISOString().split('T')[0];
             const timeNow = new Date().toTimeString().split(' ')[0].substring(0, 5);
@@ -1256,6 +1553,7 @@
                             updateAreaDropdown();
                             updateBrandDropdown();
                             updateColorDropdown();
+                            updateAdvancedFilterDropdowns();
                         }
                     }
                 } catch (settingsError) {
@@ -1347,6 +1645,7 @@
             updateAreaDropdown();
             updateBrandDropdown();
             updateColorDropdown();
+            updateAdvancedFilterDropdowns();
         }
 
         function updateShiftDropdown() {
@@ -1404,6 +1703,42 @@
             });
         }
 
+        function updateAdvancedFilterDropdowns() {
+            const brandFilter = document.getElementById('filter-brand');
+            const areaFilter = document.getElementById('filter-area');
+            const shiftFilter = document.getElementById('filter-shift');
+
+            if (brandFilter) {
+                brandFilter.innerHTML = '<option value="">ทั้งหมด</option>';
+                carBrandOptions.forEach(brand => {
+                    const option = document.createElement('option');
+                    option.value = brand;
+                    option.textContent = brand;
+                    brandFilter.appendChild(option);
+                });
+            }
+
+            if (areaFilter) {
+                areaFilter.innerHTML = '<option value="">ทั้งหมด</option>';
+                areaOptions.forEach(area => {
+                    const option = document.createElement('option');
+                    option.value = area;
+                    option.textContent = area;
+                    areaFilter.appendChild(option);
+                });
+            }
+
+            if (shiftFilter) {
+                shiftFilter.innerHTML = '<option value="">ทั้งหมด</option>';
+                shiftOptions.forEach(shift => {
+                    const option = document.createElement('option');
+                    option.value = shift;
+                    option.textContent = shift;
+                    shiftFilter.appendChild(option);
+                });
+            }
+        }
+
         function showLoading(show) {
             const overlay = document.getElementById('loading-overlay');
             if (show) {
@@ -1425,13 +1760,75 @@
             document.getElementById('arrested-cases').textContent = arrested;
             document.getElementById('solve-rate').textContent = solveRate + '%';
 
+            updateTrendIndicators();
+            updateMonthComparison();
             updateVehicleChart();
             updateStatusChart();
             updateTimeChartMonthly();
             updateShiftChart();
+            updateHotZoneChart();
+            updateHourChart();
             updateIncidentMap();
             updateRecentCases();
             updateCasesList();
+            checkForAlerts();
+        }
+
+        function updateTrendIndicators() {
+            const currentMonth = new Date().getMonth();
+            const currentYear = new Date().getFullYear();
+
+            const thisMonth = theftData.filter(item => {
+                const date = new Date(item.incidentDate);
+                return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+            }).length;
+
+            const lastMonth = theftData.filter(item => {
+                const date = new Date(item.incidentDate);
+                const lastMonthDate = new Date(currentYear, currentMonth - 1);
+                return date.getMonth() === lastMonthDate.getMonth() &&
+                    date.getFullYear() === lastMonthDate.getFullYear();
+            }).length;
+
+            const change = lastMonth > 0 ? ((thisMonth - lastMonth) / lastMonth * 100).toFixed(1) : 0;
+
+            const indicators = ['total-trend', 'investigating-trend', 'arrested-trend', 'solve-trend'];
+            indicators.forEach(id => {
+                const elem = document.getElementById(id);
+                if (elem) {
+                    const isPositive = change < 0;
+                    elem.innerHTML = `
+                        <span class="trend-indicator ${isPositive ? 'trend-down' : 'trend-up'}">
+                            <i class="fas fa-arrow-${isPositive ? 'down' : 'up'}"></i>
+                            ${Math.abs(change)}%
+                        </span>
+                    `;
+                }
+            });
+        }
+
+        function updateMonthComparison() {
+            const currentMonth = new Date().getMonth();
+            const currentYear = new Date().getFullYear();
+
+            const thisMonth = theftData.filter(item => {
+                const date = new Date(item.incidentDate);
+                return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+            }).length;
+
+            const lastMonth = theftData.filter(item => {
+                const date = new Date(item.incidentDate);
+                const lastMonthDate = new Date(currentYear, currentMonth - 1);
+                return date.getMonth() === lastMonthDate.getMonth() &&
+                    date.getFullYear() === lastMonthDate.getFullYear();
+            }).length;
+
+            const change = lastMonth > 0 ? ((thisMonth - lastMonth) / lastMonth * 100).toFixed(1) : 0;
+            const isIncrease = change > 0;
+
+            document.getElementById('comparison-value').textContent = `${isIncrease ? '+' : ''}${change}%`;
+            document.getElementById('comparison-label').textContent =
+                isIncrease ? 'เพิ่มขึ้นจากเดือนที่แล้ว' : 'ลดลงจากเดือนที่แล้ว';
         }
 
         function updateVehicleChart() {
@@ -1610,6 +2007,95 @@
             });
         }
 
+        function updateHotZoneChart() {
+            const ctx = document.getElementById('hotZoneChart');
+            if (!ctx) return;
+
+            const areaCounts = {};
+            theftData.forEach(item => {
+                const area = item.incidentArea || 'ไม่ระบุ';
+                areaCounts[area] = (areaCounts[area] || 0) + 1;
+            });
+
+            const sorted = Object.entries(areaCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10);
+
+            if (hotZoneChart) hotZoneChart.destroy();
+
+            hotZoneChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: sorted.map(([area]) => area),
+                    datasets: [{
+                        label: 'จำนวนเหตุการณ์',
+                        data: sorted.map(([, count]) => count),
+                        backgroundColor: sorted.map(([, count]) => {
+                            if (count >= 10) return '#ef4444';
+                            if (count >= 5) return '#f59e0b';
+                            return '#10b981';
+                        })
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        function updateHourChart() {
+            const ctx = document.getElementById('hourChart');
+            if (!ctx) return;
+
+            const hourCounts = new Array(24).fill(0);
+            theftData.forEach(item => {
+                if (item.incidentTime) {
+                    const hour = parseInt(item.incidentTime.split(':')[0]);
+                    if (!isNaN(hour) && hour >= 0 && hour < 24) {
+                        hourCounts[hour]++;
+                    }
+                }
+            });
+
+            if (hourChart) hourChart.destroy();
+
+            hourChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({ length: 24 }, (_, i) => `${i}:00`),
+                    datasets: [{
+                        label: 'จำนวนเหตุการณ์',
+                        data: hourCounts,
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1 }
+                        }
+                    }
+                }
+            });
+        }
+
         function updateIncidentMap() {
             const container = document.getElementById('incident-map');
             const locatedItems = theftData.filter(item => item.latitude && item.longitude);
@@ -1695,20 +2181,25 @@
 
         function updateCasesList() {
             const container = document.getElementById('cases-list');
-            const filtered = currentFilter === 'all'
+            let filtered = currentFilter === 'all'
                 ? theftData
                 : theftData.filter(d => d.status === currentFilter);
+
+            filtered = applyAdvancedFilters(filtered);
 
             const searchTerm = document.getElementById('search-input')?.value.toLowerCase() || '';
             const searched = searchTerm
                 ? filtered.filter(d =>
                     d.licensePlate.toLowerCase().includes(searchTerm) ||
                     d.brand.toLowerCase().includes(searchTerm) ||
-                    d.model.toLowerCase().includes(searchTerm)
+                    d.model.toLowerCase().includes(searchTerm) ||
+                    d.incidentArea.toLowerCase().includes(searchTerm)
                 )
                 : filtered;
 
-            if (searched.length === 0) {
+            const sorted = applySortingToData(searched);
+
+            if (sorted.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
                         <i class="fas fa-search"></i>
@@ -1719,7 +2210,7 @@
                 return;
             }
 
-            container.innerHTML = searched.map(item => `
+            container.innerHTML = sorted.map(item => `
                 <div class="case-item" onclick="showDetail('${item.id}')">
                     <div class="flex items-center justify-between mb-2">
                         <div class="font-bold text-gray-800">${item.licensePlate}</div>
@@ -1733,11 +2224,134 @@
                             <i class="fas fa-map-marker-alt mr-1"></i>${item.incidentArea}
                         </div>
                         <div class="text-xs text-gray-500">
-                            <i class="fas fa-calendar mr-1"></i>${formatDate(item.incidentDate)} ${item.incidentTime}
+                            <i class="fas fa-calendar mr-1"></i>${formatDate(item.incidentDate)} ${formatTime(item.incidentTime)}
                         </div>
                     </div>
                 </div>
             `).join('');
+        }
+
+        function applyAdvancedFilters(data) {
+            let filtered = data;
+
+            if (advancedFilters.brand) {
+                filtered = filtered.filter(d => d.brand === advancedFilters.brand);
+            }
+
+            if (advancedFilters.area) {
+                filtered = filtered.filter(d => d.incidentArea === advancedFilters.area);
+            }
+
+            if (advancedFilters.shift) {
+                filtered = filtered.filter(d => d.shift === advancedFilters.shift);
+            }
+
+            if (advancedFilters.dateStart) {
+                filtered = filtered.filter(d => d.incidentDate >= advancedFilters.dateStart);
+            }
+
+            if (advancedFilters.dateEnd) {
+                filtered = filtered.filter(d => d.incidentDate <= advancedFilters.dateEnd);
+            }
+
+            return filtered;
+        }
+
+        function applySortingToData(data) {
+            const sortOption = document.getElementById('sort-option')?.value || 'date-desc';
+
+            let sorted = [...data];
+
+            switch (sortOption) {
+                case 'date-desc':
+                    sorted.sort((a, b) => new Date(b.incidentDate) - new Date(a.incidentDate));
+                    break;
+                case 'date-asc':
+                    sorted.sort((a, b) => new Date(a.incidentDate) - new Date(b.incidentDate));
+                    break;
+                case 'status':
+                    sorted.sort((a, b) => a.status.localeCompare(b.status));
+                    break;
+                case 'area':
+                    sorted.sort((a, b) => a.incidentArea.localeCompare(b.incidentArea));
+                    break;
+            }
+
+            return sorted;
+        }
+
+        function toggleAdvancedFilter() {
+            const panel = document.getElementById('advanced-filter');
+            const arrow = document.getElementById('filter-arrow');
+
+            if (panel.classList.contains('hidden')) {
+                panel.classList.remove('hidden');
+                arrow.classList.remove('fa-chevron-down');
+                arrow.classList.add('fa-chevron-up');
+            } else {
+                panel.classList.add('hidden');
+                arrow.classList.remove('fa-chevron-up');
+                arrow.classList.add('fa-chevron-down');
+            }
+        }
+
+        function applyAdvancedFilter() {
+            advancedFilters.brand = document.getElementById('filter-brand').value;
+            advancedFilters.area = document.getElementById('filter-area').value;
+            advancedFilters.shift = document.getElementById('filter-shift').value;
+            advancedFilters.dateStart = document.getElementById('filter-date-start').value;
+            advancedFilters.dateEnd = document.getElementById('filter-date-end').value;
+
+            updateCasesList();
+        }
+
+        function clearAdvancedFilter() {
+            document.getElementById('filter-brand').value = '';
+            document.getElementById('filter-area').value = '';
+            document.getElementById('filter-shift').value = '';
+            document.getElementById('filter-date-start').value = '';
+            document.getElementById('filter-date-end').value = '';
+
+            advancedFilters = {
+                brand: '',
+                area: '',
+                dateStart: '',
+                dateEnd: '',
+                shift: ''
+            };
+
+            updateCasesList();
+            showToast('ล้างตัวกรองแล้ว', 'info');
+        }
+
+        function applySorting() {
+            updateCasesList();
+        }
+
+        function checkForAlerts() {
+            const currentMonth = new Date().getMonth();
+            const currentYear = new Date().getFullYear();
+
+            const thisMonthCases = theftData.filter(item => {
+                const date = new Date(item.incidentDate);
+                return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+            }).length;
+
+            if (thisMonthCases >= 10) {
+                showAlert(`⚠️ เดือนนี้มีคดีรถหาย ${thisMonthCases} คดีแล้ว กรุณาเพิ่มมาตรการป้องกัน`);
+            }
+        }
+
+        function showAlert(message) {
+            const alertBox = document.getElementById('alert-box');
+            const alertMessage = document.getElementById('alert-message');
+
+            alertMessage.textContent = message;
+            alertBox.classList.remove('hidden');
+
+            setTimeout(() => {
+                alertBox.classList.add('hidden');
+            }, 10000);
         }
 
         function showPage(pageName) {
@@ -1758,6 +2372,158 @@
             if (pageName === 'report') {
                 resetForm();
             }
+
+            if (pageName === 'analytics') {
+                updateAnalyticsPage();
+            }
+        }
+
+        function showAnalytics() {
+            showPage('analytics');
+        }
+
+        function updateAnalyticsPage() {
+            updateTimeline();
+            updatePerformanceChart();
+            updatePredictiveChart();
+        }
+
+        function updateTimeline() {
+            const container = document.getElementById('timeline-container');
+            if (!container) return;
+
+            const recentEvents = theftData.slice(0, 10);
+
+            container.innerHTML = recentEvents.map(item => `
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="text-sm text-gray-600">${formatDate(item.incidentDate)} ${formatTime(item.incidentTime)}</div>
+                    <div class="font-medium text-gray-800">${item.licensePlate} - ${item.brand} ${item.model}</div>
+                    <div class="text-sm text-gray-600">${item.incidentArea}</div>
+                </div>
+            `).join('');
+        }
+
+        function updatePerformanceChart() {
+            const ctx = document.getElementById('performanceChart');
+            if (!ctx) return;
+
+            const monthCounts = {};
+            const monthSolved = {};
+
+            theftData.forEach(item => {
+                if (item.incidentDate) {
+                    const date = new Date(item.incidentDate);
+                    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                    monthCounts[monthKey] = (monthCounts[monthKey] || 0) + 1;
+
+                    if (item.status === 'arrested' || item.status === 'closed') {
+                        monthSolved[monthKey] = (monthSolved[monthKey] || 0) + 1;
+                    }
+                }
+            });
+
+            const sortedMonths = Object.keys(monthCounts).sort();
+            const solveRates = sortedMonths.map(key => {
+                const total = monthCounts[key];
+                const solved = monthSolved[key] || 0;
+                return total > 0 ? (solved / total * 100).toFixed(1) : 0;
+            });
+
+            if (performanceChart) performanceChart.destroy();
+
+            performanceChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: sortedMonths.map(key => {
+                        const [year, month] = key.split('-');
+                        return `${month}/${year}`;
+                    }),
+                    datasets: [{
+                        label: 'อัตราแก้ไข (%)',
+                        data: solveRates,
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        }
+
+        function updatePredictiveChart() {
+            const ctx = document.getElementById('predictiveChart');
+            if (!ctx) return;
+
+            const monthCounts = {};
+
+            theftData.forEach(item => {
+                if (item.incidentDate) {
+                    const date = new Date(item.incidentDate);
+                    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                    monthCounts[monthKey] = (monthCounts[monthKey] || 0) + 1;
+                }
+            });
+
+            const sortedMonths = Object.keys(monthCounts).sort();
+            const values = sortedMonths.map(key => monthCounts[key]);
+
+            const average = values.reduce((a, b) => a + b, 0) / values.length || 0;
+            const predicted = [average, average, average];
+
+            if (predictiveChart) predictiveChart.destroy();
+
+            predictiveChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [...sortedMonths.map(key => {
+                        const [year, month] = key.split('-');
+                        return `${month}/${year}`;
+                    }), 'Next 1', 'Next 2', 'Next 3'],
+                    datasets: [
+                        {
+                            label: 'ข้อมูลจริง',
+                            data: [...values, null, null, null],
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            fill: true
+                        },
+                        {
+                            label: 'พยากรณ์',
+                            data: [...new Array(values.length).fill(null), ...predicted],
+                            borderColor: '#f59e0b',
+                            borderDash: [5, 5],
+                            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: { size: 11 }
+                            }
+                        }
+                    }
+                }
+            });
         }
 
         async function handleFormSubmit(e) {
@@ -1823,6 +2589,7 @@
                     success = await saveToGoogleSheets(formData);
                     if (success) {
                         theftData.unshift(formData);
+                        addNotification(`รายงานใหม่: ${formData.licensePlate}`, formData.incidentArea);
                     }
                 }
 
@@ -1905,6 +2672,16 @@
 
         function filterCases(status) {
             currentFilter = status;
+
+            document.querySelectorAll('[data-filter]').forEach(btn => {
+                btn.classList.remove('active-filter');
+            });
+
+            const activeBtn = document.querySelector(`[data-filter="${status}"]`);
+            if (activeBtn) {
+                activeBtn.classList.add('active-filter');
+            }
+
             updateCasesList();
         }
 
@@ -2049,6 +2826,8 @@
                 item.status = newStatus;
                 updateDashboard();
                 closeModal();
+
+                addNotification(`เปลี่ยนสถานะ: ${item.licensePlate}`, `สถานะใหม่: ${getStatusText(newStatus)}`);
             }
         }
 
@@ -2094,6 +2873,8 @@
                 theftData = theftData.filter(d => d.id != id);
                 updateDashboard();
                 closeModal();
+
+                showToast('ลบรายงานสำเร็จ', 'success');
             }
         }
 
@@ -2147,16 +2928,6 @@
             }
         }
 
-
-        function formatTime(time) {
-            const d = new Date(time);
-            return d.toLocaleTimeString('th-TH', {
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: false
-            });
-        }
-
         function shareCase(id) {
             const item = theftData.find(d => d.id == id);
             if (!item) return;
@@ -2198,7 +2969,7 @@
         }
 
         function shareApp() {
-            const message = '🚗 ระบบรายงานรถหาย\n\nใช้งานผ่าน LINE LIFF เพื่อรายงานและติดตามคดีรถหาย https://liff.line.me/2004593216-crBLYgWK';
+            const message = '🚗 ระบบรายงานรถหาย\n\nใช้งานผ่าน LINE LIFF เพื่อรายงานและติดตามคดีรถหาย';
 
             if (isLiffReady && typeof liff !== 'undefined' && liff.isApiAvailable && liff.isApiAvailable('shareTargetPicker')) {
                 liff.shareTargetPicker([{ type: 'text', text: message }])
@@ -2265,12 +3036,145 @@
             }
         }
 
+        function toggleDarkMode() {
+            isDarkMode = !isDarkMode;
+            document.body.classList.toggle('dark-mode', isDarkMode);
+
+            const icon = document.getElementById('theme-icon');
+            icon.className = isDarkMode ? 'fas fa-sun' : 'fas fa-moon';
+
+            localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled');
+            showToast(isDarkMode ? 'เปิดโหมดมืด' : 'ปิดโหมดมืด', 'info');
+        }
+
+        function loadDarkModePreference() {
+            const preference = localStorage.getItem('darkMode');
+            if (preference === 'enabled') {
+                isDarkMode = true;
+                document.body.classList.add('dark-mode');
+                document.getElementById('theme-icon').className = 'fas fa-sun';
+            }
+        }
+
+        function generateMockNotifications() {
+            notifications = [
+                { id: 1, title: 'รายงานใหม่', message: 'มีการรายงานรถหาย 1 รายการ', time: '5 นาทีที่แล้ว', read: false },
+                { id: 2, title: 'อัพเดทสถานะ', message: 'คดี กข 1234 เปลี่ยนเป็นสืบสวน', time: '1 ชั่วโมงที่แล้ว', read: false },
+                { id: 3, title: 'จับกุมสำเร็จ', message: 'คดี คง 5678 จับกุมสำเร็จ', time: '3 ชั่วโมงที่แล้ว', read: true }
+            ];
+
+            updateNotificationBadge();
+        }
+
+        function updateNotificationBadge() {
+            const unreadCount = notifications.filter(n => !n.read).length;
+            const badge = document.getElementById('notification-count');
+
+            if (unreadCount > 0) {
+                badge.textContent = unreadCount;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        function addNotification(title, message) {
+            const newNotif = {
+                id: Date.now(),
+                title: title,
+                message: message,
+                time: 'เมื่อสักครู่',
+                read: false
+            };
+
+            notifications.unshift(newNotif);
+            updateNotificationBadge();
+        }
+
+        function showNotifications() {
+            const modal = document.getElementById('notifications-modal');
+            const body = document.getElementById('notifications-body');
+
+            if (notifications.length === 0) {
+                body.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-bell-slash"></i>
+                        <h3>ไม่มีการแจ้งเตือน</h3>
+                        <p>คุณจะได้รับการแจ้งเตือนที่นี่</p>
+                    </div>
+                `;
+            } else {
+                body.innerHTML = notifications.map(notif => `
+                    <div class="p-4 border-b ${notif.read ? 'bg-white' : 'bg-blue-50'}">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <div class="font-semibold text-gray-800">${notif.title}</div>
+                                <div class="text-sm text-gray-600 mt-1">${notif.message}</div>
+                                <div class="text-xs text-gray-500 mt-2">${notif.time}</div>
+                            </div>
+                            ${!notif.read ? '<div class="w-2 h-2 bg-blue-600 rounded-full ml-2"></div>' : ''}
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            notifications.forEach(n => n.read = true);
+            updateNotificationBadge();
+
+            modal.classList.add('active');
+        }
+
+        function closeNotificationsModal(event) {
+            const modal = document.getElementById('notifications-modal');
+            if (event && event.target.id === 'notifications-modal') {
+                modal.classList.remove('active');
+            } else if (!event) {
+                modal.classList.remove('active');
+            }
+        }
+
+        function exportToExcel() {
+            if (theftData.length === 0) {
+                showToast('ไม่มีข้อมูลให้ Export', 'warning');
+                return;
+            }
+
+            let csv = 'วันที่,เวลา,ทะเบียน,ยี่ห้อ,รุ่น,สี,สถานที่,สถานะ,เวร\n';
+
+            theftData.forEach(item => {
+                csv += `${item.incidentDate},${item.incidentTime},${item.licensePlate},${item.brand},${item.model},${item.color},${item.incidentArea},${getStatusText(item.status)},${item.shift}\n`;
+            });
+
+            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+
+            link.setAttribute('href', url);
+            link.setAttribute('download', `รายงานรถหาย_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            showToast('Export สำเร็จ', 'success');
+        }
+
         function formatDate(dateString) {
             const date = new Date(dateString);
             return date.toLocaleDateString('th-TH', {
                 year: 'numeric',
                 month: 'short',
                 day: 'numeric'
+            });
+        }
+
+        function formatTime(time) {
+            const d = new Date(time);
+            return d.toLocaleTimeString('th-TH', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
             });
         }
 
@@ -2317,9 +3221,7 @@
             };
         }
     </script>
-    <script>(function () { function c() { var b = a.contentDocument || a.contentWindow.document; if (b) { var d = b.createElement('script'); d.innerHTML = "window.__CF$cv$params={r:'9b70f5ca903e5859',t:'MTc2NzI1OTQzMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);"; b.getElementsByTagName('head')[0].appendChild(d) } } if (document.body) { var a = document.createElement('iframe'); a.height = 1; a.width = 1; a.style.position = 'absolute'; a.style.top = 0; a.style.left = 0; a.style.border = 'none'; a.style.visibility = 'hidden'; document.body.appendChild(a); if ('loading' !== document.readyState) c(); else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c); else { var e = document.onreadystatechange || function () { }; document.onreadystatechange = function (b) { e(b); 'loading' !== document.readyState && (document.onreadystatechange = e, c()) } } } })();</script>
+    <script>(function () { function c() { var b = a.contentDocument || a.contentWindow.document; if (b) { var d = b.createElement('script'); d.innerHTML = "window.__CF$cv$params={r:'9bbb278432ed7b70',t:'MTc2ODAzNzQxNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);"; b.getElementsByTagName('head')[0].appendChild(d) } } if (document.body) { var a = document.createElement('iframe'); a.height = 1; a.width = 1; a.style.position = 'absolute'; a.style.top = 0; a.style.left = 0; a.style.border = 'none'; a.style.visibility = 'hidden'; document.body.appendChild(a); if ('loading' !== document.readyState) c(); else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c); else { var e = document.onreadystatechange || function () { }; document.onreadystatechange = function (b) { e(b); 'loading' !== document.readyState && (document.onreadystatechange = e, c()) } } } })();</script>
 </body>
 
-
 </html>
-
