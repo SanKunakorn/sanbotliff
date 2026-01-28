@@ -1829,7 +1829,7 @@
                     <span class="font-medium">${r.brand} ${r.model || ''}</span>
                     <span class="status-badge status-${r.status}">${getStatusText(r.status)}</span>
                   </div>
-                  <p class="text-gray-500 text-xs mt-1">📍 ${r.area} | ⏰ ${r.incidentTime}</p>
+                  <p class="text-gray-500 text-xs mt-1">📍 ${r.area} | ⏰ ${formatTime(r.incidentTime)}</p>
                 </div>
               `).join('')}
             </div>
@@ -2154,5 +2154,6 @@
   </script>
   <script>(function () { function c() { var b = a.contentDocument || a.contentWindow.document; if (b) { var d = b.createElement('script'); d.innerHTML = "window.__CF$cv$params={r:'9c4d526a53c57b40',t:'MTc2OTU3MDA5MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);"; b.getElementsByTagName('head')[0].appendChild(d) } } if (document.body) { var a = document.createElement('iframe'); a.height = 1; a.width = 1; a.style.position = 'absolute'; a.style.top = 0; a.style.left = 0; a.style.border = 'none'; a.style.visibility = 'hidden'; document.body.appendChild(a); if ('loading' !== document.readyState) c(); else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c); else { var e = document.onreadystatechange || function () { }; document.onreadystatechange = function (b) { e(b); 'loading' !== document.readyState && (document.onreadystatechange = e, c()) } } } })();</script>
 </body>
+
 
 </html>
