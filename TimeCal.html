@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="th" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CCTV Time Calculator</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Prompt', sans-serif; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: linear-gradient(135deg, #0a0e14 0%, #1a1f2e 50%, #0f172a 100%);
+    }
+    
+    .app-wrapper {
+      height: 100%;
+      width: 100%;
+      overflow-y: auto;
+      background: inherit;
+    }
+    
+    .glass-card {
+      background: rgba(26, 31, 46, 0.8);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+    
+    .input-field {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      transition: all 0.3s ease;
+    }
+    
+    .input-field:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+      outline: none;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    }
+    
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .btn-secondary {
+      background: rgba(100, 116, 139, 0.3);
+      border: 1px solid rgba(100, 116, 139, 0.5);
+      transition: all 0.3s ease;
+    }
+    
+    .btn-secondary:hover {
+      background: rgba(100, 116, 139, 0.5);
+    }
+    
+    .result-positive { color: #ef4444; }
+    .result-negative { color: #22c55e; }
+    .result-neutral { color: #eab308; }
+    
+    .scanner-line {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #3b82f6, transparent);
+      animation: scan 3s linear infinite;
+    }
+    
+    @keyframes scan {
+      0% { top: 0; opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { top: 100%; opacity: 0; }
+    }
+    
+    .toast {
+      animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s;
+    }
+    
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .live-clock {
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+  </style>
+</head>
+<body class="h-full">
+  <div class="app-wrapper">
+    <div class="max-w-5xl mx-auto p-4 md:p-6">
+      <!-- Header -->
+      <header class="glass-card rounded-2xl p-4 md:p-6 mb-6 relative overflow-hidden">
+        <div class="scanner-line"></div>
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 id="app-title" class="text-2xl md:text-3xl font-bold text-white flex items-center gap-3">
+              <span class="text-3xl">⏱️</span>
+              CCTV Time Calculator
+            </h1>
+            <p id="app-subtitle" class="text-gray-400 mt-1">คำนวณและแปลงเวลาระหว่างกล้องวงจรปิดกับเวลาจริง</p>
+          </div>
+          <div class="glass-card rounded-xl p-3 md:p-4">
+            <div class="text-xs text-gray-400 mb-1">🕐 เวลาปัจจุบัน</div>
+            <div id="live-clock" class="mono text-xl md:text-2xl font-semibold text-blue-400 live-clock">--:--:--</div>
+            <div id="live-date" class="text-xs text-gray-500 mt-1">--/--/----</div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <div class="space-y-6">
+        <!-- Calculator Section -->
+        <section class="glass-card rounded-2xl p-4 md:p-6 fade-in">
+          <h2 class="text-xl font-semibold text-white mb-6 flex items-center gap-2">
+            <span>🧮</span> คำนวณความต่างเวลา
+          </h2>
+          
+          <form id="calculator-form" class="space-y-6">
+            <!-- CCTV Section -->
+            <div class="glass-card rounded-xl p-4 border border-orange-500/30">
+              <h3 class="text-orange-400 font-medium mb-4 flex items-center gap-2">
+                <span>📷</span> เวลาบนกล้องวงจรปิด
+              </h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-gray-300 text-sm font-medium mb-2">วันที่</label>
+                  <input type="date" id="cctvDate" class="input-field w-full px-4 py-3 rounded-xl text-white" required>
+                </div>
+                <div>
+                  <label class="block text-gray-300 text-sm font-medium mb-2">เวลา</label>
+                  <input type="time" id="cctvTime" step="1" class="input-field w-full px-4 py-3 rounded-xl text-white" required>
+                </div>
+              </div>
+            </div>
+
+            <!-- Real Time Section -->
+            <div class="glass-card rounded-xl p-4 border border-green-500/30">
+              <h3 class="text-green-400 font-medium mb-4 flex items-center gap-2">
+                <span>✅</span> เวลาจริง
+              </h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-gray-300 text-sm font-medium mb-2">วันที่</label>
+                  <input type="date" id="realDate" class="input-field w-full px-4 py-3 rounded-xl text-white" required>
+                </div>
+                <div>
+                  <label class="block text-gray-300 text-sm font-medium mb-2">เวลา</label>
+                  <div class="flex gap-2">
+                    <input type="time" id="realTime" step="1" class="input-field flex-1 px-4 py-3 rounded-xl text-white" required>
+                    <button type="button" onclick="captureCurrentTime()" class="btn-secondary px-4 py-3 rounded-xl text-white flex items-center gap-2 whitespace-nowrap">
+                      <span>⏱️</span> <span class="hidden md:inline">จับเวลา</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Result Display -->
+            <div id="offsetResult" class="hidden glass-card rounded-xl p-4 border border-blue-500/30">
+              <h3 class="text-blue-400 font-medium mb-4 flex items-center gap-2">
+                <span>📊</span> ผลการคำนวณ
+              </h3>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="text-center p-3 rounded-lg bg-black/30">
+                  <div class="text-gray-400 text-xs mb-1">ความต่างวัน</div>
+                  <div id="offset-days" class="mono text-lg font-semibold text-white">0 วัน</div>
+                </div>
+                <div class="text-center p-3 rounded-lg bg-black/30">
+                  <div class="text-gray-400 text-xs mb-1">ความต่างเวลา</div>
+                  <div id="offset-time" class="mono text-lg font-semibold text-white">00:00:00</div>
+                </div>
+                <div class="text-center p-3 rounded-lg bg-black/30">
+                  <div class="text-gray-400 text-xs mb-1">รวมเป็นวินาที</div>
+                  <div id="offset-total" class="mono text-lg font-semibold">0 วินาที</div>
+                </div>
+              </div>
+              <div id="offset-description" class="text-center mt-3 text-sm text-gray-400"></div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex gap-3 flex-wrap">
+              <button type="button" onclick="calculateOffset()" class="btn-primary flex-1 md:flex-none px-6 py-3 rounded-xl text-white font-medium flex items-center justify-center gap-2">
+                <span>🧮</span> คำนวณ
+              </button>
+              <button type="reset" onclick="resetCalculator()" class="btn-secondary flex-1 md:flex-none px-6 py-3 rounded-xl text-white font-medium flex items-center justify-center gap-2">
+                <span>🔄</span> รีเซ็ต
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <!-- Converter Section -->
+        <section class="glass-card rounded-2xl p-4 md:p-6 fade-in">
+          <h2 class="text-xl font-semibold text-white mb-6 flex items-center gap-2">
+            <span>🔄</span> แปลงเวลา
+          </h2>
+
+          <form id="converter-form" class="space-y-6">
+            <!-- Input Section -->
+            <div class="glass-card rounded-xl p-4 border border-purple-500/30">
+              <h3 class="text-purple-400 font-medium mb-4 flex items-center gap-2">
+                <span>📅</span> ข้อมูลที่ต้องการแปลง
+              </h3>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label class="block text-gray-300 text-sm font-medium mb-2">วันที่</label>
+                  <input type="date" id="convertDate" class="input-field w-full px-4 py-3 rounded-xl text-white" required onchange="updateConversion()">
+                </div>
+                <div>
+                  <label class="block text-gray-300 text-sm font-medium mb-2">เวลา</label>
+                  <input type="time" id="convertTime" step="1" class="input-field w-full px-4 py-3 rounded-xl text-white" required onchange="updateConversion()">
+                </div>
+                <div>
+                  <label class="block text-gray-300 text-sm font-medium mb-2">แปลงเป็น</label>
+                  <select id="convertType" class="input-field w-full px-4 py-3 rounded-xl text-white" required onchange="updateConversion()">
+                    <option value="">-- เลือก --</option>
+                    <option value="toReal">แปลงเป็นเวลาจริง</option>
+                    <option value="toCCTV">แปลงเป็นเวลากล้อง</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Result Display -->
+            <div id="convertResult" class="hidden glass-card rounded-xl p-4 border border-cyan-500/30">
+              <h3 class="text-cyan-400 font-medium mb-4 flex items-center gap-2">
+                <span>✨</span> ผลลัพธ์การแปลง
+              </h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="text-center p-4 rounded-lg bg-black/30">
+                  <div class="text-gray-400 text-xs mb-2">วันที่</div>
+                  <div id="result-date" class="mono text-xl font-semibold text-white">--/--/----</div>
+                </div>
+                <div class="text-center p-4 rounded-lg bg-black/30">
+                  <div class="text-gray-400 text-xs mb-2">เวลา</div>
+                  <div id="result-time" class="mono text-xl font-semibold text-blue-400">--:--:--</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Help Text -->
+            <div class="glass-card rounded-xl p-4 border border-gray-600/30">
+              <p class="text-gray-400 text-sm">
+                <span class="text-gray-500">💡 หมายเหตุ:</span> ต้องคำนวณความต่างเวลาก่อน หากยังไม่มีค่า Offset ระบบจะใช้ค่า 0
+              </p>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex gap-3 flex-wrap">
+              <button type="button" onclick="copyResult()" id="copy-btn" class="btn-primary flex-1 md:flex-none px-6 py-3 rounded-xl text-white font-medium flex items-center justify-center gap-2 hidden">
+                <span>📋</span> คัดลอก
+              </button>
+              <button type="reset" onclick="resetConverter()" class="btn-secondary flex-1 md:flex-none px-6 py-3 rounded-xl text-white font-medium flex items-center justify-center gap-2">
+                <span>🔄</span> รีเซ็ต
+              </button>
+            </div>
+          </form>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+  <script>
+    // Global state
+    let timeOffset = 0;
+    const defaultConfig = {
+      app_title: 'CCTV Time Calculator',
+      app_subtitle: 'คำนวณและแปลงเวลาระหว่างกล้องวงจรปิดกับเวลาจริง'
+    };
+
+    // Initialize SDKs
+    async function initApp() {
+      if (window.elementSdk) {
+        window.elementSdk.init({
+          defaultConfig,
+          onConfigChange: async (config) => {
+            document.getElementById('app-title').innerHTML = `<span class="text-3xl">⏱️</span> ${config.app_title || defaultConfig.app_title}`;
+            document.getElementById('app-subtitle').textContent = config.app_subtitle || defaultConfig.app_subtitle;
+          },
+          mapToCapabilities: (config) => ({
+            recolorables: [],
+            borderables: [],
+            fontEditable: undefined,
+            fontSizeable: undefined
+          }),
+          mapToEditPanelValues: (config) => new Map([
+            ['app_title', config.app_title || defaultConfig.app_title],
+            ['app_subtitle', config.app_subtitle || defaultConfig.app_subtitle]
+          ])
+        });
+      }
+
+      // Initialize
+      updateLiveClock();
+      setInterval(updateLiveClock, 1000);
+
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('cctvDate').value = today;
+      document.getElementById('realDate').value = today;
+      document.getElementById('convertDate').value = today;
+
+      // Set up form listeners
+      document.getElementById('calculator-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        calculateOffset();
+      });
+    }
+
+    // Live clock
+    function updateLiveClock() {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('th-TH', { hour12: false });
+      const dateStr = now.toLocaleDateString('th-TH', { 
+        year: 'numeric', 
+        month: '2-digit', 
+        day: '2-digit' 
+      });
+      
+      document.getElementById('live-clock').textContent = timeStr;
+      document.getElementById('live-date').textContent = dateStr;
+    }
+
+    // Toast notification
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      
+      const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500';
+      const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+      
+      toast.className = `toast ${bgColor} px-4 py-3 rounded-xl text-white font-medium shadow-lg flex items-center gap-2`;
+      toast.innerHTML = `<span>${icon}</span> ${message}`;
+      
+      container.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    }
+
+    // Capture current time
+    function captureCurrentTime() {
+      const now = new Date();
+      const timeStr = now.toTimeString().slice(0, 8);
+      const dateStr = now.toISOString().split('T')[0];
+      
+      document.getElementById('realTime').value = timeStr;
+      document.getElementById('realDate').value = dateStr;
+      
+      showToast('จับเวลาปัจจุบันแล้ว', 'info');
+    }
+
+    // Calculate offset
+    function calculateOffset() {
+      const cctvDate = document.getElementById('cctvDate').value;
+      const cctvTime = document.getElementById('cctvTime').value;
+      const realDate = document.getElementById('realDate').value;
+      const realTime = document.getElementById('realTime').value;
+
+      if (!cctvDate || !cctvTime || !realDate || !realTime) {
+        showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'error');
+        return;
+      }
+
+      const cctvDateTime = new Date(`${cctvDate}T${cctvTime}`);
+      const realDateTime = new Date(`${realDate}T${realTime}`);
+      
+      timeOffset = Math.floor((realDateTime - cctvDateTime) / 1000);
+
+      const offsetDays = Math.floor(Math.abs(timeOffset) / 86400);
+      const remainingSeconds = Math.abs(timeOffset) % 86400;
+      const hours = Math.floor(remainingSeconds / 3600);
+      const minutes = Math.floor((remainingSeconds % 3600) / 60);
+      const seconds = remainingSeconds % 60;
+      
+      const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      
+      document.getElementById('offset-days').textContent = `${offsetDays} วัน`;
+      document.getElementById('offset-time').textContent = timeStr;
+      
+      const totalEl = document.getElementById('offset-total');
+      const sign = timeOffset >= 0 ? '+' : '';
+      totalEl.textContent = `${sign}${timeOffset.toLocaleString()} วินาที`;
+      
+      if (timeOffset > 0) {
+        totalEl.className = 'mono text-lg font-semibold result-positive';
+        document.getElementById('offset-description').textContent = '🔴 กล้องช้ากว่าเวลาจริง (ต้องบวก Offset)';
+      } else if (timeOffset < 0) {
+        totalEl.className = 'mono text-lg font-semibold result-negative';
+        document.getElementById('offset-description').textContent = '🟢 กล้องเร็วกว่าเวลาจริง (ต้องลบ Offset)';
+      } else {
+        totalEl.className = 'mono text-lg font-semibold result-neutral';
+        document.getElementById('offset-description').textContent = '🟡 กล้องตรงกับเวลาจริง';
+      }
+      
+      document.getElementById('offsetResult').classList.remove('hidden');
+      showToast('คำนวณความต่างเวลาเรียบร้อยแล้ว', 'success');
+    }
+
+    // Update conversion
+    function updateConversion() {
+      const convertDate = document.getElementById('convertDate').value;
+      const convertTime = document.getElementById('convertTime').value;
+      const convertType = document.getElementById('convertType').value;
+      const resultDiv = document.getElementById('convertResult');
+      const copyBtn = document.getElementById('copy-btn');
+
+      if (!convertDate || !convertTime || !convertType) {
+        resultDiv.classList.add('hidden');
+        copyBtn.classList.add('hidden');
+        return;
+      }
+
+      const dateTime = new Date(`${convertDate}T${convertTime}`);
+      const resultDateTime = new Date(
+        dateTime.getTime() + (convertType === 'toReal' ? timeOffset : -timeOffset) * 1000
+      );
+
+      const resultDateStr = formatDate(resultDateTime.toISOString().split('T')[0]);
+      const resultTimeStr = resultDateTime.toTimeString().slice(0, 8);
+
+      document.getElementById('result-date').textContent = resultDateStr;
+      document.getElementById('result-time').textContent = resultTimeStr;
+
+      resultDiv.classList.remove('hidden');
+      copyBtn.classList.remove('hidden');
+    }
+
+    // Format date
+    function formatDate(dateStr) {
+      if (!dateStr) return '--/--/----';
+      const [year, month, day] = dateStr.split('-');
+      return `${day}/${month}/${year}`;
+    }
+
+    // Copy result
+    function copyResult() {
+      const date = document.getElementById('result-date').textContent;
+      const time = document.getElementById('result-time').textContent;
+      const text = `${date} ${time}`;
+      
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('คัดลอกผลลัพธ์แล้ว', 'success');
+      }).catch(() => {
+        showToast('ไม่สามารถคัดลอกได้', 'error');
+      });
+    }
+
+    // Reset calculator
+    function resetCalculator() {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('cctvDate').value = today;
+      document.getElementById('realDate').value = today;
+      document.getElementById('cctvTime').value = '';
+      document.getElementById('realTime').value = '';
+      document.getElementById('offsetResult').classList.add('hidden');
+    }
+
+    // Reset converter
+    function resetConverter() {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('convertDate').value = today;
+      document.getElementById('convertTime').value = '';
+      document.getElementById('convertType').value = '';
+      document.getElementById('convertResult').classList.add('hidden');
+      document.getElementById('copy-btn').classList.add('hidden');
+    }
+
+    // Initialize
+    initApp();
+  </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9cf5fa64914e70b5',t:'MTc3MTMzODU3OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
