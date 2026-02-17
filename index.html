@@ -439,31 +439,27 @@
                 </div>
             </div>
         </div>
+
         <!-- ========================================
              TIMECAL PAGE
         ======================================== -->
+
+
+        <!-- TimeCal Page -->
         <div id="page-timecal" class="page-content hidden">
-            <div class="glass rounded-3xl shadow-2xl overflow-hidden border border-white">
-
-                <!-- ไม่แสดงส่วนหัวคำนวณเวลา
-                <div class="bg-gradient-to-r from-blue-600 via-yellow-400 to-white-500 text-white p-6">
-                    <div class="flex items-center space-x-4">
-                        <div
-                            class="w-14 h-14 bg-white bg-opacity-20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-xl">
-                            <span class="text-3xl">⏰</span>
-                        </div>
-                        <div>
-                            <h2 class="text-2xl font-black drop-shadow-lg">Time Calculator</h2>
-                            <p class="text-orange-100 font-medium">คำนวณเวลาสำหรับระบบกล้องวงจรปิด</p>
-                        </div>
-                    </div>
-                </div>-->
-
-                <div class="relative bg-white"><iframe id="timeCalFrame" src="TimeCal.html" class="w-full border-0"
-                        style="min-height: 700px;"></iframe>
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <!-- TimeCal Content -->
+                <div id="timecal">
+                    <script>fetch("TimeCal.html")
+                            .then(response => response.text())
+                            .then(data => {
+                                document.getElementById("timecal").innerHTML = data;
+                            })
+                    </script>
                 </div>
             </div>
         </div>
+
 
         <!-- ========================================
              SAN APP PAGE
