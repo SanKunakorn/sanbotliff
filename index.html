@@ -267,16 +267,20 @@
     ======================================== -->
     <nav class="glass sticky top-16 sm:top-20 z-40 shadow-xl">
         <div class="max-w-7xl mx-auto px-3 sm:px-6">
-            <div class="flex space-x-2 overflow-x-auto py-4 scrollbar-hide"><button onclick="showPage('report')"
+            <div class="flex space-x-2 overflow-x-auto py-4 scrollbar-hide">
+                <button onclick="showPage('report')"
                     class="nav-btn active whitespace-nowrap px-4 sm:px-6 py-3 rounded-xl font-bold transition-all text-sm sm:text-base min-w-max touch-manipulation">
                     <span class="text-xl mr-2">📍</span> <span class="hidden sm:inline">ตรวจที่เกิดเหตุ</span> <span
-                        class="sm:hidden">ตรวจ</span> </button> <button onclick="showPage('search')"
+                        class="sm:hidden">ตรวจ</span> </button>
+                <button onclick="showPage('search')"
                     class="nav-btn whitespace-nowrap px-4 sm:px-6 py-3 rounded-xl font-bold transition-all text-sm sm:text-base min-w-max touch-manipulation">
                     <span class="text-xl mr-2">🔍</span> <span class="hidden sm:inline">ค้นหาข้อมูล</span> <span
-                        class="sm:hidden">ค้นหา</span> </button> <button onclick="showPage('timecal')"
+                        class="sm:hidden">ค้นหา</span> </button>
+                <button onclick="showPage('timecal')"
                     class="nav-btn whitespace-nowrap px-4 sm:px-6 py-3 rounded-xl font-bold transition-all text-sm sm:text-base min-w-max touch-manipulation">
                     <span class="text-xl mr-2">⏰</span> <span class="hidden sm:inline">คำนวณเวลา</span> <span
-                        class="sm:hidden">เวลา</span> </button> <button onclick="showPage('sanapp')"
+                        class="sm:hidden">เวลา</span> </button>
+                <button onclick="showPage('sanapp')"
                     class="nav-btn whitespace-nowrap px-4 sm:px-6 py-3 rounded-xl font-bold transition-all text-sm sm:text-base min-w-max touch-manipulation">
                     <span class="text-xl mr-2">📱</span> <span class="hidden sm:inline">San APP</span> <span
                         class="sm:hidden">APP</span> </button>
@@ -285,7 +289,8 @@
     </nav><!-- ========================================
          MAIN CONTENT SECTION
     ======================================== -->
-    <main class="max-w-7xl mx-auto px-3 sm:px-6 py-6 sm:py-10"><!-- ========================================
+    <main class="max-w-7xl mx-auto px-3 sm:px-6 py-6 sm:py-10">
+        <!-- ========================================
              REPORT PAGE
         ======================================== -->
         <div id="page-report" class="page-content">
@@ -440,25 +445,35 @@
             </div>
         </div>
 
-        <!-- ========================================
-             TIMECAL PAGE
-        ======================================== -->
-
-
         <!-- TimeCal Page -->
         <div id="page-timecal" class="page-content hidden">
             <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <!-- Header 
+                <div class="bg-gradient-to-r from-indigo-600 to-indigo-700 text-white p-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+                            <span class="text-sm">⏰</span>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold">Time Calculator</h2>
+                            <p class="text-orange-100 text-sm">คำนวณเวลาสำหรับระบบกล้องวงจรปิด</p>
+                        </div>
+                    </div>
+                </div>-->
+
                 <!-- TimeCal Content -->
-                <div id="timecal">
-                    <script>fetch("TimeCal.html")
-                            .then(response => response.text())
-                            .then(data => {
-                                document.getElementById("timecal").innerHTML = data;
-                            })
-                    </script>
+                <div class="relative">
+                    <iframe id="timeCalFrame" src="TimeCal.html" style="min-height: 700px;" class="w-full h-96 border-0"
+                        sandbox="allow-scripts allow-same-origin allow-forms allow-popups" style="min-height: 600px;">
+                    </iframe>
+
                 </div>
+
+                <script></script>
             </div>
         </div>
+
+
 
 
         <!-- ========================================
@@ -631,6 +646,8 @@
                         <h4 class="font-bold text-police-blue text-center mb-1 group-hover:text-violet-700">สแกน QR</h4>
                         <p class="text-xs text-gray-500 text-center">อ่าน QR Code</p>
                     </button>
+
+
                 </div><!-- Custom URL Section -->
                 <div class="mt-8 pt-8 border-t-2 border-indigo-100">
                     <h3 class="text-lg font-black text-police-blue mb-4 flex items-center"><span class="mr-2">🔗</span>
@@ -649,20 +666,21 @@
         <!-- ========================================
              RESULTS SECTION
         ======================================== -->
-        <div id="result" class="mt-8">
+        <div id="result" class="mt-4">
             <div id="statusMessage"
-                class="glass rounded-2xl shadow-2xl p-8 whitespace-pre-line hidden border border-white font-medium text-gray-700">
+                class="glass rounded-2xl shadow-2xl p-4 whitespace-pre-line hidden border border-white font-medium text-gray-700">
             </div>
         </div>
 
-    </main><!-- ========================================
+    </main>
+    <!-- ========================================
          FOOTER SECTION
     ======================================== -->
     <footer
-        class="bg-gradient-to-r from-police-blue via-blue-800 to-police-blue text-white py-10 mt-16 shadow-2xl border-t-4 border-police-gold">
+        class="bg-gradient-to-r from-police-blue via-blue-800 to-police-blue text-white py-4 mt-4 shadow-2xl border-t-4 border-police-gold">
         <div class="max-w-7xl mx-auto px-4 text-center">
             <div class="flex items-center justify-center space-x-3 mb-4">
-                <div class="w-10 h-10 bg-police-gold rounded-xl flex items-center justify-center shadow-lg"><span
+                <div class="w-8 h-8 bg-police-gold rounded-xl flex items-center justify-center shadow-lg"><span
                         class="text-police-blue font-black text-sm">SB</span>
                 </div>
                 <p class="text-xl font-bold">San BOT</p>
