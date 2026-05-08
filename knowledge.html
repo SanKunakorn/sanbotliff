@@ -1,1437 +1,583 @@
 <!doctype html>
 <html lang="th">
- <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ความรู้ตำรวจสืบสวน</title>
-  <script src="/_sdk/element_sdk.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-        body {
-            box-sizing: border-box;
-            font-family: 'Sarabun', 'Noto Sans Thai', sans-serif;
-        }
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบคลังความรู้ตำรวจสืบสวน (SOP & Legal Knowledge)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Sarabun', sans-serif; background-color: #f8fafc; }
+        .knowledge-card { transition: all 0.2s ease; border-left: 5px solid transparent; }
+        .knowledge-card:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-left-color: #1d4ed8; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); z-index: 50; padding: 1rem; backdrop-filter: blur(4px); }
+        .modal.active { display: flex; align-items: center; justify-content: center; }
+        .modal-content { background: white; border-radius: 1rem; max-width: 800px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 2rem; position: relative; }
+        .sticky-search { position: sticky; top: 0; z-index: 40; background: rgba(248, 250, 252, 0.9); backdrop-filter: blur(8px); }
         
-        .knowledge-card {
-            transition: all 0.3s ease;
-            border-left: 4px solid transparent;
-        }
-        
-        .knowledge-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-            border-left-color: #1e40af;
-        }
-        
-        .category-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            margin-bottom: 12px;
-        }
-        
-        .search-highlight {
-            background-color: #fef3c7;
-            padding: 2px 4px;
-            border-radius: 4px;
-        }
-        
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            z-index: 1000;
-        }
-        
-        .modal.active {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .modal-content {
-            background: white;
-            border-radius: 12px;
-            padding: 24px;
-            max-width: 90%;
-            max-height: 80%;
-            overflow-y: auto;
-            position: relative;
-        }
-        
-        @media (max-width: 768px) {
-            .modal-content {
-                max-width: 95%;
-                max-height: 90%;
-                padding: 16px;
-            }
-        }
+        /* Custom Scrollbar for Modal */
+        .modal-content::-webkit-scrollbar { width: 8px; }
+        .modal-content::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        .modal-content::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .modal-content::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
-  <style>@view-transition { navigation: auto; }</style>
-  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
- </head>
- <body class="min-h-full bg-gradient-to-br from-blue-50 to-indigo-100">
-  <div class="container mx-auto px-4 py-6"><!-- Header -->
-   <header class="text-center mb-8">
-    <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-600 text-white rounded-full mb-4">
-     <svg class="w-8 h-8" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-     </svg>
+</head>
+<body class="pb-12 text-gray-800">
+
+<div class="bg-gradient-to-r from-blue-900 to-indigo-800 text-white py-10 mb-8 shadow-lg">
+    <div class="container mx-auto px-4 text-center">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-white/20 text-white rounded-full mb-4 backdrop-blur-sm">
+            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+        </div>
+        <h1 class="text-3xl md:text-4xl font-bold mb-2">Smart Investigation Base</h1>
+        <p class="text-blue-200">คลังความรู้ กฎหมาย และยุทธวิธีสำหรับงานสืบสวน</p>
     </div>
-    <h1 id="main-title" class="text-3xl font-bold text-gray-800 mb-2">ความรู้ตำรวจสืบสวน</h1>
-    <p id="subtitle" class="text-gray-600">ความรู้และเครื่องมือสำหรับงานสืบสวน</p>
-   </header><!-- Search Bar -->
-   <div class="max-w-md mx-auto mb-8">
-    <div class="relative"><input type="text" id="searchInput" placeholder="ค้นหาความรู้..." class="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-     <svg class="absolute left-4 top-3.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-     </svg>
+</div>
+
+<div class="container mx-auto px-4">
+    <div class="sticky-search py-4 mb-6">
+        <div class="max-w-3xl mx-auto relative group">
+            <input type="text" id="searchInput" placeholder="ค้นหาข้อกฎหมาย, ยุทธวิธี, หมายจับ, ยาเสพติด..." 
+                   class="w-full px-6 py-4 rounded-full border border-gray-300 focus:border-blue-600 focus:ring-4 focus:ring-blue-100 shadow-sm outline-none text-lg transition-all">
+            <span class="absolute right-6 top-4 text-gray-400 group-focus-within:text-blue-600 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </span>
+        </div>
     </div>
-   </div><!-- Knowledge Categories -->
-   <div id="knowledgeGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"><!-- Categories will be populated by JavaScript -->
-   </div>
-  </div><!-- Modal -->
-  <div id="knowledgeModal" class="modal">
-   <div class="modal-content">
-    <div class="flex justify-between items-start mb-4">
-     <h2 id="modalTitle" class="text-2xl font-bold text-gray-800"></h2><button id="closeModal" class="text-gray-500 hover:text-gray-700 text-2xl font-bold">×</button>
+
+    <div class="text-center text-sm text-gray-500 mb-6">
+        พบข้อมูล <span id="resultCount" class="font-bold text-blue-600">0</span> รายการ
     </div>
-    <div id="modalContent" class="text-gray-700 leading-relaxed"></div>
-   </div>
-  </div>
-  <script>
-        const defaultConfig = {
-            main_title: "ความรู้ตำรวจสืบสวน",
-            subtitle: "ความรู้และเครื่องมือสำหรับงานสืบสวน",
-            search_placeholder: "ค้นหาความรู้...",
-            primary_color: "#1e40af",
-            surface_color: "#ffffff",
-            text_color: "#374151",
-            accent_color: "#3b82f6",
-            background_color: "#f8fafc"
-        };
 
-        let config = { ...defaultConfig };
+    <div id="knowledgeGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        </div>
+</div>
 
-        const knowledgeData = [
-            {
-                id: 1,
-                title: "ประเภทรถยนต์",
-                category: "ยานพาหนะ",
-                icon: "🚗",
-                description: "ประเภทของรถยนต์และการจำแนกตามกฎหมาย",
-                content: `
-                    <h3 class="text-xl font-semibold mb-4">ประเภทของรถยนต์ตามกฎหมาย</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <h4 class="font-semibold text-blue-600">1. รถยนต์นั่งส่วนบุคคล (รถเก๋ง)</h4>
-                            <p>• ป้ายทะเบียนสีขาว อักษรดำ</p>
-                            <p>• ใช้สำหรับบุคคลไม่เกิน 7 คน</p>
-                            <p>• ไม่ใช้ในเชิงพาณิชย์</p>
-                            <p>• ตัวอย่าง: รถเก๋งทั่วไป รถ SUV ส่วนบุคคล</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">2. รถยนต์นั่งส่วนบุคคลเกิน 7 คน (รถตู้)</h4>
-                            <p>• ป้ายทะเบียนสีขาว อักษรดำ</p>
-                            <p>• บรรจุผู้โดยสาร 8-15 คน</p>
-                            <p>• ใช้ส่วนตัวเท่านั้น</p>
-                            <p>• ตัวอย่าง: รถตู้ส่วนตัว รถแวนครอบครัว</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">3. รถยนต์บรรทุกส่วนบุคคล</h4>
-                            <p>• ป้ายทะเบียนสีขาว อักษรดำ</p>
-                            <p>• น้ำหนักรถไม่เกิน 1,000 กก.</p>
-                            <p>• ใช้บรรทุกของส่วนตัว</p>
-                            <p>• ตัวอย่าง: รถกระบะ 4 ประตู รถ SUV แบบบรรทุก</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">4. รถยนต์รับจ้าง</h4>
-                            <p>• ป้ายทะเบียนสีเขียว อักษรขาว</p>
-                            <p>• ใช้รับจ้างบรรทุกคนหรือสิ่งของ</p>
-                            <p>• ต้องมีใบอนุญาตประกอบการขนส่ง</p>
-                            <p>• ตัวอย่าง: แท็กซี่, รถตู้โดยสารสาธารณะ, รถกระบะรับจ้าง</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">5. รถยนต์บรรทุก (รถหกล้อ สิบล้อ)</h4>
-                            <p>• ป้ายทะเบียนสีเหลือง อักษรดำ</p>
-                            <p>• น้ำหนักรถเกิน 1,000 กก.</p>
-                            <p>• ใช้บรรทุกสินค้าเชิงพาณิชย์</p>
-                            <p>• ต้องมีใบขับขี่ประเภท 2 ขึ้นไป</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">6. รถยนต์โดยสารสาธารณะ</h4>
-                            <p>• ป้ายทะเบียนสีเหลือง อักษรดำ</p>
-                            <p>• บรรจุผู้โดยสารมากกว่า 15 คน</p>
-                            <p>• รถบัส รถทัวร์</p>
-                            <p>• ต้องมีใบขับขี่ประเภท 3</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">7. รถยนต์ราชการ</h4>
-                            <p>• ป้ายทะเบียนสีแดง อักษรขาว</p>
-                            <p>• ใช้ในราชการเท่านั้น</p>
-                            <p>• ห้ามใช้เพื่อประโยชน์ส่วนตัว</p>
-                            <p>• ตัวอย่าง: รถหน่วยงานราชการ, รถตำรวจ, รถทหาร</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">8. รถยนต์ชั่วคราว</h4>
-                            <p>• ป้ายทะเบียนสีแดง อักษรขาว (มีคำว่า "ชั่วคราว")</p>
-                            <p>• ใช้ระยะเวลาจำกัด</p>
-                            <p>• สำหรับรถใหม่ที่รอจดทะเบียน หรือรถนำเข้า</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">9. รถยนต์ทดลอง</h4>
-                            <p>• ป้ายทะเบียนสีขาว อักษรแดง</p>
-                            <p>• สำหรับผู้ผลิตหรือจำหน่ายรถยนต์</p>
-                            <p>• ใช้ทดสอบหรือสาธิต</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">การตรวจสอบรถต้องสงสัย</h4>
-                            <p>✓ ตรวจสอบป้ายทะเบียนตรงกับประเภทการใช้งาน</p>
-                            <p>✓ ดูเลขตัวถังรถ (Chassis Number)</p>
-                            <p>✓ ตรวจสอบเล่มทะเบียนรถ</p>
-                            <p>✓ สังเกตสภาพรถและการใช้งานจริง</p>
-                            <p>✓ ตรวจสอบพ.ร.บ.ประกันภัย</p>
-                        </div>
-                    </div>
-                `
-            },
-            {
-                id: 2,
-                title: "วีซ่ามีกี่ประเภท",
-                category: "คนต่างด้าว",
-                icon: "📋",
-                description: "ประเภทของวีซ่าและข้อกำหนดตามกฎหมาย",
-                content: `
-                    <h3 class="text-xl font-semibold mb-4">ประเภทของวีซ่า (VISA)</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <h4 class="font-semibold text-blue-600">1. วีซ่าท่องเที่ยว (Tourist Visa - TR)</h4>
-                            <p>• อยู่ได้ 30-60 วัน</p>
-                            <p>• ใช้สำหรับท่องเที่ยวเท่านั้น</p>
-                            <p>• ห้ามทำงาน</p>
-                            <p>• ต่ออายุได้อีก 30 วัน</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">2. วีซ่าธุรกิจ (Business Visa - B)</h4>
-                            <p>• อยู่ได้ 90 วัน ต่อครั้ง</p>
-                            <p>• ใช้ทำธุรกิจ ประชุม สัมมนา</p>
-                            <p>• ห้ามทำงานประจำ</p>
-                            <p>• ต้องมีหนังสือเชิญจากบริษัทไทย</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">3. วีซ่าทำงาน (Non-Immigrant B)</h4>
-                            <p>• อยู่ได้ 90 วัน และต่อเป็นรายปี</p>
-                            <p>• ต้องมีใบอนุญาตทำงาน (Work Permit)</p>
-                            <p>• มีบริษัทรับรอง</p>
-                            <p>• ทำงานได้ตามที่ระบุในใบอนุญาต</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">4. วีซ่าการศึกษา (Education Visa - ED)</h4>
-                            <p>• อยู่ได้ 90 วัน ต่อได้ตามหลักสูตร</p>
-                            <p>• ใช้เรียนภาษาไทย หรือเข้ามหาวิทยาลัย</p>
-                            <p>• ต้องมีใบรับรองจากสถาบันการศึกษา</p>
-                            <p>• ห้ามทำงาน</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">5. วีซ่าเกษียณ (Retirement Visa - O-A)</h4>
-                            <p>• สำหรับผู้มีอายุ 50 ปีขึ้นไป</p>
-                            <p>• อยู่ได้ 1 ปี ต่ออายุได้</p>
-                            <p>• ต้องมีเงินฝากหรือรายได้ตามเกณฑ์</p>
-                            <p>• ห้ามทำงาน</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">6. วีซ่าแต่งงาน (Marriage Visa - O)</h4>
-                            <p>• สำหรับคู่สมรสชาวไทย</p>
-                            <p>• อยู่ได้ 90 วัน ต่อเป็นรายปี</p>
-                            <p>• ต้องแสดงหลักฐานการสมรส</p>
-                            <p>• ต้องมีหลักฐานทางการเงิน</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">7. วีซ่าการทูต (Diplomatic Visa)</h4>
-                            <p>• สำหรับเจ้าหน้าที่การทูต</p>
-                            <p>• มีสิทธิพิเศษตามกฎหมาย</p>
-                            <p>• ไม่ต้องขออนุญาตทำงาน</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">8. วีซ่าถาวร (Permanent Residence)</h4>
-                            <p>• อยู่ได้ถาวร</p>
-                            <p>• ต้องอยู่ติดต่อกันมาแล้วอย่างน้อย 3 ปี</p>
-                            <p>• มีคุณสมบัติตามที่กฎหมายกำหนด</p>
-                            <p>• โควต้าจำกัดต่อปี</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">การตรวจสอบวีซ่า</h4>
-                            <p>✓ ตรวจสอบตราประทับในหนังสือเดินทาง</p>
-                            <p>✓ ดูวันหมดอายุของวีซ่า</p>
-                            <p>✓ ตรวจสอบประเภทวีซ่าตรงกับการใช้งาน</p>
-                            <p>✓ ถ้าทำงานต้องมี Work Permit ด้วย</p>
-                            <p>✓ ตรวจสอบ TM.6 (ใบขาวเข้า-ออก)</p>
-                            <p>✓ ตรวจสอบการแจ้งที่พัก ทม.30</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">การฝ่าฝืนที่พบบ่อย</h4>
-                            <p>• พำนักเกินกำหนด (Overstay)</p>
-                            <p>• ทำงานโดยไม่มีใบอนุญาต</p>
-                            <p>• ทำงานไม่ตรงตามใบอนุญาต</p>
-                            <p>• ไม่แจ้งที่พักตามกฎหมาย</p>
-                            <p>• ใช้วีซ่าปลอม</p>
-                        </div>
-                    </div>
-                `
-            },
-            {
-                id: 3,
-                title: "งานที่ต่างด้าวห้ามทำ",
-                category: "คนต่างด้าว",
-                icon: "🛠",
-                description: "อาชีพต้องห้ามสำหรับคนต่างด้าวตามกฎหมาย",
-                content: `
-                    <h3 class="text-xl font-semibold mb-4">39 อาชีพต้องห้ามสำหรับคนต่างด้าว</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <h4 class="font-semibold text-blue-600">กลุ่มที่ 1: งานฝีมือพิเศษและศิลปะ</h4>
-                            <p>1. งานหล่อ หรือแกะสลักพระพุทธรูป</p>
-                            <p>2. งานช่างไม้ แกะสลัก</p>
-                            <p>3. งานขับรถยนต์ (ยกเว้นขับรถนำเที่ยวระหว่างประเทศ)</p>
-                            <p>4. งานขายของทอดตลาด</p>
-                            <p>5. งานตัดผม ทำผม</p>
-                            <p>6. งานแพทย์แผนไทย</p>
-                            <p>7. งานนวดไทย</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">กลุ่มที่ 2: งานวิชาชีพและบริการ</h4>
-                            <p>8. งานทนายความ</p>
-                            <p>9. งานสถาปนิก (ยกเว้นงานเฉพาะทาง)</p>
-                            <p>10. งานวิศวกร (ยกเว้นงานเฉพาะทาง)</p>
-                            <p>11. งานบัญชี (ยกเว้นงานเฉพาะทาง)</p>
-                            <p>12. งานทำขนมหวาน ขนมไทย</p>
-                            <p>13. งานตัดเย็บเสื้อผ้าไทย</p>
-                            <p>14. งานทอผ้าไทยด้วยมือ</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">กลุ่มที่ 3: งานการค้าและธุรกิจ</h4>
-                            <p>15. งานทำเครื่องปั้นดินเผาไทย</p>
-                            <p>16. งานทำเครื่องเขิน ลงยา สลักทอง</p>
-                            <p>17. งานทำเครื่องจักสาน</p>
-                            <p>18. งานทำเครื่องหนังสาน</p>
-                            <p>19. งานทำเครื่องเงิน</p>
-                            <p>20. งานโลหะกรรมศิลป์</p>
-                            <p>21. งานผลิตเครื่องดนตรีไทย</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">กลุ่มที่ 4: งานการเกษตร</h4>
-                            <p>22. งานเกษตรกรรม</p>
-                            <p>23. งานประมง</p>
-                            <p>24. งานป่าไม้</p>
-                            <p>25. งานเลี้ยงสัตว์</p>
-                            <p>26. งานสัตวแพทย์ (ยกเว้นงานเฉพาะทาง)</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">กลุ่มที่ 5: งานก่อสร้างและแรงงาน</h4>
-                            <p>27. งานก่ออิฐ ก่อหิน</p>
-                            <p>28. งานช่างไม้</p>
-                            <p>29. งานควบคุมงานก่อสร้าง</p>
-                            <p>30. งานคนงานทั่วไป</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">กลุ่มที่ 6: งานพิเศษอื่นๆ</h4>
-                            <p>31. งานนายหน้าซื้อขายอสังหาริมทรัพย์</p>
-                            <p>32. งานประมูล</p>
-                            <p>33. งานมัคคุเทศก์</p>
-                            <p>34. งานขายของในร้านค้า</p>
-                            <p>35. งานโฆษณาข่าว (ยกเว้นเฉพาะทาง)</p>
-                            <p>36. งานพิมพ์</p>
-                            <p>37. งานห่อของของขวัญ</p>
-                            <p>38. งานเสริฟ (เสิร์ฟ) อาหาร</p>
-                            <p>39. งานเลขานุการ (ยกเว้นเฉพาะทาง)</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">ข้อยกเว้น</h4>
-                            <p>• งานที่ต้องใช้ความเชี่ยวชาญพิเศษ อาจได้รับอนุญาต</p>
-                            <p>• ผู้เชี่ยวชาญต่างชาติที่ได้รับการร้องขอเป็นพิเศษ</p>
-                            <p>• งานตามสัญญากับรัฐบาล</p>
-                            <p>• ต้องขออนุญาตเป็นกรณีพิเศษ</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">บทลงโทษ</h4>
-                            <p>• คนต่างด้าวที่ทำงานต้องห้าม: จำคุก 5 ปี หรือปรับ 2,000-100,000 บาท หรือทั้งจำทั้งปรับ</p>
-                            <p>• นายจ้างที่จ้างต่างด้าวทำงานต้องห้าม: ปรับ 10,000-100,000 บาทต่อคน</p>
-                            <p>• พานายจ้างที่จ้างต่างด้าวทำงานโดยไม่มีใบอนุญาต: ปรับ 400,000-800,000 บาท</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">การตรวจสอบ</h4>
-                            <p>✓ ตรวจสอบใบอนุญาตทำงาน (Work Permit)</p>
-                            <p>✓ ดูประเภทงานที่ระบุในใบอนุญาต</p>
-                            <p>✓ ตรวจสอบว่าทำงานตรงตามที่ได้รับอนุญาตหรือไม่</p>
-                            <p>✓ เช็คสถานที่ทำงานตรงกับที่ขึ้นทะเบียน</p>
-                            <p>✓ ตรวจสอบวีซ่าและการพำนัก</p>
-                        </div>
-                    </div>
-                `
-            },
-            {
-                id: 4,
-                title: "การปฐมพยาบาลทางยุทธวิธี",
-                category: "ยุทธวิธี",
-                icon: "📜",
-                description: "หลักการปฐมพยาบาลในสถานการณ์วิกฤต",
-                content: `
-                    <h3 class="text-xl font-semibold mb-4">การปฐมพยาบาลทางยุทธวิธี (Tactical First Aid)</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <h4 class="font-semibold text-blue-600">หลัก 3C</h4>
-                            <p><strong>1. Care Under Fire (การดูแลภายใต้การยิง)</strong></p>
-                            <p>• ลากผู้บาดเจ็บออกจากแนวยิง</p>
-                            <p>• สั่งผู้บาดเจ็บไปหาที่กำบัง</p>
-                            <p>• ใช้ Tourniquet หยุดเลือดแขนขาฉุกเฉิน</p>
-                            <p>• ยิงตอบโต้เพื่อปกป้อง</p>
-                            <p><br><strong>2. Tactical Field Care (การดูแลเมื่อปลอดภัย)</strong></p>
-                            <p>• ประเมินสภาพผู้บาดเจ็บ</p>
-                            <p>• ใช้หลัก MARCH</p>
-                            <p>• ให้การรักษาเบื้องต้นที่จำเป็น</p>
-                            <p><br><strong>3. Combat Casualty Evacuation Care (การดูแลขณะเคลื่อนย้าย)</strong></p>
-                            <p>• รักษาสภาพผู้บาดเจ็บขณะเคลื่อนย้าย</p>
-                            <p>• เฝ้าระวังสัญญาณชีพ</p>
-                            <p>• ประสานงานส่งต่อโรงพยาบาล</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">หลัก MARCH</h4>
-                            <p><strong>M - Massive Hemorrhage (เลือดออกรุนแรง)</strong></p>
-                            <p>• หยุดเลือดด้วย Tourniquet ทันที</p>
-                            <p>• กดเลือด หรือใช้ Hemostatic Gauze</p>
-                            <p>• บันทึกเวลาที่รัด Tourniquet</p>
-                            <p><br><strong>A - Airway (ทางเดินหายใจ)</strong></p>
-                            <p>• เปิดทางเดินหายใจ Chin Lift หรือ Jaw Thrust</p>
-                            <p>• ใช้ Nasopharyngeal Airway (NPA) ถ้ามี</p>
-                            <p>• ดูดเสมหะ เลือด หากมีอุปกรณ์</p>
-                            <p><br><strong>R - Respiration (การหายใจ)</strong></p>
-                            <p>• ดู Chest Seal สำหรับบาดแผลทรวงอก</p>
-                            <p>• ระวัง Tension Pneumothorax</p>
-                            <p>• เจาะ Needle Decompression หากได้รับการฝึก</p>
-                            <p><br><strong>C - Circulation (การไหลเวียนเลือด)</strong></p>
-                            <p>• ตรวจชีพจร</p>
-                            <p>• ให้สารน้ำ IV หากมี</p>
-                            <p>• ป้องกัน Shock</p>
-                            <p><br><strong>H - Hypothermia/Head Injury (อุณหภูมิ/บาดเจ็บศีรษะ)</strong></p>
-                            <p>• คลุมผ้ากันความเย็น</p>
-                            <p>• ตรวจระดับความรู้สึกตัว</p>
-                            <p>• ไม่ให้ทาน หากบาดเจ็บศีรษะ</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">อุปกรณ์ IFAK (Individual First Aid Kit)</h4>
-                            <p>• Tourniquet (CAT หรือ SOF-T)</p>
-                            <p>• Combat Gauze / Hemostatic Gauze</p>
-                            <p>• Pressure Bandage / Israeli Bandage</p>
-                            <p>• Chest Seal</p>
-                            <p>• Nasopharyngeal Airway (NPA)</p>
-                            <p>• Medical Gloves</p>
-                            <p>• Medical Tape</p>
-                            <p>• Shears / กรรไกรตัดเสื้อ</p>
-                            <p>• Marker สำหรับเขียนเวลาบนผู้บาดเจ็บ</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">วิธีใช้ Tourniquet อย่างถูกต้อง</h4>
-                            <p>1. รัดเหนือแผล 2-3 นิ้ว (ใกล้ตัว)</p>
-                            <p>2. รัดให้แน่น บิดจนเลือดหยุดไหล</p>
-                            <p>3. ล็อคให้แน่น</p>
-                            <p>4. เขียนเวลาที่รัดบนผู้บาดเจ็บ</p>
-                            <p>5. ห้ามคลายเด็ดขาด</p>
-                            <p>6. เวลาไม่เกิน 2 ชั่วโมง (ถ้าเกินอาจตัดขาด)</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">การจัดลำดับความสำคัญ (Triage)</h4>
-                            <p><strong style="color: red;">🔴 Immediate (แดง)</strong> - เลือดออกรุนแรง หายใจลำบาก</p>
-                            <p><strong style="color: orange;">🟡 Delayed (เหลือง)</strong> - บาดเจ็บปานกลาง รอได้</p>
-                            <p><strong style="color: green;">🟢 Minor (เขียว)</strong> - บาดเจ็บเล็กน้อย ช่วยตัวเองได้</p>
-                            <p><strong>⚫ Expectant (ดำ)</strong> - บาดเจ็บสาหัส ไม่มีโอกาสรอด</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">ข้อควรระวัง</h4>
-                            <p>• ความปลอดภัยของตนเองมาก่อนเสมอ</p>
-                            <p>• ห้ามเข้าไปในพื้นที่อันตราย</p>
-                            <p>• สวมถุงมือทุกครั้งก่อนสัมผัสเลือด</p>
-                            <p>• บันทึกทุกการรักษาบน Casualty Card</p>
-                            <p>• ส่งต่อโรงพยาบาลโดยเร็วที่สุด</p>
-                            <p>• ห้ามให้อาหาร น้ำ ถ้าบาดเจ็บหนัก</p>
-                        </div>
-                    </div>
-                `
-            },
-            {
-                id: 5,
-                title: "วิธีสังเกตพฤติกรรมน่าสงสัย",
-                category: "เทคนิค",
-                icon: "👀",
-                description: "การสังเกตและจับพฤติกรรมผิดปกติ",
-                content: `
-                    <h3 class="text-xl font-semibold mb-4">การสังเกตพฤติกรรมน่าสงสัย</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <h4 class="font-semibold text-blue-600">สัญญาณทางกายภาพ</h4>
-                            <p>• <strong>หน้าตา:</strong> ซีด เหงื่อออก มองซ้ายขวาบ่อย หลบสายตา</p>
-                            <p>• <strong>มือ:</strong> สั่น ขยำกระเป๋า จับโทรศัพท์แน่น ซ่อนมือ</p>
-                            <p>• <strong>ท่าทาง:</strong> ยืนไม่นิ่ง เหยียดลำตัว มองหาทางหนี</p>
-                            <p>• <strong>เสื้อผ้า:</strong> สวมหนาเกินอากาศ กระเป๋าใหญ่ผิดปกติ มีรอยเปื้อน</p>
-                            <p>• <strong>กระเป๋า:</strong> ถือแน่นมาก ซ่อนไว้ด้านหลัง ห้อยหนัก</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">พฤติกรรมน่าสงสัย</h4>
-                            <p>• <strong>หลบหลีก:</strong> เห็นตำรวจแล้วหลบ หันหลัง เปลี่ยนเส้นทาง</p>
-                            <p>• <strong>สังเกตการณ์:</strong> มองสถานที่นานเกินไป สำรวจกล้องวงจรปิด</p>
-                            <p>• <strong>ส่งสัญญาณ:</strong> ใช้โทรศัพท์บ่อย ส่งสัญญาณให้เพื่อน</p>
-                            <p>• <strong>รอคอย:</strong> ยืนรอนาน ไม่มีจุดหมาย เดินไปมา</p>
-                            <p>• <strong>ความกังวล:</strong> ประหม่า ตอบคำถามสั่น เล่าไม่ต่อเนื่อง</p>
-                            <p>• <strong>ดื้อรั้น:</strong> ไม่ยอมให้ตรวจค้น ปฏิเสธทุกอย่าง โกรธง่าย</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">สถานการณ์น่าสงสัย - ยาเสพติด</h4>
-                            <p>• แลกของกัน เร็ว ลับๆ</p>
-                            <p>• นัดพบในที่ลับตา เวลาผิดปกติ</p>
-                            <p>• ดวงตาแดง หรือม่านตาขยาย/หดผิดปกติ</p>
-                            <p>• มีกลิ่นกัญชา สารเคมี</p>
-                            <p>• มีอาการสั่น ประสาทหลอน พูดอย่างเดียวซ้ำๆ</p>
-                            <p>• พกเข็ม หลอดแก้ว กระดาษฟอยล์ ถุงซิป</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">สถานการณ์น่าสงสัย - ลักทรัพย์</h4>
-                            <p>• เดินไปมาหน้าร้านบ่อย แต่ไม่ซื้อ</p>
-                            <p>• มองพนักงานว่าสนใจหรือไม่</p>
-                            <p>• จับของแล้วซ่อนในกระเป๋า เสื้อ</p>
-                            <p>• มาเป็นกลุ่ม แยกกระจาย ทำเป็นวุ่นวาย</p>
-                            <p>• ถือกระเป๋าใหญ่ หรือสวมเสื้อหลวม</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">สถานการณ์น่าสงสัย - อาชญากรรม</h4>
-                            <p>• สังเกตการณ์ร้านค้า ธนาคาร ATM นานเกินไป</p>
-                            <p>• ขับรถวนไปมาหน้าบ้านคนอื่น</p>
-                            <p>• มีเครื่องมือพิเศษ (ไขควง ชะแลง ตัดโซ่)</p>
-                            <p>• ปิดหน้า สวมหมวก แว่นดำในที่ร่ม</p>
-                            <p>• เดินทางในเวลาผิดปกติ (ดึกมาก หรือเช้ามืด)</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">สถานการณ์น่าสงสัย - คนต่างด้าว</h4>
-                            <p>• ทำงานในอาชีพต้องห้าม (39 อาชีพ)</p>
-                            <p>• อยู่ในกลุ่มแออัด บ้านพักแออัดผิดปกติ</p>
-                            <p>• ไม่มีเอกสารหรือเอกสารปลอม</p>
-                            <p>• กลัวเจ้าหน้าที่ หลบหนี</p>
-                            <p>• มีลักษณะถูกบังคับ หรือถูกหลอก</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">การจับภาษากาย</h4>
-                            <p>• <strong>โกหก:</strong> แตะจมูก ปิดปาก จับคอ หลบสายตา</p>
-                            <p>• <strong>กังวล:</strong> สัปหงก เดินไปมา กัดเล็บ</p>
-                            <p>• <strong>ก้าวร้าว:</strong> กำหมัด กระดกแขน เข้ามาใกล้</p>
-                            <p>• <strong>กลัว:</strong> ถอยหลัง ย่อตัว สั่น แข็งกระชาก</p>
-                            <p>• <strong>เตรียมหนี:</strong> มองหาทางออก ถอยเท้า หันตัวไปทางออก</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">เทคนิคการสังเกต</h4>
-                            <p>✓ สังเกตคนแปลกหน้าในพื้นที่</p>
-                            <p>✓ จำรูปร่าง หน้าตา ลักษณะพิเศษ</p>
-                            <p>✓ สังเกตทะเบียนรถ</p>
-                            <p>✓ ดูบริบทแวดล้อม สถานที่ เวลา</p>
-                            <p>✓ ถ่ายรูปหรือบันทึกวิดีโอหากสงสัย</p>
-                            <p>✓ ไม่ให้รู้ว่าคุณกำลังสังเกต</p>
-                            <p>✓ เรียกเจ้าหน้าที่มาตรวจสอบ</p>
-                            <p>✓ ห้ามเผชิญหน้าคนเดียว</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">ข้อควรระวัง</h4>
-                            <p>• อย่าตัดสินจากรูปลักษณ์อย่างเดียว</p>
-                            <p>• รอดูพฤติกรรมหลายอย่างประกอบกัน</p>
-                            <p>• ให้เกียรติและสุภาพ อย่าคิดล่วงหน้า</p>
-                            <p>• ใช้ดุลยพินิจ และประสบการณ์</p>
-                            <p>• ปกป้องตัวเองเป็นอันดับแรก</p>
-                        </div>
-                    </div>
-                `
-            },
-            {
-                id: 6,
-                title: "ยาเสพติด",
-                category: "ยาเสพติด",
-                icon: "💊",
-                description: "ประเภทยาเสพติดและการตรวจจับ",
-                content: `
-                    <h3 class="text-xl font-semibold mb-4">ยาเสพติดและการตรวจจับ</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <h4 class="font-semibold text-blue-600">ยาเสพติดให้โทษประเภท 1</h4>
-                            <p><strong>เฮโรอีน (Heroin)</strong></p>
-                            <p>• ลักษณะ: ผงสีขาว หรือสีน้ำตาลเข้ม</p>
-                            <p>• อาการ: ง่วงมาก ม่านตาเล็กมาก ไม่ค่อยตอบสนอง</p>
-                            <p>• การใช้: ฉีด สูด สูบ</p>
-                            <p><br><strong>ยาบ้า (Methamphetamine)</strong></p>
-                            <p>• ลักษณะ: เม็ดกลมสีส้ม หรือสีเขียว มี WY, 99</p>
-                            <p>• อาการ: ตาโต กระตือรือร้น พูดเร็ว ไม่หลับ</p>
-                            <p>• การใช้: กลืน สูบ บด</p>
-                            <p><br><strong>ยาไอซ์ (Crystal Meth)</strong></p>
-                            <p>• ลักษณะ: ผลึกใส คล้ายน้ำแข็ง หรือเกลือหยาบ</p>
-                            <p>• อาการ: ตื่นเต้นรุนแรง หลอน หวาดระแวง</p>
-                            <p>• การใช้: สูบ ฉีด</p>
-                            <p><br><strong>ยาอี (MDMA, Ecstasy)</strong></p>
-                            <p>• ลักษณะ: เม็ดกลม มีลวดลาย โลโก้</p>
-                            <p>• อาการ: ตื่นเต้น เต้นไม่หยุด กรามกัด ม่านตาโต</p>
-                            <p>• การใช้: กลืน</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">ยาเสพติดให้โทษประเภท 2</h4>
-                            <p><strong>โคเคน (Cocaine)</strong></p>
-                            <p>• ลักษณะ: ผงสีขาว ละเอียด</p>
-                            <p>• อาการ: ตื่นเต้น พูดเร็ว มั่นใจมาก ม่านตาโต</p>
-                            <p>• การใช้: สูด ฉีด ทาเหงือก</p>
-                            <p><br><strong>ฝิ่น (Opium)</strong></p>
-                            <p>• ลักษณะ: ก้อนสีน้ำตาลดำ เหนียว มีกลิ่นฉุน</p>
-                            <p>• อาการ: ง่วง ม่านตาเล็ก คลื่นไส้</p>
-                            <p>• การใช้: สูบ กิน ชง</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">ยาเสพติดให้โทษประเภท 5</h4>
-                            <p><strong>กัญชา (Marijuana)</strong></p>
-                            <p>• ลักษณะ: ใบแห้งสีเขียวสีน้ำตาล มีกลิ่นเฉพาะ</p>
-                            <p>• อาการ: ตาแดง หิวมาก หัวเราะง่าย คลายความรู้สึก</p>
-                            <p>• การใช้: สูบ กิน ชง</p>
-                            <p>• หมายเหตุ: ทำเป็นสาร extract, oil, edible ได้</p>
-                            <p><br><strong>กระท่อม (Kratom)</strong></p>
-                            <p>• ลักษณะ: ใบสด หรือใบแห้ง</p>
-                            <p>• อาการ: ตื่นเต้น (ขนาดน้อย) หรือง่วง (ขนาดมาก)</p>
-                            <p>• การใช้: เคี้ยว ต้ม ชง</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">อาการของผู้เสพยาเสพติด</h4>
-                            <p><strong>ระยะเสพ (High/Intoxication)</strong></p>
-                            <p>• กระตือรือร้นผิดปกติ หรือง่วงมาก</p>
-                            <p>• ม่านตาโตหรือเล็กผิดปกติ</p>
-                            <p>• ตาแดง มือสั่น เหงื่อออก</p>
-                            <p>• พูดเร็ว หรือพูดช้า ไม่ชัด</p>
-                            <p>• ประสาทหลอน หวาดระแวง</p>
-                            <p><br><strong>ระยะขาดยา (Withdrawal)</strong></p>
-                            <p>• กระสับกระส่าย ขาดสมาธิ</p>
-                            <p>• เหงื่อออก หนาวสั่น</p>
-                            <p>• ปวดเมื่อยกล้ามเนื้อ</p>
-                            <p>• ท้องเสีย คลื่นไส้</p>
-                            <p>• หงุดหงิด โมโหง่าย</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">ของกลางที่พบบ่อย</h4>
-                            <p>• หลอดแก้ว (บอง) ไปป์แก้ว</p>
-                            <p>• กระดาษฟอยล์ ไฟแช็ก</p>
-                            <p>• ถุงซิป ถุงใส ขนาดเล็ก</p>
-                            <p>• เข็มฉีดยา ยางรัด ช้อน</p>
-                            <p>• ตาชั่งดิจิทัล ขนาดเล็ก</p>
-                            <p>• ท่อพลาสติก หลอดดูด</p>
-                            <p>• กระดาษม้วนบาง (สำหรับมวน)</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">การตรวจยาเสพติด</h4>
-                            <p><strong>Test Kit แบบปัสสาวะ</strong></p>
-                            <p>• ตรวจได้หลายชนิดในคราวเดียว</p>
-                            <p>• ใช้เวลา 5-10 นาที</p>
-                            <p>• ตรวจพบการเสพย้อนหลัง 3-7 วัน</p>
-                            <p><br><strong>Test Kit แบบน้ำลาย</strong></p>
-                            <p>• เก็บง่าย ไม่ต้องเข้าห้องน้ำ</p>
-                            <p>• ตรวจพบการเสพล่าสุด 1-2 วัน</p>
-                            <p><br><strong>ตรวจเลือด</strong></p>
-                            <p>• แม่นยำสูงสุด</p>
-                            <p>• ต้องส่งห้องแลป</p>
-                            <p>• ใช้เวลานานกว่า</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">บทลงโทษ</h4>
-                            <p><strong>เสพ:</strong></p>
-                            <p>• ประเภท 1: จำคุกไม่เกิน 1 ปี หรือปรับไม่เกิน 20,000 บาท</p>
-                            <p>• ประเภท 2: จำคุกไม่เกิน 5 ปี หรือปรับไม่เกิน 100,000 บาท</p>
-                            <p><br><strong>ครอบครอง:</strong></p>
-                            <p>• ประเภท 1: จำคุก 1-10 ปี และปรับ 10,000-100,000 บาท</p>
-                            <p>• หากปริมาณมาก: จำคุก 2-15 ปี และปรับ 20,000-150,000 บาท</p>
-                            <p><br><strong>ค้า/ผลิต:</strong></p>
-                            <p>• จำคุกตลอดชีวิต หรือ ประหารชีวิต</p>
-                            <p>• และปรับ 1-5 ล้านบาท</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">การจับกุมและเก็บของกลาง</h4>
-                            <p>✓ สวมถุงมือตลอดเวลา</p>
-                            <p>✓ ถ่ายรูป ถ่ายวิดีโอก่อนและหลังเก็บ</p>
-                            <p>✓ บรรจุในถุงพลาสติกใส ปิดผนึก</p>
-                            <p>✓ ติดป้ายระบุ วัน เวลา สถานที่</p>
-                            <p>✓ ชั่งน้ำหนัก บันทึกปริมาณ</p>
-                            <p>✓ ส่งตรวจพิสูจน์ที่ ศพฐ. หรือห้องแลป</p>
-                            <p>✓ เก็บ Chain of Custody ให้สมบูรณ์</p>
-                        </div>
-                    </div>
-                `
-            },
-            {
-                id: 7,
-                title: "เงินกู้นอกระบบ",
-                category: "อาชญากรรม",
-                icon: "💰",
-                description: "การจับกุมและดำเนินคดีเงินกู้นอกระบบ",
-                content: `
-                    <h3 class="text-xl font-semibold mb-4">เงินกู้นอกระบบ (Loan Shark)</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <h4 class="font-semibold text-blue-600">ลักษณะเงินกู้นอกระบบ</h4>
-                            <p>• ไม่มีใบอนุญาตประกอบธุรกิจเงินกู้</p>
-                            <p>• คิดดอกเบี้ยเกินกว่าที่กฎหมายกำหนด</p>
-                            <p>• ใช้วิธีการรุนแรงในการทวงหนี้</p>
-                            <p>• ไม่มีสัญญาที่ชัดเจน หรือสัญญาไม่เป็นธรรม</p>
-                            <p>• ขู่กรรโชก ข่มขืนใจ</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">อัตราดอกเบี้ยตามกฎหมาย</h4>
-                            <p><strong>ดอกเบี้ยสูงสุดที่เรียกได้ตามกฎหมาย:</strong></p>
-                            <p>• เงินกู้ทั่วไป: <strong>15% ต่อปี</strong></p>
-                            <p>• เงินกู้ไมโครไฟแนนซ์: <strong>28% ต่อปี</strong></p>
-                            <p>• นอกเหนือจากนี้ถือว่า<strong>ผิดกฎหมาย</strong></p>
-                            <p><br><strong>ตัวอย่างการคำนวณ:</strong></p>
-                            <p>• กู้ 10,000 บาท อัตรา 15% ต่อปี</p>
-                            <p>• ดอกเบี้ย 1 เดือน = 10,000 × 15% ÷ 12 = 125 บาท</p>
-                            <p>• ถ้าคิด 1,000 บาท/เดือน = 120%/ปี = <strong>ผิดกฎหมาย</strong></p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">รูปแบบเงินกู้นอกระบบ</h4>
-                            <p><strong>1. เงินกู้ด่วน</strong></p>
-                            <p>• โฆษณาผ่าน LINE, Facebook, ป้ายโฆษณา</p>
-                            <p>• อนุมัติเร็ว ไม่เช็คเครดิต</p>
-                            <p>• คิดดอกเบี้ยสูงมาก (5-20% ต่อเดือน)</p>
-                            <p><br><strong>2. แม่ทัพ/พ่อทัพ</strong></p>
-                            <p>• ให้กู้ในชุมชน หมู่บ้าน</p>
-                            <p>• เก็บดอกเบี้ยรายวัน รายสัปดาห์</p>
-                            <p>• ใช้ความรุนแรงทวงหนี้</p>
-                            <p><br><strong>3. เงินกู้ออนไลน์</strong></p>
-                            <p>• ผ่าน App, Website</p>
-                            <p>• ขอข้อมูลส่วนตัวมาก (Contacts, รูปถ่าย)</p>
-                            <p>• ขู่เอาข้อมูลไปแพร่หากไม่จ่าย</p>
-                            <p><br><strong>4. เงินกู้ผ่านร้านค้า</strong></p>
-                            <p>• ร้านจำนำ ร้านสะดวกซื้อ ร้านโทรศัพท์</p>
-                            <p>• ปลอมเป็นการขายผ่อน</p>
-                            <p>• คิดดอกเบี้ยแฝงสูง</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">วิธีการทวงหนี้ผิดกฎหมาย</h4>
-                            <p>• พ่นสี เขียนคำหยาบ หน้าบ้าน</p>
-                            <p>• โทรข่มขู่ ดูถูก ด่าทอ</p>
-                            <p>• โพสต์ใน Facebook หรือ Social Media</p>
-                            <p>• ส่ง SMS ข่มขู่เป็นจำนวนมาก</p>
-                            <p>• โทรไปหาญาติ เพื่อน ที่ทำงาน</p>
-                            <p>• เข้าไปในบ้านโดยไม่ได้รับอนุญาต</p>
-                            <p>• ทำร้ายร่างกาย ข่มขู่ด้วยอาวุธ</p>
-                            <p>• ยึดทรัพย์สินโดยไม่ผ่านศาล</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">ความผิดที่เกี่ยวข้อง</h4>
-                            <p><strong>1. ให้กู้ยืมเงินคิดดอกเบี้ยเกินอัตรา (มาตรา 654)</strong></p>
-                            <p>• ปรับไม่เกิน 40,000 บาท</p>
-                            <p>• และ/หรือจำคุกไม่เกิน 1 ปี</p>
-                            <p><br><strong>2. ประกอบธุรกิจเงินกู้โดยไม่มีใบอนุญาต</strong></p>
-                            <p>• ปรับ 50,000 - 500,000 บาท</p>
-                            <p>• และ/หรือจำคุก 6 เดือน - 5 ปี</p>
-                            <p><br><strong>3. ข่มขู่เรียกทรัพย์ (มาตรา 337)</strong></p>
-                            <p>• ปรับไม่เกิน 20,000 บาท</p>
-                            <p>• และ/หรือจำคุกไม่เกิน 1 ปี</p>
-                            <p><br><strong>4. กรรโชก (มาตรา 239)</strong></p>
-                            <p>• จำคุก 6 เดือน - 5 ปี</p>
-                            <p>• ปรับ 1,000 - 10,000 บาท</p>
-                            <p><br><strong>5. ผิดพ.ร.บ.คอมพิวเตอร์</strong></p>
-                            <p>• (กรณีข่มขู่ผ่าน Social Media)</p>
-                            <p>• ปรับไม่เกิน 100,000 บาท</p>
-                            <p>• และ/หรือจำคุกไม่เกิน 5 ปี</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">พยานหลักฐานที่ต้องเก็บ</h4>
-                            <p>✓ <strong>สัญญากู้ยืม</strong> (ถ้ามี) หรือใบเสร็จ</p>
-                            <p>✓ <strong>ประวัติการโอนเงิน</strong> ผ่านธนาคาร</p>
-                            <p>✓ <strong>ข้อความ SMS</strong> ข่มขู่ เรียกเก็บ</p>
-                            <p>✓ <strong>การสนทนา LINE, Facebook Messenger</strong></p>
-                            <p>✓ <strong>บันทึกการโทร</strong> หรือบันทึกเสียง</p>
-                            <p>✓ <strong>รูปถ่ายการพ่นสี</strong> ข้อความหยาบคาย</p>
-                            <p>✓ <strong>พยานบุคคล</strong> เพื่อนบ้าน ญาติ</p>
-                            <p>✓ <strong>ใบขับขี่ ทะเบียนรถ</strong> ของผู้ทวงหนี้</p>
-                            <p>✓ <strong>CCTV</strong> หน้าบ้าน หรือชุมชน</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">ขั้นตอนการดำเนินคดี</h4>
-                            <p>1. รับแจ้งความจากผู้เสียหาย</p>
-                            <p>2. บันทึกประจำวันรับแจ้ง</p>
-                            <p>3. เก็บรวบรวมพยานหลักฐาน</p>
-                            <p>4. สอบปากคำผู้เสียหาย พยาน</p>
-                            <p>5. ตรวจสอบบัญชีธนาคารผู้ให้กู้</p>
-                            <p>6. ออกหมายจับ หรือหมายค้น</p>
-                            <p>7. จับกุมผู้ต้องหา</p>
-                            <p>8. ส่งฟ้องศาล</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">คำแนะนำสำหรับผู้เสียหาย</h4>
-                            <p>• แจ้งความทันที อย่ากลัว</p>
-                            <p>• เก็บหลักฐานทุกชนิด</p>
-                            <p>• อย่าโอนเงินเพิ่มถ้าถูกข่มขู่</p>
-                            <p>• ปรึกษาทนายความ หรือศูนย์พิทักษ์สิทธิ</p>
-                            <p>• แจ้งญาติให้ช่วยเป็นพยาน</p>
-                            <p>• บล็อกเบอร์โทรศัพท์ที่ข่มขู่</p>
-                            <p>• ติดกล้องวงจรปิดหน้าบ้าน</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">การป้องกัน</h4>
-                            <p>• ตรวจสอบใบอนุญาตผู้ให้กู้</p>
-                            <p>• อ่านสัญญาให้ละเอียด</p>
-                            <p>• คำนวณดอกเบี้ยจริง</p>
-                            <p>• หาข้อมูลก่อนกู้ (รีวิว คำติชม)</p>
-                            <p>• ใช้สถาบันการเงินที่ถูกกฎหมาย</p>
-                            <p>• อย่ากู้เกินความจำเป็น</p>
-                        </div>
-                    </div>
-                `
-            },
-            {
-                id: 8,
-                title: "รับซื้อของเก่า/ผิดกฎหมาย",
-                category: "อาชญากรรม",
-                icon: "🪙",
-                description: "การตรวจสอบร้านรับซื้อของเก่าและของต้องสงสัย",
-                content: `
-                    <h3 class="text-xl font-semibold mb-4">รับซื้อของเก่า / ของผิดกฎหมาย</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <h4 class="font-semibold text-blue-600">ร้านรับซื้อของเก่าที่ต้องขออนุญาต</h4>
-                            <p>• ร้านรับซื้อของเก่า (Second-hand Shop)</p>
-                            <p>• ร้านจำนำ (Pawnshop)</p>
-                            <p>• ร้านรับซื้อโลหะ เศษเหล็ก</p>
-                            <p>• ร้านรับซื้ออุปกรณ์อิเล็กทรอนิกส์</p>
-                            <p>• ร้านรับซื้อทองเก่า เครื่องประดับ</p>
-                            <p><br><strong>ต้องมีใบอนุญาตจาก:</strong></p>
-                            <p>✓ สำนักงานเขตหรืออำเภอ (กรุงเทพฯ/ต่างจังหวัด)</p>
-                            <p>✓ ต้องมีทะเบียนพาณิชย์</p>
-                            <p>✓ ต้องมีสมุดทะเบียนรับซื้อของ</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">สิ่งที่ร้านรับซื้อต้องทำ</h4>
-                            <p><strong>1. ตรวจสอบตัวตนผู้ขาย</strong></p>
-                            <p>• ขอบัตรประชาชน หรือบัตรที่ราชการออกให้</p>
-                            <p>• สำเนาบัตรและเก็บไว้</p>
-                            <p>• ถ่ายรูปผู้ขายพร้อมของ (ถ้าทำได้)</p>
-                            <p><br><strong>2. บันทึกในสมุดทะเบียน</strong></p>
-                            <p>• วัน เวลาที่รับซื้อ</p>
-                            <p>• ชื่อ ที่อยู่ ผู้ขาย</p>
-                            <p>• รายละเอียดของที่รับซื้อ (ชนิด ยี่ห้อ หมายเลขเครื่อง)</p>
-                            <p>• ราคาที่รับซื้อ</p>
-                            <p>• ลายเซ็นผู้ขาย</p>
-                            <p><br><strong>3. แจ้งเจ้าหน้าที่</strong></p>
-                            <p>• แจ้งตำรวจหากสงสัยว่าของขโมย</p>
-                            <p>• แจ้งเมื่อรับซื้อของมีค่าสูง</p>
-                            <p>• เปิดให้ตำรวจตรวจสอบได้ตลอด</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">ของที่ห้ามรับซื้อ</h4>
-                            <p>• <strong>พระพุทธรูป พระเครื่อง</strong> (ของโบราณ อายุเกิน 100 ปี)</p>
-                            <p>• <strong>ของโบราณคดี</strong> ต้องแจ้งกรมศิลปากร</p>
-                            <p>• <strong>ทะเบียนรถ ป้ายทะเบียน</strong></p>
-                            <p>• <strong>บัตรประชาชน พาสปอร์ต</strong></p>
-                            <p>• <strong>อาวุธปืน กระสุน</strong></p>
-                            <p>• <strong>ยาเสพติด</strong></p>
-                            <p>• <strong>สิ่งของราชการ</strong> (เครื่องแบบตำรวจ ทหาร)</p>
-                            <p>• <strong>เหรียญกษาปณ์ปลอม</strong></p>
-                            <p>• <strong>ของที่เห็นได้ชัดว่าขโมยมา</strong></p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">สัญญาณของต้องสงสัย</h4>
-                            <p>• ขายของมีค่าในราคาถูกผิดปกติ</p>
-                            <p>• ผู้ขายประหม่า กังวล รีบร้อน</p>
-                            <p>• ไม่มีเอกสารแสดงตัวตน</p>
-                            <p>• เด็ก เยาวชน มาขายของมีค่า</p>
-                            <p>• ของยังใหม่มาก แต่ขายถูกมาก</p>
-                            <p>• ขายของหลายชิ้นพร้อมกัน (เช่น โทรศัพท์ 5-10 เครื่อง)</p>
-                            <p>• ไม่สามารถอธิบายที่มาของได้</p>
-                            <p>• ของมีรอยแงะ รอยงัด รอยทุบ</p>
-                            <p>• ขายของที่มีชื่อคนอื่น (สร้อยคอมีชื่อ)</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">ของมีค่าที่ถูกขโมยบ่อย</h4>
-                            <p>• <strong>โทรศัพท์มือถือ</strong> (iPhone, Samsung ราคาแพง)</p>
-                            <p>• <strong>โน้ตบุ๊ค แท็บเล็ต</strong></p>
-                            <p>• <strong>ทอง เครื่องประดับ</strong></p>
-                            <p>• <strong>กล้อง เลนส์</strong></p>
-                            <p>• <strong>เครื่องเล่นเกม PlayStation, Xbox, Nintendo</strong></p>
-                            <p>• <strong>จักรยาน จักรยานยนต์</strong></p>
-                            <p>• <strong>ท่อทองแดง สายไฟ</strong> (ขโมยจากไซต์ก่อสร้าง)</p>
-                            <p>• <strong>ฝาท่อ ฝาบ่อ เหล็กดัด</strong></p>
-                            <p>• <strong>แบตเตอรี่รถยนต์</strong></p>
-                            <p>• <strong>ล้อแม็ก ยางรถยนต์</strong></p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">การตรวจสอบร้านรับซื้อของเก่า</h4>
-                            <p>1. ตรวจใบอนุญาตประกอบการ</p>
-                            <p>2. ตรวจสมุดทะเบียนรับซื้อของ</p>
-                            <p>3. ตรวจของที่รับซื้อมาล่าสุด</p>
-                            <p>4. เทียบกับรายการแจ้งความของหาย</p>
-                            <p>5. ถามผู้ประกอบการเกี่ยวกับของที่สงสัย</p>
-                            <p>6. ตรวจ IMEI โทรศัพท์กับฐานข้อมูล</p>
-                            <p>7. ตรวจหมายเลขเครื่องคอมพิวเตอร์ (Serial Number)</p>
-                            <p>8. ยึดของต้องสงสัยเป็นของกลาง</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">ความผิดที่เกี่ยวข้อง</h4>
-                            <p><strong>1. รับซื้อของที่รู้ว่าเป็นของขโมย (มาตรา 357)</strong></p>
-                            <p>• จำคุกไม่เกิน 3 ปี</p>
-                            <p>• หรือปรับไม่เกิน 60,000 บาท</p>
-                            <p>• หรือทั้งจำทั้งปรับ</p>
-                            <p><br><strong>2. ประกอบกิจการโดยไม่มีใบอนุญาต</strong></p>
-                            <p>• ปรับไม่เกิน 10,000 บาท</p>
-                            <p>• และปรับรายวันไม่เกินวันละ 500 บาท</p>
-                            <p><br><strong>3. ไม่บันทึกสมุดทะเบียน</strong></p>
-                            <p>• ปรับไม่เกิน 5,000 บาท</p>
-                            <p><br><strong>4. รับซื้อของต้องห้าม</strong></p>
-                            <p>• ตามความผิดของสิ่งของนั้น ๆ</p>
-                            <p>• เช่น รับซื้อยาเสพติด ผิดตาม พ.ร.บ.ยาเสพติด</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">เครื่องมือตรวจสอบ</h4>
-                            <p>• <strong>ตรวจ IMEI โทรศัพท์:</strong> www.imei.info หรือ *#06#</p>
-                            <p>• <strong>ตรวจฐานข้อมูลของหาย:</strong> ระบบ CRIMELINE, กลุ่มงาน Facebook</p>
-                            <p>• <strong>ตรวจ Serial Number:</strong> ฐานข้อมูลผู้ผลิต</p>
-                            <p>• <strong>ถ่ายรูปบันทึก:</strong> รูปของและผู้ขาย</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">คำแนะนำสำหรับร้านค้า</h4>
-                            <p>✓ ติดกล้องวงจรปิดภายในร้าน</p>
-                            <p>✓ บันทึกทุกรายการอย่างละเอียด</p>
-                            <p>✓ ปฏิเสธรับซื้อหากสงสัย</p>
-                            <p>✓ ประสานตำรวจท้องที่อย่างสม่ำเสมอ</p>
-                            <p>✓ เก็บสำเนาบัตรผู้ขายทุกครั้ง</p>
-                            <p>✓ ติดป้ายแจ้งว่า "ตรวจสอบของก่อนรับซื้อ"</p>
-                            <p>✓ เข้าร่วมกลุ่ม LINE ร้านค้าในพื้นที่</p>
-                        </div>
-                    </div>
-                `
-            },
-            {
-                id: 9,
-                title: "วิเคราะห์หมายจับ",
-                category: "เทคนิค",
-                icon: "🏴‍☠️",
-                description: "การวิเคราะห์และปฏิบัติตามหมายจับ",
-                content: `
-                    <h3 class="text-xl font-semibold mb-4">การวิเคราะห์และปฏิบัติตามหมายจับ</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <h4 class="font-semibold text-blue-600">ประเภทของหมายจับ</h4>
-                            <p><strong>1. หมายจับทั่วไป</strong></p>
-                            <p>• ออกโดยศาล</p>
-                            <p>• มีชื่อผู้ต้องหาระบุชัดเจน</p>
-                            <p>• ระบุข้อหา วัน เวลาที่ออกหมาย</p>
-                            <p>• มีอายุ 2 เดือนนับจากวันออก (ส่วนใหญ่)</p>
-                            <p><br><strong>2. หมายจับผู้ร้ายหลบหนี</strong></p>
-                            <p>• กรณีถูกปล่อยชั่วคราวแล้วหลบหนี</p>
-                            <p>• ไม่มีกำหนดอายุ</p>
-                            <p>• ใช้ได้จนกว่าจะจับได้</p>
-                            <p><br><strong>3. หมายจับทั่วราชอาณาจักร</strong></p>
-                            <p>• สำหรับคดีร้ายแรง</p>
-                            <p>• เจ้าหน้าที่ทุกพื้นที่สามารถจับได้</p>
-                            <p>• มักมีรูปถ่ายและรายละเอียดครบถ้วน</p>
-                            <p><br><strong>4. Red Notice (หมายจับสากล)</strong></p>
-                            <p>• ออกโดย INTERPOL</p>
-                            <p>• ใช้ได้ทั่วโลก</p>
-                            <p>• สำหรับคดีร้ายแรงข้ามชาติ</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">ข้อมูลในหมายจับที่ต้องตรวจสอบ</h4>
-                            <p>✓ <strong>ชื่อ-นามสกุล</strong> ผู้ต้องหา</p>
-                            <p>✓ <strong>นามสกุลเดิม</strong> ชื่อเล่น ฉายา (ถ้ามี)</p>
-                            <p>✓ <strong>อายุ วันเดือนปีเกิด</strong></p>
-                            <p>✓ <strong>เลขบัตรประชาชน</strong></p>
-                            <p>✓ <strong>ที่อยู่ทะเบียนบ้าน</strong> ที่พักอาศัยจริง</p>
-                            <p>✓ <strong>รูปพรรณสัณฐาน:</strong></p>
-                            <p>&nbsp;&nbsp;&nbsp;- ส่วนสูง น้ำหนัก รูปร่าง</p>
-                            <p>&nbsp;&nbsp;&nbsp;- สีผิว รูปหน้า</p>
-                            <p>&nbsp;&nbsp;&nbsp;- รอยสัก ตำหนิ รอยแผลเป็น</p>
-                            <p>&nbsp;&nbsp;&nbsp;- ลักษณะพิเศษ (ขาเป๋ หูหนวก ฯลฯ)</p>
-                            <p>✓ <strong>ข้อหา</strong> ที่กล่าวหา</p>
-                            <p>✓ <strong>วันที่ออกหมาย</strong> และอายุหมาย</p>
-                            <p>✓ <strong>ศาลที่ออกหมาย</strong></p>
-                            <p>✓ <strong>หมายเลขคดี</strong></p>
-                            <p>✓ <strong>จำเลยลำดับที่</strong> (ถ้าเป็นคดีหลายคน)</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">การวิเคราะห์หมายจับก่อนปฏิบัติ</h4>
-                            <p><strong>1. วิเคราะห์ข้อมูลพื้นฐาน</strong></p>
-                            <p>• ตรวจสอบรูปถ่าย (ถ้ามี)</p>
-                            <p>• ตรวจประวัติอาชญากรรมเดิม</p>
-                            <p>• ดูว่าเป็นคดีอะไร - อันตรายแค่ไหน</p>
-                            <p>• ตรวจสอบว่ามีอาวุธหรือไม่</p>
-                            <p><br><strong>2. สืบหาข้อมูลเพิ่มเติม</strong></p>
-                            <p>• ตรวจฐานข้อมูล CRIMELINE</p>
-                            <p>• ตรวจประวัติทะเบียนบ้าน</p>
-                            <p>• ค้นหาในโซเชียลมีเดีย (Facebook, TikTok)</p>
-                            <p>• สอบถามญาติ เพื่อน เพื่อนบ้าน</p>
-                            <p>• หาข้อมูลสถานที่ที่ชอบไป</p>
-                            <p>• ตรวจสอบยานพาหนะ (ถ้ามี)</p>
-                            <p><br><strong>3. ประเมินความเสี่ยง</strong></p>
-                            <p>• คดีร้ายแรง = เตรียมกำลังเสริม</p>
-                            <p>• มีอาวุธ = สวมเสื้อเกราะ เตรียมแผน</p>
-                            <p>• มีเครือข่าย = วางกำลังปิดล้อม</p>
-                            <p>• พกยาเสพติด = เตรียมชุดทดสอบ</p>
-                            <p>• มีประวัติหลบหนี = ปิดทางหนีทุกทาง</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">การวางแผนจับกุม</h4>
-                            <p><strong>ขั้นตอนที่ 1: รวบรวมข้อมูล</strong></p>
-                            <p>• สำรวจสถานที่ล่วงหน้า</p>
-                            <p>• ดูทางเข้า-ออก</p>
-                            <p>• สังเกตพฤติกรรมผู้ต้องหา</p>
-                            <p>• ถ่ายภาพ ทำแผนที่</p>
-                            <p><br><strong>ขั้นตอนที่ 2: วางแผน</strong></p>
-                            <p>• กำหนดเวลาจับกุม (เช้าตรู่มักดีที่สุด)</p>
-                            <p>• แบ่งหน้าที่ทีม (ทีมจับ, ทีมปิดหลัง, ทีมสนับสนุน)</p>
-                            <p>• เตรียมอุปกรณ์ (กุญแจมือ, ไฟฉาย, เสื้อกั๊ก)</p>
-                            <p>• แจ้งผู้บังคับบัญชา</p>
-                            <p>• ประสานหน่วยงานที่เกี่ยวข้อง</p>
-                            <p><br><strong>ขั้นตอนที่ 3: ปฏิบัติการ</strong></p>
-                            <p>• Briefing ทีมก่อนออกปฏิบัติ</p>
-                            <p>• ตรวจอุปกรณ์สื่อสาร</p>
-                            <p>• เข้าประจำตำแหน่งตามแผน</p>
-                            <p>• ใช้สัญญาณติดต่อกัน</p>
-                            <p>• จับกุมอย่างรวดเร็ว ปลอดภัย</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">เทคนิคในการจับกุม</h4>
-                            <p><strong>1. การเข้าจับในบ้าน</strong></p>
-                            <p>• เคาะประตู แสดงตัวเป็นเจ้าหน้าที่</p>
-                            <p>• แสดงหมายจับ</p>
-                            <p>• ขออนุญาตเข้าบ้าน</p>
-                            <p>• ห้ามทุบประตู ถ้าไม่จำเป็น</p>
-                            <p>• ตรวจค้นตามกฎหมาย</p>
-                            <p><br><strong>2. การดักจับตามทาง</strong></p>
-                            <p>• ตั้งจุดตรวจ/ด่าน</p>
-                            <p>• ใช้รถบังสายตา</p>
-                            <p>• ให้สัญญาณหยุดรถ</p>
-                            <p>• ล้อมรถอย่างรวดเร็ว</p>
-                            <p><br><strong>3. การจับกุมในที่สาธารณะ</strong></p>
-                            <p>• ใช้ชุดพลเรือน</p>
-                            <p>• เข้าใกล้อย่างไม่เป็นที่สงสัย</p>
-                            <p>• จับอย่างรวดเร็ว ระมัดระวังคนรอบข้าง</p>
-                            <p>• แสดงตัวทันทีหลังจับ</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">หลังจับกุมผู้ต้องหา</h4>
-                            <p>1. <strong>ตรวจค้นตัว</strong> หาอาวุธ ของกลาง</p>
-                            <p>2. <strong>สวมกุญแจมือ</strong> ข้อมือข้างหลัง</p>
-                            <p>3. <strong>แจ้งสิทธิ</strong> (ศิลปะ 5 ข้อ):</p>
-                            <p>&nbsp;&nbsp;&nbsp;- สิทธิรู้ข้อหา</p>
-                            <p>&nbsp;&nbsp;&nbsp;- สิทธิไม่ให้การปรักปรำตนเอง</p>
-                            <p>&nbsp;&nbsp;&nbsp;- สิทธิมีทนายความ</p>
-                            <p>&nbsp;&nbsp;&nbsp;- สิทธิแจ้งญาติ</p>
-                            <p>&nbsp;&nbsp;&nbsp;- สิทธิขอประกันตัว</p>
-                            <p>4. <strong>บันทึกเหตุการณ์</strong> เวลา สถานที่ ผู้ร่วมปฏิบัติ</p>
-                            <p>5. <strong>ถ่ายภาพ/วิดีโอ</strong> ผู้ต้องหาและของกลาง</p>
-                            <p>6. <strong>ส่งตัวโรงพักพร้อมหมายจับฉบับจริง</strong></p>
-                            <p>7. <strong>ตรวจสุขภาพก่อนขัง</strong></p>
-                            <p>8. <strong>ทำบันทึกประจำวันรับตัว</strong></p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">กรณีจับไม่ได้ตัว</h4>
-                            <p>• บันทึกการไปตามหมายจับ</p>
-                            <p>• สอบถามญาติ คนรู้จัก</p>
-                            <p>• ขอความร่วมมือให้แจ้งเมื่อพบตัว</p>
-                            <p>• ติดตามในสถานที่ที่อาจไปพบ</p>
-                            <p>• ตรวจสอบ Social Media</p>
-                            <p>• ประสานหน่วยข้างเคียง</p>
-                            <p>• รอคอยโอกาสจับใหม่</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">ข้อควรระวัง</h4>
-                            <p>• ตรวจสอบความถูกต้องของหมายจับก่อนจับ</p>
-                            <p>• ห้ามใช้กำลังเกินจำเป็น</p>
-                            <p>• ระวังอาวุธซ่อนติดตัว</p>
-                            <p>• ห้ามจับผิดคน (ตรวจสอบตัวตนก่อน)</p>
-                            <p>• มีพยานประจักษ์ในการจับกุม</p>
-                            <p>• ปฏิบัติตามกฎหมายอย่างเคร่งครัด</p>
-                            <p>• ถ่ายภาพบันทึกทุกขั้นตอน</p>
-                            <p>• แจ้งผู้บังคับบัญชาทันทีหลังจับได้</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">เครื่องมือที่ใช้</h4>
-                            <p>• สำเนาหมายจับ</p>
-                            <p>• กุญแจมือ</p>
-                            <p>• วิทยุสื่อสาร</p>
-                            <p>• ไฟฉาย</p>
-                            <p>• กล้องถ่ายรูป/โทรศัพท์</p>
-                            <p>• อุปกรณ์ป้องกันตัว (เสื้อเกราะ)</p>
-                            <p>• ใบแจ้งสิทธิ (ศิลปะ 5)</p>
-                            <p>• แบบฟอร์มบันทึกการจับกุม</p>
-                        </div>
-                    </div>
-                `
-            },
-            {
-                id: 10,
-                title: "หลักการสืบสวน",
-                category: "พื้นฐาน",
-                icon: "🔍",
-                description: "หลักการและแนวทางในการสืบสวนคดี",
-                content: `
-                    <h3 class="text-xl font-semibold mb-4">หลักการสืบสวนคดี</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <h4 class="font-semibold text-blue-600">1. หลักการเก็บรักษาสถานที่เกิดเหตุ</h4>
-                            <p>• ปิดล้อมพื้นที่เกิดเหตุทันที</p>
-                            <p>• ห้ามบุคคลที่ไม่เกี่ยวข้องเข้าไปในพื้นที่</p>
-                            <p>• บันทึกสภาพเดิมของสถานที่เกิดเหตุ</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">2. การเก็บพยานหลักฐาน</h4>
-                            <p>• ถ่ายภาพก่อนเก็บพยานหลักฐาน</p>
-                            <p>• ใช้อุปกรณ์ที่เหมาะสมในการเก็บ</p>
-                            <p>• ติดป้ายระบุและบันทึกรายละเอียด</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">3. การสอบสวนพยาน</h4>
-                            <p>• สร้างบรรยากาศที่เหมาะสม</p>
-                            <p>• ใช้คำถามแบบเปิด</p>
-                            <p>• บันทึกข้อมูลอย่างละเอียด</p>
-                        </div>
-                    </div>
-                `
-            },
-            {
-                id: 2,
-                title: "การเก็บพยานหลักฐาน",
-                category: "เทคนิค",
-                icon: "📋",
-                description: "วิธีการเก็บและรักษาพยานหลักฐานอย่างถูกต้อง",
-                content: `
-                    <h3 class="text-xl font-semibold mb-4">การเก็บพยานหลักฐาน</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <h4 class="font-semibold text-blue-600">ประเภทพยานหลักฐาน</h4>
-                            <p>• พยานหลักฐานทางกายภาพ (Physical Evidence)</p>
-                            <p>• พยานหลักฐานทางชีววิทยา (Biological Evidence)</p>
-                            <p>• พยานหลักฐานดิจิทัล (Digital Evidence)</p>
-                            <p>• พยานหลักฐานเอกสาร (Documentary Evidence)</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">ขั้นตอนการเก็บ</h4>
-                            <p>1. สวมอุปกรณ์ป้องกัน (ถุงมือ, หน้ากาก)</p>
-                            <p>2. ถ่ายภาพสถานที่และพยานหลักฐาน</p>
-                            <p>3. เก็บพยานหลักฐานด้วยเครื่องมือที่เหมาะสม</p>
-                            <p>4. ใส่ภาชนะที่เหมาะสมและปิดผึ้ง</p>
-                            <p>5. ติดป้ายระบุรายละเอียด</p>
-                            <p>6. บันทึกในสมุดบันทึกการสืบสวน</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">การรักษาพยานหลักฐาน</h4>
-                            <p>• เก็บในสภาพแวดล้อมที่เหมาะสม</p>
-                            <p>• ควบคุมการเข้าถึง (Chain of Custody)</p>
-                            <p>• บันทึกการเคลื่อนย้าย</p>
-                        </div>
-                    </div>
-                `
-            },
-            {
-                id: 3,
-                title: "เทคนิคการสอบปากคำ",
-                category: "เทคนิค",
-                icon: "🎤",
-                description: "เทคนิคการสอบปากคำพยานและผู้ต้องหา",
-                content: `
-                    <h3 class="text-xl font-semibold mb-4">เทคนิคการสอบปากคำ</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <h4 class="font-semibold text-blue-600">การเตรียมตัวก่อนสอบปากคำ</h4>
-                            <p>• ศึกษาข้อมูลคดีอย่างละเอียด</p>
-                            <p>• เตรียมคำถามล่วงหน้า</p>
-                            <p>• จัดเตรียมสถานที่ที่เหมาะสม</p>
-                            <p>• ตรวจสอบอุปกรณ์บันทึกเสียง</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">เทคนิคการถามคำถาม</h4>
-                            <p>• เริ่มด้วยคำถามง่าย ๆ เพื่อสร้างความคุ้นเคย</p>
-                            <p>• ใช้คำถามแบบเปิด (Open-ended Questions)</p>
-                            <p>• หลีกเลี่ยงคำถามแบบชี้นำ</p>
-                            <p>• ให้เวลาในการตอบคำถาม</p>
-                            <p>• สังเกตภาษากายและท่าทาง</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">การจัดการกับผู้ให้การที่ไม่ร่วมมือ</h4>
-                            <p>• รักษาความสงบและอดทน</p>
-                            <p>• เปลี่ยนแนวทางการสอบปากคำ</p>
-                            <p>• ใช้เทคนิคการสร้างความไว้วางใจ</p>
-                            <p>• หาจุดร่วมหรือความสนใจร่วม</p>
-                        </div>
-                    </div>
-                `
-            },
-            {
-                id: 4,
-                title: "กฎหมายที่เกี่ยวข้อง",
-                category: "กฎหมาย",
-                icon: "⚖️",
-                description: "กฎหมายและระเบียบที่เกี่ยวข้องกับการสืบสวน",
-                content: `
-                    <h3 class="text-xl font-semibold mb-4">กฎหมายที่เกี่ยวข้องกับการสืบสวน</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <h4 class="font-semibold text-blue-600">ประมวลกฎหมายวิธีพิจารณาความอาญา</h4>
-                            <p>• มาตรา 131 - อำนาจในการสืบสวน</p>
-                            <p>• มาตรา 132 - การจับกุมผู้ต้องหา</p>
-                            <p>• มาตรา 134 - การค้นตัวและที่อยู่อาศัย</p>
-                            <p>• มาตรา 135 - การยึดของกลาง</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">สิทธิของผู้ต้องหา</h4>
-                            <p>• สิทธิในการได้รับทราบข้อกล่าวหา</p>
-                            <p>• สิทธิในการมีทนายความ</p>
-                            <p>• สิทธิในการไม่ให้การปรักปรำตนเอง</p>
-                            <p>• สิทธิในการประกันตัว</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">หลักเกณฑ์การเก็บพยานหลักฐาน</h4>
-                            <p>• ต้องได้มาโดยชอบด้วยกฎหมาย</p>
-                            <p>• ต้องมีการรักษาสายโซ่พยานหลักฐาน</p>
-                            <p>• ต้องไม่ละเมิดสิทธิส่วนบุคคล</p>
-                            <p>• ต้องมีหมายค้นหากจำเป็น</p>
-                        </div>
-                    </div>
-                `
-            },
-            {
-                id: 5,
-                title: "เทคโนโลยีในการสืบสวน",
-                category: "เทคโนโลยี",
-                icon: "💻",
-                description: "การใช้เทคโนโลยีสมัยใหม่ในงานสืบสวน",
-                content: `
-                    <h3 class="text-xl font-semibold mb-4">เทคโนโลยีในการสืบสวน</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <h4 class="font-semibold text-blue-600">เทคโนโลยีดิจิทัลฟอเรนซิก</h4>
-                            <p>• การตรวจสอบคอมพิวเตอร์และอุปกรณ์ดิจิทัล</p>
-                            <p>• การกู้คืนข้อมูลที่ถูกลบ</p>
-                            <p>• การวิเคราะห์ข้อมูลจากโทรศัพท์มือถือ</p>
-                            <p>• การตรวจสอบประวัติการใช้อินเทอร์เน็ต</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">ระบบกล้องวงจรปิด (CCTV)</h4>
-                            <p>• การขอข้อมูลจากกล้องวงจรปิด</p>
-                            <p>• การวิเคราะห์ภาพและวิดีโอ</p>
-                            <p>• การใช้โปรแกรมปรับปรุงคุณภาพภาพ</p>
-                            <p>• การติดตามเส้นทางการเคลื่อนไหว</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">ระบบฐานข้อมูล</h4>
-                            <p>• ฐานข้อมูลประวัติอาชญากรรม</p>
-                            <p>• ระบบจดจำใบหน้า</p>
-                            <p>• ฐานข้อมูลลายนิ้วมือ</p>
-                            <p>• ระบบติดตาม GPS</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">เครื่องมือวิเคราะห์</h4>
-                            <p>• เครื่องตรวจจับสารเสพติด</p>
-                            <p>• เครื่องวิเคราะห์ DNA</p>
-                            <p>• เครื่องตรวจสอบเอกสารปลอม</p>
-                            <p>• เครื่องบันทึกเสียงคุณภาพสูง</p>
-                        </div>
-                    </div>
-                `
-            },
-            {
-                id: 6,
-                title: "จิตวิทยาอาชญากรรม",
-                category: "จิตวิทยา",
-                icon: "🧠",
-                description: "การเข้าใจจิตวิทยาของผู้กระทำผิดและเหยื่อ",
-                content: `
-                    <h3 class="text-xl font-semibold mb-4">จิตวิทยาอาชญากรรม</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <h4 class="font-semibold text-blue-600">ประเภทของผู้กระทำผิด</h4>
-                            <p>• ผู้กระทำผิดแบบฉับพลัน (Impulsive)</p>
-                            <p>• ผู้กระทำผิดแบบมีแผน (Organized)</p>
-                            <p>• ผู้กระทำผิดแบบผสม (Mixed)</p>
-                            <p>• ผู้กระทำผิดซ้ำ (Repeat Offender)</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">การวิเคราะห์พฤติกรรม</h4>
-                            <p>• รูปแบบการกระทำผิด (Modus Operandi)</p>
-                            <p>• ลายเซ็นพฤติกรรม (Behavioral Signature)</p>
-                            <p>• การเลือกเหยื่อ (Victim Selection)</p>
-                            <p>• สถานที่เกิดเหตุ (Crime Scene Analysis)</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">เทคนิคการสร้างโปรไฟล์</h4>
-                            <p>• วิเคราะห์ลักษณะทางกายภาพ</p>
-                            <p>• ประเมินสถานะทางสังคม</p>
-                            <p>• วิเคราะห์ความสัมพันธ์กับเหยื่อ</p>
-                            <p>• ทำนายพฤติกรรมในอนาคต</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-600">การจัดการกับเหยื่อ</h4>
-                            <p>• เข้าใจภาวะทางจิตใจของเหยื่อ</p>
-                            <p>• สร้างความไว้วางใจ</p>
-                            <p>• หลีกเลี่ยงการทำให้เกิดบาดแผลทางจิตใจซ้ำ</p>
-                            <p>• ให้การสนับสนุนที่เหมาะสม</p>
-                        </div>
-                    </div>
-                `
-            }
-        ];
+<div id="knowledgeModal" class="modal">
+    <div class="modal-content shadow-2xl">
+        <button id="closeModal" class="absolute top-4 right-4 text-3xl font-bold text-gray-400 hover:text-red-500 transition-colors">&times;</button>
+        <div id="modalBody"></div>
+    </div>
+</div>
 
-        let filteredData = [...knowledgeData];
-
-        function renderKnowledgeGrid() {
-            const grid = document.getElementById('knowledgeGrid');
-            grid.innerHTML = '';
-
-            filteredData.forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'knowledge-card bg-white rounded-lg shadow-md p-6 cursor-pointer hover:shadow-lg transition-all duration-300';
-                card.innerHTML = `
-                    <div class="category-icon bg-blue-100 text-blue-600">
-                        ${item.icon}
+<script>
+    const knowledgeData = [
+        {
+            id: 'v01',
+            title: "การบันทึกภาพและเสียง (พ.ร.บ.อุ้มหาย)",
+            category: "กฎหมายใหม่",
+            icon: "📹",
+            description: "พ.ร.บ.ป้องกันการทรมานฯ (ม.22) หลักเกณฑ์การบันทึกภาพขณะจับกุม",
+            content: `
+                <h3 class="text-2xl font-bold text-indigo-800 mb-4 border-b-2 border-indigo-100 pb-2">พ.ร.บ.ป้องกันและปราบปรามการทรมานฯ (ม.22)</h3>
+                <div class="space-y-4 text-gray-700">
+                    <p class="font-bold text-red-600 underline text-lg">สาระสำคัญที่สายสืบต้องปฏิบัติ:</p>
+                    <ul class="list-disc pl-5 space-y-2">
+                        <li><strong>ต้องบันทึกภาพและเสียง:</strong> อย่างต่อเนื่องตั้งแต่เริ่มควบคุมตัว จนกว่าจะส่งตัวให้พนักงานสอบสวน</li>
+                        <li><strong>การแจ้งเหตุ (สำคัญมาก):</strong> ต้องแจ้งการควบคุมตัวให้ <strong>"พนักงานอัยการ"</strong> และ <strong>"นายอำเภอ/ฝ่ายปกครอง"</strong> ทันทีในท้องที่ที่มีการจับกุม</li>
+                        <li><strong>กรณีสุดวิสัย:</strong> หากกล้องเสีย แบตหมด หรือเหตุชุลมุน ต้องบันทึกเหตุผลความจำเป็นลงใน "บันทึกการจับกุม" และรายงานผู้บังคับบัญชาทันที</li>
+                    </ul>
+                    <div class="bg-red-50 p-4 border-l-4 border-red-500 rounded text-sm mt-4">
+                        <strong>ข้อควรระวัง:</strong> หากฝ่าฝืนไม่บันทึกภาพและไม่แจ้งอัยการ/ปกครอง การจับกุมนั้นอาจถูกมองว่าเป็นการควบคุมตัวโดยมิชอบ และเจ้าหน้าที่มีความผิดได้
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-800 mb-2">${item.title}</h3>
-                    <p class="text-sm text-blue-600 mb-3">${item.category}</p>
-                    <p class="text-gray-600 text-sm">${item.description}</p>
-                `;
-                
-                card.addEventListener('click', () => openModal(item));
-                grid.appendChild(card);
-            });
+                </div>`
+        },
+        {
+            id: 'v02',
+            title: "อาชญากรรมไซเบอร์ (พ.ร.ก. 2566)",
+            category: "กฎหมายใหม่",
+            icon: "💻",
+            description: "ขั้นตอนการระงับบัญชีม้า ซิมม้า และการแจ้งความออนไลน์",
+            content: `
+                <h3 class="text-2xl font-bold text-indigo-800 mb-4 border-b-2 border-indigo-100 pb-2">พ.ร.ก. มาตรการป้องกันและปราบปรามอาชญากรรมทางเทคโนโลยี</h3>
+                <div class="space-y-4 text-gray-700">
+                    <h4 class="font-bold text-blue-700 text-lg">1. การระงับบัญชีม้า (Bank Freeze)</h4>
+                    <p>ผู้เสียหายสามารถโทรแจ้งธนาคารได้โดยตรง ธนาคารมีหน้าที่ต้องระงับบัญชีไว้ <strong>72 ชั่วโมง</strong> ทันที และให้ผู้เสียหายไปแจ้งความร้องทุกข์ภายในเวลาดังกล่าวเพื่อให้พนักงานสอบสวนออกหมายอายัดต่อ</p>
+                    
+                    <h4 class="font-bold text-blue-700 text-lg mt-4">2. บทลงโทษ "บัญชีม้า / ซิมม้า"</h4>
+                    <ul class="list-disc pl-5 space-y-2">
+                        <li><strong>เปิดบัญชีม้า/ยอมให้ใช้บัญชี:</strong> จำคุกไม่เกิน 3 ปี หรือปรับไม่เกิน 300,000 บาท หรือทั้งจำทั้งปรับ</li>
+                        <li><strong>เป็นธุระจัดหา/โฆษณาซื้อขายบัญชี:</strong> จำคุก 2-5 ปี หรือปรับ 200,000 - 500,000 บาท หรือทั้งจำทั้งปรับ</li>
+                    </ul>
+                    <div class="bg-blue-50 p-4 rounded mt-4 text-sm font-bold">
+                        ช่องทางแจ้งเหตุ: แจ้งความออนไลน์ www.thaipoliceonline.go.th หรือ AOC สายด่วน 1441
+                    </div>
+                </div>`
+        },
+        {
+            id: 'v03',
+            title: "วิเคราะห์และปฏิบัติตามหมายจับ",
+            category: "เทคนิค",
+            icon: "📄",
+            description: "การวิเคราะห์ข้อมูลหมายจับ และยุทธวิธีการเข้าจับกุม",
+            content: `
+                <h3 class="text-2xl font-bold text-indigo-800 mb-4 border-b-2 border-indigo-100 pb-2">การวิเคราะห์หมายจับและการเข้าทำ</h3>
+                <div class="space-y-4 text-gray-700">
+                    <h4 class="font-bold text-blue-700">ข้อมูลที่ต้องเช็คก่อนลงพื้นที่</h4>
+                    <ul class="list-disc pl-5">
+                        <li>ความถูกต้องของหมาย: ชื่อ, สกุล, เลขบัตรปชช, วันที่ออกหมาย, อายุความ</li>
+                        <li>ประเภทคดี: คดีอุกฉกรรจ์ ยาเสพติด หรือคดีทั่วไป (ประเมินการพกพาอาวุธ)</li>
+                        <li>ตรวจสอบรูปพรรณ: รอยสัก ตำหนิ ส่วนสูง ฐานข้อมูล CRIMELINE</li>
+                    </ul>
+                    
+                    <h4 class="font-bold text-blue-700 mt-4">ขั้นตอนการจับกุม (ตามกฎหมายใหม่)</h4>
+                    <ol class="list-decimal pl-5 space-y-1">
+                        <li><strong>เปิดกล้อง Body Cam</strong> บันทึกภาพและเสียง</li>
+                        <li>แสดงตัวเป็นเจ้าพนักงานตำรวจ</li>
+                        <li>แสดงหมายจับให้อ่าน และถามว่าเป็นบุคคลตามหมายหรือไม่</li>
+                        <li>แจ้งข้อกล่าวหา และ <strong>แจ้งสิทธิ (ศิลปะ 5 ข้อ)</strong>
+                            <ul class="list-disc pl-5 text-sm mt-1 mb-1 text-gray-600">
+                                <li>สิทธิที่จะให้การหรือไม่ให้การก็ได้</li>
+                                <li>ถ้อยคำที่ให้การอาจใช้เป็นพยานหลักฐานในศาล</li>
+                                <li>สิทธิพบและปรึกษาทนายความ</li>
+                                <li>สิทธิให้ญาติเข้าร่วมรับฟังการสอบสวน</li>
+                                <li>สิทธิได้รับการรักษาพยาบาล (ถ้ามีอาการป่วย/บาดเจ็บ)</li>
+                            </ul>
+                        </li>
+                        <li>แจ้งพนักงานอัยการและฝ่ายปกครองในท้องที่ทันที</li>
+                        <li>ทำบันทึกการจับกุม</li>
+                    </ol>
+                </div>`
+        },
+        {
+            id: 'v04',
+            title: "ยาเสพติด (กฎหมายใหม่)",
+            category: "ยาเสพติด",
+            icon: "💊",
+            description: "พฤติการณ์ ฐานความผิด โทษ และการสังเกตยาเสพติด",
+            content: `
+                <h3 class="text-2xl font-bold text-indigo-800 mb-4 border-b-2 border-indigo-100 pb-2">ยาเสพติดและการตรวจจับ (ประมวลกม.ยาเสพติด)</h3>
+                <div class="space-y-4 text-gray-700">
+                    <div class="bg-yellow-50 p-4 border-l-4 border-yellow-500 rounded mb-4">
+                        <strong>กฎหมายใหม่เน้น "พฤติการณ์"</strong><br>
+                        * ตามกฎกระทรวงล่าสุด (2567): ครอบครองยาบ้า <strong>ไม่เกิน 1 เม็ด หรือน้ำหนักสุทธิไม่เกิน 100 มิลลิกรัม</strong> ให้สันนิษฐานไว้ก่อนว่า "มีไว้เพื่อเสพ" (หากเกินถือว่ามีไว้เพื่อจำหน่าย)
+                    </div>
+                    
+                    <h4 class="font-bold text-blue-700">ประเภทยาเสพติดที่พบบ่อย</h4>
+                    <ul class="list-disc pl-5 space-y-2">
+                        <li><strong>ยาบ้า (Methamphetamine):</strong> เม็ดกลมสีส้ม/เขียว มีอักษร WY, 99 อาการ: ตาโต ตื่นตัว พูดเร็ว ไม่หลับ</li>
+                        <li><strong>ยาไอซ์ (Crystal Meth):</strong> ผลึกใสคล้ายน้ำแข็ง อาการ: ตื่นเต้นรุนแรง หลอน หวาดระแวง</li>
+                        <li><strong>เฮโรอีน (Heroin):</strong> ผงสีขาว/น้ำตาลเข้ม อาการ: ง่วง ม่านตาหดเล็ก ไม่ค่อยตอบสนอง</li>
+                        <li><strong>ยาอี (Ecstasy):</strong> เม็ดกลมมีลวดลาย อาการ: กรามค้าง ม่านตาโต เต้นไม่หยุด</li>
+                    </ul>
+
+                    <h4 class="font-bold text-blue-700 mt-4">ของกลางที่พบบ่อย (อุปกรณ์)</h4>
+                    <p>หลอดแก้ว ไปป์แก้ว, กระดาษฟอยล์ ไฟแช็กดัดแปลง, ถุงซิปขนาดเล็ก (ใบแอปเปิ้ล), ตาชั่งดิจิทัล</p>
+                </div>`
+        },
+        {
+            id: 'v05',
+            title: "ประเภทรถยนต์และการตรวจสอบ",
+            category: "ยานพาหนะ",
+            icon: "🚗",
+            description: "ประเภทป้ายทะเบียน และการสังเกตรถสวมทะเบียน",
+            content: `
+                <h3 class="text-2xl font-bold text-indigo-800 mb-4 border-b-2 border-indigo-100 pb-2">ยานพาหนะและการสวมทะเบียน</h3>
+                <div class="space-y-4 text-gray-700">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div class="border p-4 rounded bg-gray-50">
+                            <h4 class="font-bold text-blue-700 mb-2">ประเภทป้ายทะเบียน</h4>
+                            <ul class="text-sm space-y-2">
+                                <li><strong>ขาว-ดำ:</strong> นั่งส่วนบุคคลไม่เกิน 7 คน (เก๋ง)</li>
+                                <li><strong>ขาว-น้ำเงิน:</strong> นั่งส่วนบุคคลเกิน 7 คน (ตู้)</li>
+                                <li><strong>ขาว-เขียว:</strong> บรรทุกส่วนบุคคล (กระบะ)</li>
+                                <li><strong>เหลือง-ดำ:</strong> รับจ้าง (แท็กซี่, รถบรรทุกสาธารณะ)</li>
+                                <li><strong>แดง-ดำ:</strong> ป้ายแดง (รถใหม่/ใช้ชั่วคราว)</li>
+                            </ul>
+                        </div>
+                        <div class="border p-4 rounded bg-gray-50">
+                            <h4 class="font-bold text-blue-700 mb-2">จุดสังเกตรถสวมทะเบียน/รถขโมย</h4>
+                            <ul class="text-sm space-y-2">
+                                <li><strong>ป้ายเสียภาษี (วงกลม):</strong> ทะเบียนและจังหวัดไม่ตรงกับป้ายเหล็ก</li>
+                                <li><strong>ตรา ขส.:</strong> ป้ายปลอมมักไม่มีตัวนูนอักษร "ขส" มุมล่างขวา (หรือลายน้ำ)</li>
+                                <li><strong>เลขตัวถัง (VIN/Chassis):</strong> มีรอยเจียร ลบ เชื่อมใหม่ หรือพ่นสีทับ</li>
+                                <li><strong>ร่องรอยงัดแงะ:</strong> เบ้ากุญแจประตู, สวิตช์กุญแจสตาร์ท</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>`
+        },
+        {
+            id: 'v06',
+            title: "ประเภทวีซ่า และข้อกฎหมาย",
+            category: "คนต่างด้าว",
+            icon: "🛂",
+            description: "ประเภท VISA, การรายงานตัว 90 วัน และ พ.ร.บ.คนเข้าเมือง",
+            content: `
+                <h3 class="text-2xl font-bold text-indigo-800 mb-4 border-b-2 border-indigo-100 pb-2">ความรู้คนต่างด้าว (วีซ่า)</h3>
+                <div class="space-y-4 text-gray-700">
+                    <h4 class="font-bold text-blue-700">ประเภทวีซ่าที่พบบ่อย</h4>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong>Tourist (TR):</strong> ท่องเที่ยว อยู่ได้ 60 วัน (ห้ามทำงานเด็ดขาด)</li>
+                        <li><strong>Non-Immigrant (B):</strong> ธุรกิจ/ทำงาน ต้องมี Work Permit ควบคู่</li>
+                        <li><strong>Non-Immigrant (ED):</strong> ศึกษา/เรียนภาษา (มักใช้เป็นข้ออ้างเพื่ออยู่ยาว)</li>
+                        <li><strong>Non-Immigrant (O):</strong> ครอบครัวไทย/เกษียณอายุ (ห้ามทำงาน)</li>
+                    </ul>
+
+                    <h4 class="font-bold text-blue-700 mt-4">กฎหมายสำคัญตาม พ.ร.บ.คนเข้าเมือง</h4>
+                    <ul class="list-disc pl-5 space-y-2">
+                        <li><strong>ม.37 (รายงานตัว 90 วัน):</strong> ต่างด้าวที่อยู่เกิน 90 วัน ต้องรายงานตัวต่อ ตม.</li>
+                        <li><strong>ม.38 (การแจ้งที่พัก):</strong> เจ้าบ้าน/ผู้จัดการโรงแรม ที่รับต่างด้าวเข้าพัก ต้องแจ้ง ตม. ภายใน 24 ชม. (มีผลจับปรับเจ้าของบ้านพักบ่อยครั้ง)</li>
+                        <li><strong>Overstay:</strong> อยู่เกินกำหนดอนุญาต
+                            <ul class="list-circle pl-5 text-sm mt-1">
+                                <li>ถูกจับกุม: อยู่เกิน 1 วัน ห้ามเข้าประเทศ 5 ปี / เกิน 1 ปี ห้ามเข้า 10 ปี</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>`
+        },
+        {
+            id: 'v07',
+            title: "อาชีพสงวนที่ต่างด้าวห้ามทำ",
+            category: "คนต่างด้าว",
+            icon: "🚫",
+            description: "บัญชีอาชีพสงวนสำหรับคนไทย (พ.ร.ก.การบริหารจัดการการทำงานของคนต่างด้าว)",
+            content: `
+                <h3 class="text-2xl font-bold text-indigo-800 mb-4 border-b-2 border-indigo-100 pb-2">อาชีพที่คนต่างด้าวห้ามทำเด็ดขาด</h3>
+                <div class="space-y-4 text-gray-700">
+                    <p>ตาม พ.ร.ก.การบริหารจัดการการทำงานของคนต่างด้าว มีงานที่สงวนไว้สำหรับคนไทย (ห้ามต่างด้าวทำโดยเด็ดขาด 27 อาชีพ) อาชีพที่พบบ่อยในการจับกุม ได้แก่:</p>
+                    <ul class="list-disc pl-5 space-y-2 bg-gray-50 p-4 rounded">
+                        <li><strong>เร่ขายสินค้า</strong> (ขายไอศกรีม, ลูกชิ้นปิ้ง, ขายของตามตลาดนัด)</li>
+                        <li><strong>ตัดผม ดัดผม หรือเสริมสวย</strong></li>
+                        <li><strong>ขับขี่ยานพาหนะ</strong> (ขับวินมอเตอร์ไซค์, แท็กซี่, ขับรถตู้โดยสาร) ยกเว้นขับเครื่องบินในประเทศ</li>
+                        <li><strong>มัคคุเทศก์ หรือจัดนำเที่ยว</strong></li>
+                        <li><strong>งานนวดแผนไทย</strong></li>
+                        <li><strong>พนักงานรักษาความปลอดภัย (รปภ.)</strong></li>
+                    </ul>
+                    
+                    <h4 class="font-bold text-red-600 mt-4">บทลงโทษ</h4>
+                    <ul class="list-disc pl-5">
+                        <li><strong>ต่างด้าวทำงานไม่มีใบอนุญาต/ผิดประเภท:</strong> ปรับ 5,000 - 50,000 บาท และผลักดันส่งกลับ</li>
+                        <li><strong>นายจ้างรับต่างด้าวไม่มีใบอนุญาต/ผิดประเภท:</strong> ปรับ 10,000 - 100,000 บาท ต่อต่างด้าว 1 คน (หากทำผิดซ้ำ จำคุกไม่เกิน 1 ปี)</li>
+                    </ul>
+                </div>`
+        },
+        {
+            id: 'v08',
+            title: "การปฐมพยาบาลทางยุทธวิธี",
+            category: "ยุทธวิธี",
+            icon: "⚕️",
+            description: "หลัก TCCC, การดูแลภายใต้การยิง (Care Under Fire) และ MARCH",
+            content: `
+                <h3 class="text-2xl font-bold text-indigo-800 mb-4 border-b-2 border-indigo-100 pb-2">การปฐมพยาบาลทางยุทธวิธี (TCCC)</h3>
+                <div class="space-y-4 text-gray-700">
+                    <h4 class="font-bold text-blue-700">3 ระยะของการดูแลผู้บาดเจ็บทางยุทธวิธี</h4>
+                    <ol class="list-decimal pl-5 space-y-2">
+                        <li><strong>Care Under Fire (ภายใต้การยิง):</strong> ความปลอดภัยของทีมสำคัญสุด ยิงกดดันศัตรู แนะนำให้ผู้บาดเจ็บคลานเข้าที่กำบังด้วยตนเอง หากมีเลือดออกตกยางออกรุนแรง ให้ใช้ Tourniquet (สายรัดห้ามเลือด) รัดเหนือแผลทันทีผ่านเสื้อผ้า</li>
+                        <li><strong>Tactical Field Care (เมื่อปลอดภัย/ในที่กำบัง):</strong> ประเมินตามหลัก MARCH</li>
+                        <li><strong>Tactical Evacuation Care (การเคลื่อนย้าย):</strong> เตรียมส่งต่อแพทย์</li>
+                    </ol>
+
+                    <h4 class="font-bold text-blue-700 mt-4">หลัก MARCH</h4>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong>M - Massive Hemorrhage:</strong> ห้ามเลือดรุนแรง (รัด Tourniquet / อุดแผลด้วยผ้าก๊อซห้ามเลือด)</li>
+                        <li><strong>A - Airway:</strong> เปิดทางเดินหายใจ (เชิดคาง / ใส่หลอด NPA)</li>
+                        <li><strong>R - Respiration:</strong> จัดการบาดแผลที่ทรวงอก (แปะ Chest Seal)</li>
+                        <li><strong>C - Circulation:</strong> เช็คชีพจร ป้องกันช็อก</li>
+                        <li><strong>H - Hypothermia/Head:</strong> ป้องกันภาวะอุณหภูมิตก (ห่มผ้า) และประเมินการบาดเจ็บที่ศีรษะ</li>
+                    </ul>
+                </div>`
+        },
+        {
+            id: 'v09',
+            title: "วิธีสังเกตพฤติกรรมน่าสงสัย",
+            category: "เทคนิค",
+            icon: "👀",
+            description: "ภาษากาย, การหลบเลี่ยง และพฤติกรรมของอาชญากร",
+            content: `
+                <h3 class="text-2xl font-bold text-indigo-800 mb-4 border-b-2 border-indigo-100 pb-2">การสังเกตพฤติกรรมและภาษากาย</h3>
+                <div class="space-y-4 text-gray-700">
+                    <h4 class="font-bold text-blue-700">สัญญาณทางกายภาพ (Body Language)</h4>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong>สายตา:</strong> หลบสายตาเจ้าหน้าที่, มองซ้ายขวาเลิ่กลั่ก (สแกนหาทางหนี), มองจ้องที่จุดใดจุดหนึ่งผิดปกติ (เช่น เล็งกระเป๋าเหยื่อ)</li>
+                        <li><strong>มือและแขน:</strong> ล้วงกระเป๋าแน่น (กำของผิดกฎหมาย/อาวุธ), แขนแนบลำตัวแข็งเกร็ง, เหงื่อออกตามฝ่ามือ</li>
+                        <li><strong>การเดิน:</strong> เปลี่ยนทิศทางกะทันหันเมื่อเห็นด่านหรือตำรวจ, เดินวนเวียนบริเวณเดิมซ้ำๆ</li>
+                    </ul>
+
+                    <h4 class="font-bold text-blue-700 mt-4">ลักษณะของนักค้ายา / ผู้พกพาอาวุธ</h4>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong>ผู้พกอาวุธปืน:</strong> มักเอามือแตะ/เช็คตำแหน่งที่ซ่อนปืนบ่อยๆ (Security Feel), เดินไหล่ตกข้างหนึ่ง (น้ำหนักปืน), ใส่เสื้อแจ็คเก็ตหนาในวันที่อากาศร้อน</li>
+                        <li><strong>นักค้ายา:</strong> ใช้การพยักหน้าหรือส่งสายตาแทนการชี้มือ, ทำการแลกเปลี่ยนของอย่างรวดเร็ว (Hand to hand), นัดพบในจุดอับสายตา CCTV</li>
+                    </ul>
+                </div>`
+        },
+        {
+            id: 'v10',
+            title: "เงินกู้นอกระบบ",
+            category: "อาชญากรรม",
+            icon: "💰",
+            description: "อัตราดอกเบี้ยผิดกฎหมาย, พ.ร.บ.ทวงถามหนี้",
+            content: `
+                <h3 class="text-2xl font-bold text-indigo-800 mb-4 border-b-2 border-indigo-100 pb-2">เงินกู้นอกระบบ และการทวงหนี้</h3>
+                <div class="space-y-4 text-gray-700">
+                    <h4 class="font-bold text-blue-700">อัตราดอกเบี้ยตามกฎหมาย (ประมวลกฎหมายแพ่งและพาณิชย์)</h4>
+                    <p>ห้ามคิดดอกเบี้ยเกิน <strong>ร้อยละ 15 ต่อปี (1.25% ต่อเดือน)</strong> หากเกินกว่านี้ถือว่าผิดกฎหมายฐาน "เรียกดอกเบี้ยเกินอัตรา"</p>
+
+                    <h4 class="font-bold text-blue-700 mt-4">พ.ร.บ.การทวงถามหนี้ พ.ศ. 2558 (ข้อห้ามสำคัญ)</h4>
+                    <ul class="list-disc pl-5 space-y-2">
+                        <li><strong>ห้ามข่มขู่/ใช้ความรุนแรง:</strong> ทำร้ายร่างกาย, ทำลายทรัพย์สิน (ปาขวด, สาดสี)</li>
+                        <li><strong>ห้ามประจาน:</strong> การทวงหนี้ผ่านบุคคลที่สามที่ไม่ใช่ญาติ, การโพสต์ประจานลง Social Media</li>
+                        <li><strong>เวลาทวงถาม:</strong> จันทร์-ศุกร์ (08.00-20.00 น.) / วันหยุดราชการ (08.00-18.00 น.)</li>
+                        <li><strong>ความถี่:</strong> ทวงถามได้ไม่เกิน 1 ครั้งต่อวัน</li>
+                    </ul>
+                    
+                    <h4 class="font-bold text-blue-700 mt-4">การเก็บหลักฐาน</h4>
+                    <p>แชทสนทนา, สลิปโอนเงินรายวัน, คลิปเสียง/วิดีโอตอนถูกข่มขู่, ภาพถ่ายทรัพย์สินที่ถูกทำลาย, นามบัตร/ใบปลิวเงินกู้</p>
+                </div>`
+        },
+        {
+            id: 'v11',
+            title: "รับซื้อของเก่า/ของขโมย",
+            category: "อาชญากรรม",
+            icon: "♻️",
+            description: "พ.ร.บ.ควบคุมการขายทอดตลาดฯ และข้อหารับของโจร",
+            content: `
+                <h3 class="text-2xl font-bold text-indigo-800 mb-4 border-b-2 border-indigo-100 pb-2">ร้านรับซื้อของเก่า / ข้อหารับของโจร</h3>
+                <div class="space-y-4 text-gray-700">
+                    <h4 class="font-bold text-blue-700">สิ่งที่ร้านรับซื้อของเก่า "ต้องทำ" ตามกฎหมาย</h4>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li>ต้องมีใบอนุญาตประกอบกิจการร้านรับซื้อของเก่า</li>
+                        <li><strong>ต้องจดบันทึกบัญชีลงสมุด:</strong> รายการสิ่งของ, วันเวลา, และขอสำเนาบัตรประชาชนผู้ขายทุกครั้ง</li>
+                        <li>หากสงสัยว่าเป็นของโจรกรรม (เช่น สายทองแดงลอกฉนวน, ฝาท่อ, มิเตอร์น้ำ) ต้องอายัดและแจ้งตำรวจ</li>
+                    </ul>
+
+                    <h4 class="font-bold text-red-600 mt-4">ความผิดฐาน "รับของโจร" (ม.357)</h4>
+                    <p>ผู้ใดช่วยซ่อนเร้น ช่วยจำหน่าย ช่วยพาเอาไปเสีย ซื้อ รับจำนำ หรือรับไว้ประการใดซึ่งทรัพย์อันได้มาโดยการกระทำความผิด (เช่น ลักทรัพย์, วิ่งราว, ชิงทรัพย์) ผิดฐานรับของโจร</p>
+                    <ul class="list-disc pl-5 text-sm mt-2">
+                        <li><strong>ข้อสังเกตเจตนา:</strong> ซื้อในราคาที่ถูกกว่าท้องตลาดมาก, ซื้อในเวลากลางคืน/สถานที่ลับตา, ผู้ขายมีพิรุธและไม่มีเอกสารแสดงความเป็นเจ้าของ</li>
+                    </ul>
+                </div>`
+        },
+        {
+            id: 'v12',
+            title: "หลักการสืบสวน",
+            category: "พื้นฐาน",
+            icon: "🔍",
+            description: "วงจรการสืบสวน, รวบรวมข้อมูล และการตัดประเด็น",
+            content: `
+                <h3 class="text-2xl font-bold text-indigo-800 mb-4 border-b-2 border-indigo-100 pb-2">หลักการสืบสวน (Investigation Principles)</h3>
+                <div class="space-y-4 text-gray-700">
+                    <h4 class="font-bold text-blue-700">วงจรการสืบสวน (Investigation Cycle)</h4>
+                    <ol class="list-decimal pl-5 space-y-2">
+                        <li><strong>รับแจ้งเหตุ/เข้าสถานที่เกิดเหตุ:</strong> รักษาที่เกิดเหตุ (Crime Scene Preservation) ห้ามบุคคลไม่เกี่ยวข้องเข้าเด็ดขาด</li>
+                        <li><strong>รวบรวมข้อมูล:</strong> กล้องวงจรปิด (ไล่กล้อง), พยานบุคคล, ข้อมูลทางโทรศัพท์ (CDR)</li>
+                        <li><strong>ตั้งสมมติฐาน (Hypothesis):</strong> ใคร ทำอะไร ที่ไหน อย่างไร ทำไม (มูลเหตุจูงใจ)</li>
+                        <li><strong>พิสูจน์ทราบ/ตัดประเด็น:</strong> ตรวจสอบ Alibi (ถิ่นที่อยู่ขณะเกิดเหตุ) ของผู้ต้องสงสัย</li>
+                        <li><strong>จับกุม/ตรวจค้น:</strong> ปฏิบัติตามยุทธวิธีและข้อกฎหมาย (พ.ร.บ.อุ้มหาย)</li>
+                    </ol>
+                    
+                    <h4 class="font-bold text-blue-700 mt-4">สามเหลี่ยมอาชญากรรม (Crime Triangle)</h4>
+                    <p>อาชญากรรมจะเกิดได้เมื่อมี 3 องค์ประกอบครบ: 1) อาชญากรมีเจตนา 2) เหยื่อ/เป้าหมายที่เหมาะสม 3) โอกาส/ช่องโหว่ (ไม่มีคนเฝ้า, ที่เปลี่ยว)</p>
+                </div>`
+        },
+        {
+            id: 'v13',
+            title: "การเก็บพยานหลักฐาน",
+            category: "เทคนิค",
+            icon: "🔬",
+            description: "การรักษาสถานที่เกิดเหตุ และ Chain of Custody",
+            content: `
+                <h3 class="text-2xl font-bold text-indigo-800 mb-4 border-b-2 border-indigo-100 pb-2">การเก็บและรักษาพยานหลักฐาน</h3>
+                <div class="space-y-4 text-gray-700">
+                    <h4 class="font-bold text-blue-700">การรักษาสถานที่เกิดเหตุ (First Responder)</h4>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li>ช่วยชีวิตผู้บาดเจ็บก่อนเสมอ (ระวังการเหยียบย่ำหลักฐาน)</li>
+                        <li>กั้นแนว (Police Line) แบ่งโซนชัดเจน (ชั้นใน, ชั้นนอก)</li>
+                        <li>จดบันทึกว่าใครเข้า-ออกที่เกิดเหตุบ้าง และเปลี่ยนแปลงอะไรไปบ้าง (เช่น เปิดไฟ, ขยับศพ)</li>
+                    </ul>
+
+                    <h4 class="font-bold text-blue-700 mt-4">Chain of Custody (ห่วงโซ่การครอบครองวัตถุพยาน)</h4>
+                    <p>พยานหลักฐานจะต้องมีความน่าเชื่อถือในชั้นศาล ต้องตอบได้ว่า:</p>
+                    <ul class="list-decimal pl-5">
+                        <li>ใครเป็นผู้เก็บ? (ใส่ถุงมือ ถ่ายภาพก่อนเก็บ)</li>
+                        <li>เก็บเมื่อไหร่ อย่างไร? (ซีลปากถุง เซ็นกำกับ)</li>
+                        <li>ใครครอบครองต่อ? (การส่งตรวจพิสูจน์หลักฐาน)</li>
+                    </ul>
+                    <p class="text-sm text-red-600 mt-2">*หากห่วงโซ่ขาด ศาลอาจยกประโยชน์ความสงสัยให้จำเลย</p>
+                </div>`
+        },
+        {
+            id: 'v14',
+            title: "เทคนิคการสอบปากคำ",
+            category: "เทคนิค",
+            icon: "🗣️",
+            description: "การสัมภาษณ์พยาน และการสอบปากคำผู้ต้องสงสัย (Interrogation)",
+            content: `
+                <h3 class="text-2xl font-bold text-indigo-800 mb-4 border-b-2 border-indigo-100 pb-2">เทคนิคการซักถามและสอบปากคำ</h3>
+                <div class="space-y-4 text-gray-700">
+                    <h4 class="font-bold text-blue-700">1. การซักถามพยาน/ผู้เสียหาย (Interview)</h4>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong>เปิดให้เล่าอิสระ (Free Recall):</strong> ให้พยานเล่าเรื่องตั้งแต่ต้นจนจบโดยไม่แทรก</li>
+                        <li><strong>ใช้คำถามปลายเปิด (Open-ended):</strong> "เกิดอะไรขึ้น?", "เล่าลักษณะคนร้ายให้ฟังหน่อย"</li>
+                        <li><strong>ห้ามนำพยาน (No Leading Questions):</strong> ห้ามถามชี้นำ เช่น "คนร้ายใส่เสื้อแดงใช่ไหม?" ให้เปลี่ยนเป็น "คนร้ายใส่เสื้อสีอะไร?"</li>
+                    </ul>
+
+                    <h4 class="font-bold text-blue-700 mt-4">2. การสอบปากคำผู้ต้องสงสัย (Interrogation)</h4>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li>เตรียมพยานหลักฐาน (ไพ่ตาย) ไว้ในมือให้พร้อมก่อนเริ่มสอบ</li>
+                        <li>สร้าง Rapport (ความคุ้นเคย) ถามเรื่องทั่วไปก่อนเพื่อดูพฤติกรรมฐาน (Baseline Behavior) ตอนพูดความจริง</li>
+                        <li>ใช้เทคนิค Good Cop / Bad Cop (การสลับบทบาท)</li>
+                        <li>จับพิรุธ: การตอบคำถามด้วยคำถาม, เล่ารายละเอียดแม่นเกินไป (ท่องมา), ปิดป้องร่างกาย</li>
+                    </ul>
+                </div>`
+        },
+        {
+            id: 'v15',
+            title: "กฎหมายที่เกี่ยวข้อง (ป.วิ.อาญา)",
+            category: "กฎหมาย",
+            icon: "⚖️",
+            description: "อำนาจจับ ค้น และยึด ตาม ป.วิ.อาญา",
+            content: `
+                <h3 class="text-2xl font-bold text-indigo-800 mb-4 border-b-2 border-indigo-100 pb-2">ประมวลกฎหมายวิธีพิจารณาความอาญา (ป.วิ.อ.)</h3>
+                <div class="space-y-4 text-gray-700">
+                    <h4 class="font-bold text-blue-700">การจับกุม (ม.78)</h4>
+                    <p>พนักงานฝ่ายปกครองหรือตำรวจจะจับผู้ใดโดยไม่มีหมายจับไม่ได้ <strong>เว้นแต่:</strong></p>
+                    <ul class="list-disc pl-5">
+                        <li>1. เป็นความผิดซึ่งหน้า</li>
+                        <li>2. พบผู้ต้องสงสัยมีพฤติการณ์อันควรสงสัย (พกเครื่องมือจะไปก่อเหตุ/ของโจร)</li>
+                        <li>3. มีเหตุออกหมายจับได้ แต่มีความจำเป็นเร่งด่วนนำหมายไม่ทัน (จะหลบหนี)</li>
+                    </ul>
+
+                    <h4 class="font-bold text-blue-700 mt-4">การตรวจค้น (ม.92) ห้ามค้นในที่รโหฐานโดยไม่มีหมายค้น เว้นแต่:</h4>
+                    <ul class="list-disc pl-5">
+                        <li>มีเสียงร้องให้ช่วยจากข้างใน</li>
+                        <li>มีผู้กระทำผิดซึ่งหน้าหนีเข้าไปซ่อนตัว</li>
+                        <li>มีพยานหลักฐานสิ่งของผิดกฎหมายซ่อนอยู่ และหากรอหมายค้น สิ่งของนั้นจะถูกทำลาย/โยกย้าย (ต้องมีผู้บังคับบัญชาชั้นผู้ใหญ่/สว.ขึ้นไปเป็นผู้นำค้น)</li>
+                    </ul>
+                </div>`
+        },
+        {
+            id: 'v16',
+            title: "เทคโนโลยีในการสืบสวน",
+            category: "เทคโนโลยี",
+            icon: "📱",
+            description: "Digital Forensics, การไล่กล้อง CCTV และ CDR",
+            content: `
+                <h3 class="text-2xl font-bold text-indigo-800 mb-4 border-b-2 border-indigo-100 pb-2">เทคโนโลยีช่วยงานสืบสวน</h3>
+                <div class="space-y-4 text-gray-700">
+                    <h4 class="font-bold text-blue-700">1. การวิเคราะห์ข้อมูลการใช้โทรศัพท์ (CDR)</h4>
+                    <p>Call Detail Record ประวัติการโทร, ตำแหน่งเสาสัญญาณ (Cell Site) เพื่อยืนยันว่าผู้ต้องสงสัยอยู่ที่ไหนในช่วงเวลาเกิดเหตุ (Alibi) และติดต่อกับใคร (หาเครือข่าย)</p>
+
+                    <h4 class="font-bold text-blue-700 mt-4">2. การสืบสวนวงจรปิด (CCTV Tracking)</h4>
+                    <ul class="list-disc pl-5">
+                        <li>ไล่ตามเวลาจริง (Real-time) และย้อนหลัง</li>
+                        <li><strong>จุดที่ต้องโฟกัส:</strong> เส้นทางมาก่อเหตุ (Approach), จุดเกิดเหตุ (Scene), และเส้นทางหลบหนี (Escape Route) ทิ้งรถ/เปลี่ยนเสื้อผ้า</li>
+                    </ul>
+
+                    <h4 class="font-bold text-blue-700 mt-4">3. OSINT (Open-Source Intelligence)</h4>
+                    <p>การสืบข้อมูลจากสื่อสาธารณะ: เช็คหน้าโปรไฟล์ Facebook, TikTok, IG ของเป้าหมาย ดูรายชื่อเพื่อน รูปถ่ายสถานที่เช็คอิน เพื่อนำมาวิเคราะห์ความสัมพันธ์เบื้องต้น</p>
+                </div>`
+        },
+        {
+            id: 'v17',
+            title: "จิตวิทยาอาชญากรรม",
+            category: "จิตวิทยา",
+            icon: "🧠",
+            description: "Modus Operandi (MO) แผนประทุษกรรม และการทำโปรไฟล์",
+            content: `
+                <h3 class="text-2xl font-bold text-indigo-800 mb-4 border-b-2 border-indigo-100 pb-2">จิตวิทยาและการทำโปรไฟล์อาชญากร</h3>
+                <div class="space-y-4 text-gray-700">
+                    <h4 class="font-bold text-blue-700">Modus Operandi (M.O. - แผนประทุษกรรม)</h4>
+                    <p>วิธีการที่คนร้ายใช้ในการก่อเหตุให้สำเร็จ (M.O. สามารถเปลี่ยนและพัฒนาได้ตามประสบการณ์) เช่น การงัดประตูหน้าต่างแบบเดิม, การใช้เครื่องมือเฉพาะ, หรือการใช้คำพูดเดิมๆ กับเหยื่อ</p>
+
+                    <h4 class="font-bold text-blue-700 mt-4">ลายเซ็นอาชญากร (Signature)</h4>
+                    <p>สิ่งที่ไม่จำเป็นต้องทำเพื่อบรรลุผล แต่คนร้ายทำเพื่อสนองความต้องการทางจิตใจ (ไม่ค่อยเปลี่ยน) เช่น การจัดท่าศพ, การขโมยของที่ระลึกจากเหยื่อ, การผูกเงื่อนเชือกเฉพาะตัว</p>
+
+                    <h4 class="font-bold text-blue-700 mt-4">ประเภทอาชญากรเบื้องต้น</h4>
+                    <ul class="list-disc pl-5">
+                        <li><strong>แบบมีการวางแผน (Organized):</strong> ฉลาด เตรียมตัวมาดี เลือกเหยื่อล่วงหน้า ซ่อนหลักฐาน เก็บกวาดที่เกิดเหตุ (สืบยาก)</li>
+                        <li><strong>แบบไม่มีการวางแผน (Disorganized):</strong> มักก่อเหตุจากอารมณ์ชั่ววูบ ใช้ของใกล้มือเป็นอาวุธ ทิ้งหลักฐานเกลื่อนกลาด</li>
+                    </ul>
+                </div>`
+        }
+    ];
+
+    function renderCards(data) {
+        const grid = document.getElementById('knowledgeGrid');
+        const count = document.getElementById('resultCount');
+        
+        count.textContent = data.length;
+        
+        if(data.length === 0) {
+            grid.innerHTML = `<div class="col-span-full text-center py-10 text-gray-400">ไม่พบข้อมูลที่ค้นหา</div>`;
+            return;
         }
 
-        function openModal(item) {
+        grid.innerHTML = data.map(item => `
+            <div onclick="openModal('${item.id}')" class="knowledge-card bg-white p-6 rounded-2xl shadow-sm cursor-pointer relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <span class="text-6xl">${item.icon}</span>
+                </div>
+                <div class="text-3xl mb-4 relative z-10">${item.icon}</div>
+                <div class="text-xs font-bold text-blue-600 bg-blue-50 inline-block px-2 py-1 rounded mb-2 relative z-10">${item.category}</div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2 relative z-10 line-clamp-2">${item.title}</h3>
+                <p class="text-gray-500 text-sm relative z-10 line-clamp-3">${item.description}</p>
+            </div>
+        `).join('');
+    }
+
+    function openModal(id) {
+        const item = knowledgeData.find(i => i.id === id);
+        if (item) {
+            document.getElementById('modalBody').innerHTML = item.content;
             const modal = document.getElementById('knowledgeModal');
-            const modalTitle = document.getElementById('modalTitle');
-            const modalContent = document.getElementById('modalContent');
-            
-            modalTitle.textContent = item.title;
-            modalContent.innerHTML = item.content;
             modal.classList.add('active');
+            
+            // Animation for modal content
+            const content = modal.querySelector('.modal-content');
+            content.style.transform = 'scale(0.95)';
+            content.style.opacity = '0';
+            setTimeout(() => {
+                content.style.transition = 'all 0.2s ease-out';
+                content.style.transform = 'scale(1)';
+                content.style.opacity = '1';
+            }, 10);
+            
+            document.body.style.overflow = 'hidden';
         }
+    }
 
-        function closeModal() {
-            const modal = document.getElementById('knowledgeModal');
+    function closeModal() {
+        const modal = document.getElementById('knowledgeModal');
+        const content = modal.querySelector('.modal-content');
+        
+        content.style.transform = 'scale(0.95)';
+        content.style.opacity = '0';
+        
+        setTimeout(() => {
             modal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+            content.style.transition = ''; // reset
+        }, 200);
+    }
+
+    // Search logic
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase().trim();
+        const filtered = knowledgeData.filter(i => 
+            i.title.toLowerCase().includes(term) || 
+            i.category.toLowerCase().includes(term) ||
+            i.description.toLowerCase().includes(term) ||
+            i.content.toLowerCase().includes(term)
+        );
+        renderCards(filtered);
+    });
+
+    // Close Modals events
+    document.getElementById('closeModal').onclick = closeModal;
+    window.onclick = (e) => {
+        if (e.target.id === 'knowledgeModal') closeModal();
+    };
+    
+    // Close on Escape key
+    document.addEventListener('keydown', (e) => {
+        if(e.key === 'Escape' && document.getElementById('knowledgeModal').classList.contains('active')) {
+            closeModal();
         }
+    });
 
-        function filterKnowledge(searchTerm) {
-            if (!searchTerm.trim()) {
-                filteredData = [...knowledgeData];
-            } else {
-                filteredData = knowledgeData.filter(item => 
-                    item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    item.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    item.content.toLowerCase().includes(searchTerm.toLowerCase())
-                );
-            }
-            renderKnowledgeGrid();
-        }
-
-        // Event Listeners
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            filterKnowledge(e.target.value);
-        });
-
-        document.getElementById('closeModal').addEventListener('click', closeModal);
-
-        document.getElementById('knowledgeModal').addEventListener('click', (e) => {
-            if (e.target.id === 'knowledgeModal') {
-                closeModal();
-            }
-        });
-
-        // Element SDK Implementation
-        async function onConfigChange(newConfig) {
-            config = { ...config, ...newConfig };
-            
-            // Update UI elements
-            document.getElementById('main-title').textContent = config.main_title || defaultConfig.main_title;
-            document.getElementById('subtitle').textContent = config.subtitle || defaultConfig.subtitle;
-            document.getElementById('searchInput').placeholder = config.search_placeholder || defaultConfig.search_placeholder;
-            
-            // Update colors
-            document.body.style.background = `linear-gradient(to bottom right, ${config.background_color || defaultConfig.background_color}, ${config.accent_color || defaultConfig.accent_color}20)`;
-            
-            // Update card colors
-            const cards = document.querySelectorAll('.knowledge-card');
-            cards.forEach(card => {
-                card.style.backgroundColor = config.surface_color || defaultConfig.surface_color;
-                card.style.color = config.text_color || defaultConfig.text_color;
-            });
-        }
-
-        function mapToCapabilities(config) {
-            return {
-                recolorables: [
-                    {
-                        get: () => config.primary_color || defaultConfig.primary_color,
-                        set: (value) => {
-                            config.primary_color = value;
-                            window.elementSdk.setConfig({ primary_color: value });
-                        }
-                    },
-                    {
-                        get: () => config.surface_color || defaultConfig.surface_color,
-                        set: (value) => {
-                            config.surface_color = value;
-                            window.elementSdk.setConfig({ surface_color: value });
-                        }
-                    },
-                    {
-                        get: () => config.text_color || defaultConfig.text_color,
-                        set: (value) => {
-                            config.text_color = value;
-                            window.elementSdk.setConfig({ text_color: value });
-                        }
-                    },
-                    {
-                        get: () => config.accent_color || defaultConfig.accent_color,
-                        set: (value) => {
-                            config.accent_color = value;
-                            window.elementSdk.setConfig({ accent_color: value });
-                        }
-                    },
-                    {
-                        get: () => config.background_color || defaultConfig.background_color,
-                        set: (value) => {
-                            config.background_color = value;
-                            window.elementSdk.setConfig({ background_color: value });
-                        }
-                    }
-                ],
-                borderables: [],
-                fontEditable: undefined,
-                fontSizeable: undefined
-            };
-        }
-
-        function mapToEditPanelValues(config) {
-            return new Map([
-                ["main_title", config.main_title || defaultConfig.main_title],
-                ["subtitle", config.subtitle || defaultConfig.subtitle],
-                ["search_placeholder", config.search_placeholder || defaultConfig.search_placeholder]
-            ]);
-        }
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            renderKnowledgeGrid();
-            
-            if (window.elementSdk) {
-                window.elementSdk.init({
-                    defaultConfig,
-                    onConfigChange,
-                    mapToCapabilities,
-                    mapToEditPanelValues
-                });
-            }
-        });
-    </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b57e5d6257c8e41',t:'MTc2Njk5NjYzMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+    // Initial render
+    renderCards(knowledgeData);
+</script>
+</body>
 </html>

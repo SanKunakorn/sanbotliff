@@ -1,249 +1,24 @@
 <!DOCTYPE html>
 <html lang="th" class="h-full">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>CCTV Time Calculator & Detective Tools</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="/_sdk/element_sdk.js"></script>
-  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <style>
-    * { font-family: 'Prompt', sans-serif; }
-    .mono { font-family: 'JetBrains Mono', monospace; }
-    
-    html, body {
-      height: 100%;
-      margin: 0;
-      background: linear-gradient(135deg, #0a0e14 0%, #1a1f2e 50%, #0f172a 100%);
-      color: #e2e8f0;
-    }
-    
-    .app-wrapper {
-      height: 100%;
-      width: 100%;
-      overflow-y: auto;
-      background: inherit;
-    }
-    
-    .glass-card {
-      background: rgba(26, 31, 46, 0.8);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(59, 130, 246, 0.2);
-    }
-    
-    .input-field {
-      background: rgba(15, 23, 42, 0.8);
-      border: 1px solid rgba(59, 130, 246, 0.3);
-      transition: all 0.3s ease;
-      color: #ffffff;
-    }
-    
-    .input-field:focus {
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-      outline: none;
-    }
-    
-    .btn-primary {
-      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-      transition: all 0.3s ease;
-    }
-    
-    .btn-primary:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
-    }
-    
-    .btn-primary:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    
-    .btn-secondary {
-      background: rgba(100, 116, 139, 0.3);
-      border: 1px solid rgba(100, 116, 139, 0.5);
-      transition: all 0.3s ease;
-    }
-    
-    .btn-secondary:hover {
-      background: rgba(100, 116, 139, 0.5);
-    }
+  <link
+    href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="css/time.css">
+  <script defer src="js/timecal.js"></script>
 
-    .btn-danger {
-      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-      transition: all 0.3s ease;
-    }
-    .btn-danger:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
-    }
-    .btn-danger:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    
-    .result-positive { color: #ef4444; }
-    .result-negative { color: #22c55e; }
-    .result-neutral { color: #eab308; }
-    
-    .scanner-line {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, #3b82f6, transparent);
-      animation: scan 3s linear infinite;
-    }
-    
-    @keyframes scan {
-      0% { top: 0; opacity: 0; }
-      10% { opacity: 1; }
-      90% { opacity: 1; }
-      100% { top: 100%; opacity: 0; }
-    }
-    
-    .toast {
-      animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s;
-    }
-    
-    @keyframes slideIn {
-      from { transform: translateX(100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
-    
-    @keyframes fadeOut {
-      from { opacity: 1; }
-      to { opacity: 0; }
-    }
-    
-    .fade-in {
-      animation: fadeIn 0.3s ease;
-    }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    .live-clock {
-      animation: pulse 2s infinite;
-    }
-    
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.7; }
-    }
-
-    /* Tabs System Styles */
-    .nav-tabs {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 20px;
-      background: rgba(26, 31, 46, 0.8);
-      backdrop-filter: blur(20px);
-      border-radius: 12px;
-      padding: 8px;
-      border: 1px solid rgba(59, 130, 246, 0.2);
-      overflow-x: auto;
-    }
-    .nav-tab {
-      flex: 1;
-      min-width: fit-content;
-      padding: 10px 14px;
-      background: transparent;
-      border: none;
-      border-radius: 8px;
-      color: #94a3b8;
-      font-size: 0.9rem;
-      cursor: pointer;
-      transition: all 0.2s;
-      white-space: nowrap;
-      font-weight: 500;
-    }
-    .nav-tab:hover {
-      color: #f1f5f9;
-      background: rgba(59, 130, 246, 0.1);
-    }
-    .nav-tab.active {
-      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-      color: white;
-      font-weight: 600;
-    }
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-
-    /* Stopwatch & Countdown Styles */
-    .stopwatch-display, .countdown-display {
-      font-size: 3.5rem;
-      font-weight: 700;
-      color: #f8fafc;
-      text-align: center;
-      margin: 20px 0;
-      letter-spacing: 2px;
-      font-variant-numeric: tabular-nums;
-      font-family: 'JetBrains Mono', monospace;
-    }
-    .stopwatch-ms { font-size: 2rem; color: #3b82f6; }
-    .lap-list { max-height: 300px; overflow-y: auto; margin-top: 16px; }
-    .lap-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 10px 16px;
-      border-bottom: 1px solid rgba(100, 116, 139, 0.3);
-      font-size: 0.9rem;
-      font-family: 'JetBrains Mono', monospace;
-    }
-    .lap-item:last-child { border-bottom: none; }
-    .lap-num { color: #94a3b8; font-family: 'Prompt', sans-serif;}
-    .lap-time { color: #f8fafc; font-weight: 600; }
-    .lap-diff { color: #3b82f6; font-size: 0.85rem; }
-    .countdown-display.expired { color: #ef4444; animation: blink 1s infinite; }
-    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-
-    /* Timeline & Grid Styles */
-    .timeline-list { margin-top: 16px; }
-    .timeline-item {
-      display: flex;
-      gap: 12px;
-      padding: 12px;
-      margin-bottom: 8px;
-      background: rgba(15, 23, 42, 0.8);
-      border: 1px solid rgba(100, 116, 139, 0.5);
-      border-radius: 10px;
-      align-items: flex-start;
-      transition: border-color 0.2s;
-    }
-    .timeline-item:hover { border-color: #3b82f6; }
-    .timeline-time { min-width: 80px; font-weight: 700; color: #3b82f6; font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; }
-    .timeline-date { font-size: 0.75rem; color: #94a3b8; }
-    .timeline-desc { flex: 1; font-size: 0.95rem; color: #f1f5f9; }
-    .timeline-actions button {
-      background: none; border: none; cursor: pointer; font-size: 1.1rem; padding: 2px; opacity: 0.6; transition: opacity 0.2s;
-    }
-    .timeline-actions button:hover { opacity: 1; }
-
-    .result-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 12px;
-    }
-    .result-item {
-      padding: 12px;
-      background: rgba(15, 23, 42, 0.8);
-      border-radius: 8px;
-      border: 1px solid rgba(100, 116, 139, 0.3);
-    }
-    .result-item .city { font-size: 0.85rem; color: #94a3b8; margin-bottom: 4px; }
-    .result-item .time { font-size: 1.25rem; font-weight: 600; color: #f8fafc; font-family: 'JetBrains Mono', monospace; }
-    .result-item .date { font-size: 0.8rem; color: #94a3b8; }
-  </style>
 </head>
+
 <body class="h-full">
   <div class="app-wrapper">
-    <div class="max-w-5xl mx-auto p-4 md:p-6">
-      
+    <div class="max-w-8xl mx-auto p-4 md:p-6">
+
       <!-- Header -->
       <header class="glass-card rounded-2xl p-4 md:p-6 mb-6 relative overflow-hidden">
         <div class="scanner-line"></div>
@@ -264,18 +39,18 @@
 
       <!-- Tab Navigation -->
       <nav class="nav-tabs" role="tablist">
-        <button class="nav-tab active" role="tab" aria-selected="true" data-tab="tab-cctv">📹 CCTV</button> 
-        <button class="nav-tab" role="tab" aria-selected="false" data-tab="tab-calc">🧮 บวก/ลบ เวลา</button> 
-        <button class="nav-tab" role="tab" aria-selected="false" data-tab="tab-stopwatch">⏱️ จับเวลา</button> 
-        <button class="nav-tab" role="tab" aria-selected="false" data-tab="tab-countdown">⏳ นับถอยหลัง</button> 
-        <button class="nav-tab" role="tab" aria-selected="false" data-tab="tab-timeline">📋 Timeline</button> 
+        <button class="nav-tab active" role="tab" aria-selected="true" data-tab="tab-cctv">📹 CCTV</button>
+        <button class="nav-tab" role="tab" aria-selected="false" data-tab="tab-calc">🧮 บวก/ลบ เวลา</button>
+        <button class="nav-tab" role="tab" aria-selected="false" data-tab="tab-stopwatch">⏱️ จับเวลา</button>
+        <button class="nav-tab" role="tab" aria-selected="false" data-tab="tab-countdown">⏳ นับถอยหลัง</button>
+        <button class="nav-tab" role="tab" aria-selected="false" data-tab="tab-timeline">📋 Timeline</button>
         <button class="nav-tab" role="tab" aria-selected="false" data-tab="tab-convert">🔄 โซนเวลา</button>
       </nav>
 
       <!-- Main Content Container -->
       <div class="space-y-6">
-        
-        <!-- Tab 1: CCTV Time Calculator (From File 2) -->
+
+        <!-- Tab 1: CCTV Time Calculator -->
         <section class="tab-content active" id="tab-cctv">
           <div class="space-y-6 fade-in">
             <!-- Calculator Section -->
@@ -283,7 +58,7 @@
               <h2 class="text-xl font-semibold text-white mb-6 flex items-center gap-2">
                 <span>🧮</span> คำนวณความต่างเวลา
               </h2>
-              
+
               <form id="calculator-form" class="space-y-6">
                 <!-- CCTV Section -->
                 <div class="glass-card rounded-xl p-4 border border-orange-500/30">
@@ -297,7 +72,8 @@
                     </div>
                     <div>
                       <label class="block text-gray-300 text-sm font-medium mb-2">เวลา</label>
-                      <input type="time" id="cctvTime" step="1" class="input-field w-full px-4 py-3 rounded-xl" required>
+                      <input type="time" id="cctvTime" step="1" class="input-field w-full px-4 py-3 rounded-xl"
+                        required>
                     </div>
                   </div>
                 </div>
@@ -315,8 +91,10 @@
                     <div>
                       <label class="block text-gray-300 text-sm font-medium mb-2">เวลา</label>
                       <div class="flex gap-2">
-                        <input type="time" id="realTime" step="1" class="input-field flex-1 px-4 py-3 rounded-xl" required>
-                        <button type="button" onclick="captureCurrentTime()" class="btn-secondary px-4 py-3 rounded-xl text-white flex items-center gap-2 whitespace-nowrap">
+                        <input type="time" id="realTime" step="1" class="input-field flex-1 px-4 py-3 rounded-xl"
+                          required>
+                        <button type="button" onclick="captureCurrentTime()"
+                          class="btn-secondary px-4 py-3 rounded-xl text-white flex items-center gap-2 whitespace-nowrap">
                           <span>⏱️</span> <span class="hidden md:inline">จับเวลา</span>
                         </button>
                       </div>
@@ -348,10 +126,12 @@
 
                 <!-- Buttons -->
                 <div class="flex gap-3 flex-wrap">
-                  <button type="submit" class="btn-primary flex-1 md:flex-none px-6 py-3 rounded-xl text-white font-medium flex items-center justify-center gap-2">
+                  <button type="submit"
+                    class="btn-primary flex-1 md:flex-none px-6 py-3 rounded-xl text-white font-medium flex items-center justify-center gap-2">
                     <span>🧮</span> คำนวณ
                   </button>
-                  <button type="button" onclick="resetCalculator()" class="btn-secondary flex-1 md:flex-none px-6 py-3 rounded-xl text-white font-medium flex items-center justify-center gap-2">
+                  <button type="button" onclick="resetCalculator()"
+                    class="btn-secondary flex-1 md:flex-none px-6 py-3 rounded-xl text-white font-medium flex items-center justify-center gap-2">
                     <span>🔄</span> รีเซ็ต
                   </button>
                 </div>
@@ -372,15 +152,18 @@
                   <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <label class="block text-gray-300 text-sm font-medium mb-2">วันที่</label>
-                      <input type="date" id="convertDate" class="input-field w-full px-4 py-3 rounded-xl" required onchange="updateConversion()">
+                      <input type="date" id="convertDate" class="input-field w-full px-4 py-3 rounded-xl" required
+                        onchange="updateConversion()">
                     </div>
                     <div>
                       <label class="block text-gray-300 text-sm font-medium mb-2">เวลา</label>
-                      <input type="time" id="convertTime" step="1" class="input-field w-full px-4 py-3 rounded-xl" required onchange="updateConversion()">
+                      <input type="time" id="convertTime" step="1" class="input-field w-full px-4 py-3 rounded-xl"
+                        required onchange="updateConversion()">
                     </div>
                     <div>
                       <label class="block text-gray-300 text-sm font-medium mb-2">แปลงเป็น</label>
-                      <select id="convertType" class="input-field w-full px-4 py-3 rounded-xl" required onchange="updateConversion()">
+                      <select id="convertType" class="input-field w-full px-4 py-3 rounded-xl" required
+                        onchange="updateConversion()">
                         <option value="">-- เลือก --</option>
                         <option value="toReal">แปลงเป็นเวลาจริง</option>
                         <option value="toCCTV">แปลงเป็นเวลากล้อง</option>
@@ -390,7 +173,8 @@
                 </div>
 
                 <!-- Result Display -->
-                <div id="convertResult" class="hidden glass-card rounded-xl p-4 border border-cyan-500/30 bg-cyan-500/5">
+                <div id="convertResult"
+                  class="hidden glass-card rounded-xl p-4 border border-cyan-500/30 bg-cyan-500/5">
                   <h3 class="text-cyan-400 font-medium mb-4 flex items-center gap-2">
                     <span>✨</span> ผลลัพธ์การแปลง
                   </h3>
@@ -408,15 +192,18 @@
 
                 <div class="glass-card rounded-xl p-4 border border-gray-600/30">
                   <p class="text-gray-400 text-sm">
-                    <span class="text-gray-500">💡 หมายเหตุ:</span> ต้องคำนวณความต่างเวลาก่อน หากยังไม่มีค่า Offset ระบบจะใช้ค่า 0
+                    <span class="text-gray-500">💡 หมายเหตุ:</span> ต้องคำนวณความต่างเวลาก่อน หากยังไม่มีค่า Offset
+                    ระบบจะใช้ค่า 0
                   </p>
                 </div>
 
                 <div class="flex gap-3 flex-wrap">
-                  <button type="button" onclick="copyResult()" id="copy-btn" class="btn-primary flex-1 md:flex-none px-6 py-3 rounded-xl text-white font-medium flex items-center justify-center gap-2 hidden">
+                  <button type="button" onclick="copyResult()" id="copy-btn"
+                    class="btn-primary flex-1 md:flex-none px-6 py-3 rounded-xl text-white font-medium flex items-center justify-center gap-2 hidden">
                     <span>📋</span> คัดลอก
                   </button>
-                  <button type="button" onclick="resetConverter()" class="btn-secondary flex-1 md:flex-none px-6 py-3 rounded-xl text-white font-medium flex items-center justify-center gap-2">
+                  <button type="button" onclick="resetConverter()"
+                    class="btn-secondary flex-1 md:flex-none px-6 py-3 rounded-xl text-white font-medium flex items-center justify-center gap-2">
                     <span>🔄</span> รีเซ็ต
                   </button>
                 </div>
@@ -439,7 +226,8 @@
                   </div>
                   <div>
                     <label class="block text-gray-300 text-sm font-medium mb-2">เวลา</label>
-                    <input type="time" id="calcBaseTime" step="1" class="input-field w-full px-4 py-3 rounded-xl" required>
+                    <input type="time" id="calcBaseTime" step="1" class="input-field w-full px-4 py-3 rounded-xl"
+                      required>
                   </div>
                 </div>
               </div>
@@ -455,19 +243,23 @@
                   </div>
                   <div>
                     <label class="block text-gray-300 text-sm font-medium mb-2">วัน</label>
-                    <input type="number" id="calcDays" min="0" value="0" class="input-field w-full px-4 py-3 rounded-xl">
+                    <input type="number" id="calcDays" min="0" value="0"
+                      class="input-field w-full px-4 py-3 rounded-xl">
                   </div>
                   <div>
                     <label class="block text-gray-300 text-sm font-medium mb-2">ชั่วโมง</label>
-                    <input type="number" id="calcHours" min="0" value="0" class="input-field w-full px-4 py-3 rounded-xl">
+                    <input type="number" id="calcHours" min="0" value="0"
+                      class="input-field w-full px-4 py-3 rounded-xl">
                   </div>
                   <div>
                     <label class="block text-gray-300 text-sm font-medium mb-2">นาที</label>
-                    <input type="number" id="calcMinutes" min="0" value="0" class="input-field w-full px-4 py-3 rounded-xl">
+                    <input type="number" id="calcMinutes" min="0" value="0"
+                      class="input-field w-full px-4 py-3 rounded-xl">
                   </div>
                   <div>
                     <label class="block text-gray-300 text-sm font-medium mb-2">วินาที</label>
-                    <input type="number" id="calcSeconds" min="0" value="0" class="input-field w-full px-4 py-3 rounded-xl">
+                    <input type="number" id="calcSeconds" min="0" value="0"
+                      class="input-field w-full px-4 py-3 rounded-xl">
                   </div>
                 </div>
               </div>
@@ -485,13 +277,16 @@
                 </div>
               </div>
               <div class="flex gap-3 flex-wrap">
-                <button type="button" onclick="calculateTime()" class="btn-primary flex-1 md:flex-none px-6 py-3 rounded-xl text-white font-medium flex items-center justify-center gap-2">
+                <button type="button" onclick="calculateTime()"
+                  class="btn-primary flex-1 md:flex-none px-6 py-3 rounded-xl text-white font-medium flex items-center justify-center gap-2">
                   <span>🧮</span> คำนวณ
                 </button>
-                <button type="button" onclick="setCalcNow()" class="btn-secondary flex-1 md:flex-none px-6 py-3 rounded-xl text-white font-medium flex items-center justify-center gap-2">
+                <button type="button" onclick="setCalcNow()"
+                  class="btn-secondary flex-1 md:flex-none px-6 py-3 rounded-xl text-white font-medium flex items-center justify-center gap-2">
                   <span>⏱️</span> เวลาปัจจุบัน
                 </button>
-                <button type="reset" onclick="resetCalcForm()" class="btn-secondary flex-1 md:flex-none px-6 py-3 rounded-xl text-white font-medium flex items-center justify-center gap-2">
+                <button type="reset" onclick="resetCalcForm()"
+                  class="btn-secondary flex-1 md:flex-none px-6 py-3 rounded-xl text-white font-medium flex items-center justify-center gap-2">
                   <span>🔄</span> รีเซ็ต
                 </button>
               </div>
@@ -507,9 +302,14 @@
               00:00:00<span class="stopwatch-ms">.000</span>
             </div>
             <div class="flex gap-3 justify-center flex-wrap mb-4">
-              <button id="btn-sw-start" class="btn-primary px-8 py-3 rounded-xl text-white font-medium flex items-center gap-2">▶ เริ่ม</button>
-              <button id="btn-sw-lap" class="btn-secondary px-8 py-3 rounded-xl text-white font-medium flex items-center gap-2" disabled>🏁 รอบ</button>
-              <button id="btn-sw-reset" class="btn-secondary px-8 py-3 rounded-xl text-white font-medium flex items-center gap-2">↺ รีเซ็ต</button>
+              <button id="btn-sw-start"
+                class="btn-primary px-8 py-3 rounded-xl text-white font-medium flex items-center gap-2">▶ เริ่ม</button>
+              <button id="btn-sw-lap"
+                class="btn-secondary px-8 py-3 rounded-xl text-white font-medium flex items-center gap-2" disabled>🏁
+                รอบ</button>
+              <button id="btn-sw-reset"
+                class="btn-secondary px-8 py-3 rounded-xl text-white font-medium flex items-center gap-2">↺
+                รีเซ็ต</button>
             </div>
             <div class="lap-list glass-card rounded-xl p-2 border border-slate-700" id="lap-list"></div>
           </div>
@@ -531,19 +331,24 @@
                 </div>
                 <div>
                   <label class="block text-gray-300 text-sm font-medium mb-2">นาที</label>
-                  <input type="number" id="cd-minutes" min="0" value="0" class="input-field w-full px-4 py-3 rounded-xl">
+                  <input type="number" id="cd-minutes" min="0" value="0"
+                    class="input-field w-full px-4 py-3 rounded-xl">
                 </div>
                 <div>
                   <label class="block text-gray-300 text-sm font-medium mb-2">วินาที</label>
-                  <input type="number" id="cd-seconds" min="0" value="0" class="input-field w-full px-4 py-3 rounded-xl">
+                  <input type="number" id="cd-seconds" min="0" value="0"
+                    class="input-field w-full px-4 py-3 rounded-xl">
                 </div>
               </div>
               <div class="countdown-display" id="countdown-display">00:00:00</div>
               <div class="flex gap-3 justify-center flex-wrap">
-                <button type="button" id="btn-cd-start" class="btn-primary px-8 py-3 rounded-xl text-white font-medium flex items-center justify-center gap-2">
+                <button type="button" id="btn-cd-start"
+                  class="btn-primary px-8 py-3 rounded-xl text-white font-medium flex items-center justify-center gap-2">
                   <span>▶</span> เริ่มนับถอยหลัง
                 </button>
-                <button type="button" id="btn-cd-stop" class="btn-danger px-8 py-3 rounded-xl text-white font-medium flex items-center justify-center gap-2" disabled>
+                <button type="button" id="btn-cd-stop"
+                  class="btn-danger px-8 py-3 rounded-xl text-white font-medium flex items-center justify-center gap-2"
+                  disabled>
                   <span>⏹</span> หยุด
                 </button>
               </div>
@@ -554,7 +359,8 @@
         <!-- Tab 5: Timeline -->
         <section class="tab-content" id="tab-timeline">
           <div class="glass-card rounded-2xl p-4 md:p-6 fade-in">
-            <h2 class="text-xl font-semibold text-white mb-6 flex items-center gap-2"><span>📋</span> บันทึก Timeline</h2>
+            <h2 class="text-xl font-semibold text-white mb-6 flex items-center gap-2"><span>📋</span> บันทึก Timeline
+            </h2>
             <form id="timeline-form" class="space-y-6" onsubmit="event.preventDefault();">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -568,19 +374,26 @@
               </div>
               <div>
                 <label class="block text-gray-300 text-sm font-medium mb-2">รายละเอียดเหตุการณ์</label>
-                <textarea id="tl-desc" class="input-field w-full px-4 py-3 rounded-xl" rows="3" placeholder="เช่น ผู้ต้องสงสัยเดินเข้าร้านสะดวกซื้อ" required></textarea>
+                <textarea id="tl-desc" class="input-field w-full px-4 py-3 rounded-xl" rows="3"
+                  placeholder="เช่น ผู้ต้องสงสัยเดินเข้าร้านสะดวกซื้อ" required></textarea>
               </div>
               <div class="flex gap-3 flex-wrap">
-                <button type="button" onclick="addTimelineItem()" class="btn-primary flex-1 md:flex-none px-6 py-3 rounded-xl text-white font-medium flex items-center justify-center gap-2">
+                <button type="button" onclick="addTimelineItem()"
+                  class="btn-primary flex-1 md:flex-none px-6 py-3 rounded-xl text-white font-medium flex items-center justify-center gap-2">
                   <span>+</span> เพิ่มเหตุการณ์
                 </button>
-                <button type="button" onclick="setTimelineNow()" class="btn-secondary flex-1 md:flex-none px-6 py-3 rounded-xl text-white font-medium flex items-center justify-center gap-2">
+                <button type="button" onclick="setTimelineNow()"
+                  class="btn-secondary flex-1 md:flex-none px-6 py-3 rounded-xl text-white font-medium flex items-center justify-center gap-2">
                   <span>⏱️</span> เวลาปัจจุบัน
                 </button>
-                <button type="button" id="btn-tl-copy" onclick="copyTimeline()" class="btn-secondary flex-1 md:flex-none px-6 py-3 rounded-xl text-white font-medium flex items-center justify-center gap-2" style="display:none;">
+                <button type="button" id="btn-tl-copy" onclick="copyTimeline()"
+                  class="btn-secondary flex-1 md:flex-none px-6 py-3 rounded-xl text-white font-medium flex items-center justify-center gap-2"
+                  style="display:none;">
                   <span>📋</span> คัดลอก
                 </button>
-                <button type="button" id="btn-tl-clear" onclick="clearAllTimeline()" class="btn-danger flex-1 md:flex-none px-6 py-3 rounded-xl text-white font-medium flex items-center justify-center gap-2" style="display:none;">
+                <button type="button" id="btn-tl-clear" onclick="clearAllTimeline()"
+                  class="btn-danger flex-1 md:flex-none px-6 py-3 rounded-xl text-white font-medium flex items-center justify-center gap-2"
+                  style="display:none;">
                   <span>🗑</span> ล้างทั้งหมด
                 </button>
               </div>
@@ -592,7 +405,8 @@
         <!-- Tab 6: Time Zone Converter -->
         <section class="tab-content" id="tab-convert">
           <div class="glass-card rounded-2xl p-4 md:p-6 fade-in">
-            <h2 class="text-xl font-semibold text-white mb-6 flex items-center gap-2"><span>🔄</span> แปลงโซนเวลาทั่วโลก</h2>
+            <h2 class="text-xl font-semibold text-white mb-6 flex items-center gap-2"><span>🔄</span> แปลงโซนเวลาทั่วโลก
+            </h2>
             <form id="convert-form" class="space-y-6" onsubmit="event.preventDefault();">
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
@@ -601,18 +415,21 @@
                 </div>
                 <div>
                   <label class="block text-gray-300 text-sm font-medium mb-2">เวลา</label>
-                  <input type="time" id="convert-tz-time" step="1" class="input-field w-full px-4 py-3 rounded-xl" required>
+                  <input type="time" id="convert-tz-time" step="1" class="input-field w-full px-4 py-3 rounded-xl"
+                    required>
                 </div>
                 <div>
                   <label class="block text-gray-300 text-sm font-medium mb-2">จากโซนเวลา</label>
                   <select id="convert-tz-from" class="input-field w-full px-4 py-3 rounded-xl" required></select>
                 </div>
               </div>
-              <button type="button" onclick="convertTimezone()" class="btn-primary w-full px-6 py-3 rounded-xl text-white font-medium flex items-center justify-center gap-2">
+              <button type="button" onclick="convertTimezone()"
+                class="btn-primary w-full px-6 py-3 rounded-xl text-white font-medium flex items-center justify-center gap-2">
                 <span>🔄</span> แปลงเวลา
               </button>
             </form>
-            <div id="convert-tz-result" class="hidden glass-card rounded-xl p-4 border border-cyan-500/30 bg-cyan-500/5 mt-6">
+            <div id="convert-tz-result"
+              class="hidden glass-card rounded-xl p-4 border border-cyan-500/30 bg-cyan-500/5 mt-6">
               <h3 class="text-cyan-400 font-medium mb-4 flex items-center gap-2"><span>✨</span> ผลลัพธ์</h3>
               <div class="result-grid" id="result-grid"></div>
             </div>
@@ -625,431 +442,7 @@
 
   <!-- Toast Container -->
   <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
-
-  <script>
-    // --- Global State & Configuration ---
-    let timeOffset = 0;
-    let timelineData = [];
-    let swRunning = false, swStart = 0, swElapsed = 0, swInterval = null, swLaps = [];
-    let cdInterval = null, cdEndTime = 0;
-
-    const thaiDays = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
-    const thaiMonths = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
-
-    const cities = [
-      { name: 'กรุงเทพฯ', nameEn: 'Bangkok', flag: '🇹🇭', tz: 'Asia/Bangkok' },
-      { name: 'กัวลาลัมเปอร์', nameEn: 'Kuala Lumpur', flag: '🇲🇾', tz: 'Asia/Kuala_Lumpur' },
-      { name: 'สิงคโปร์', nameEn: 'Singapore', flag: '🇸🇬', tz: 'Asia/Singapore' },
-      { name: 'จาการ์ตา', nameEn: 'Jakarta', flag: '🇮🇩', tz: 'Asia/Jakarta' },
-      { name: 'โตเกียว', nameEn: 'Tokyo', flag: '🇯🇵', tz: 'Asia/Tokyo' },
-      { name: 'เซี่ยงไฮ้', nameEn: 'Shanghai', flag: '🇨🇳', tz: 'Asia/Shanghai' },
-      { name: 'ฮ่องกง', nameEn: 'Hong Kong', flag: '🇭🇰', tz: 'Asia/Hong_Kong' },
-      { name: 'นิวยอร์ก', nameEn: 'New York', flag: '🇺🇸', tz: 'America/New_York' },
-      { name: 'ลอนดอน', nameEn: 'London', flag: '🇬🇧', tz: 'Europe/London' },
-      { name: 'เยอรมนี', nameEn: 'Frankfurt', flag: '🇩🇪', tz: 'Europe/Berlin' },
-      { name: 'UTC', nameEn: 'UTC', flag: '🌐', tz: 'UTC' }
-    ];
-
-    const defaultConfig = {
-      app_title: 'CCTV Time Calculator',
-      app_subtitle: 'เครื่องมือสืบสวนและคำนวณเวลาแบบครบวงจร'
-    };
-
-    // --- Initialization ---
-    async function initApp() {
-      // Setup Element SDK
-      if (window.elementSdk) {
-        window.elementSdk.init({
-          defaultConfig,
-          onConfigChange: async (config) => {
-            document.getElementById('app-title').innerHTML = `<span class="text-3xl">⏱️</span> ${config.app_title || defaultConfig.app_title}`;
-            document.getElementById('app-subtitle').textContent = config.app_subtitle || defaultConfig.app_subtitle;
-          },
-          mapToCapabilities: (config) => ({ recolorables: [], borderables: [], fontEditable: undefined, fontSizeable: undefined }),
-          mapToEditPanelValues: (config) => new Map([
-            ['app_title', config.app_title || defaultConfig.app_title],
-            ['app_subtitle', config.app_subtitle || defaultConfig.app_subtitle]
-          ])
-        });
-      }
-
-      // Setup Data SDK for Timeline
-      if (window.dataSdk) {
-        await window.dataSdk.init({
-          onDataChanged: (data) => {
-            timelineData = data;
-            renderTimeline();
-          }
-        });
-      }
-
-      // Start Clock
-      updateLiveClock();
-      setInterval(updateLiveClock, 1000);
-
-      // Pre-fill Dates
-      const today = new Date().toISOString().split('T')[0];
-      ['cctvDate', 'realDate', 'convertDate', 'calcBaseDate', 'tl-date', 'convert-tz-date'].forEach(id => {
-        const el = document.getElementById(id);
-        if(el) el.value = today;
-      });
-
-      // Bind Listeners
-      setupTabNavigation();
-      setupTimezoneOptions();
-      
-      document.getElementById('calculator-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        calculateOffset();
-      });
-
-      document.getElementById('btn-sw-start').addEventListener('click', toggleStopwatch);
-      document.getElementById('btn-sw-lap').addEventListener('click', recordLap);
-      document.getElementById('btn-sw-reset').addEventListener('click', resetStopwatch);
-      
-      document.getElementById('btn-cd-start').addEventListener('click', startCountdown);
-      document.getElementById('btn-cd-stop').addEventListener('click', stopCountdown);
-    }
-
-    // --- Utility Functions ---
-    function pad(n) { return String(n).padStart(2, '0'); }
-    function formatThaiDateShort(d) { return `${d.getDate()} ${thaiMonths[d.getMonth()]} พ.ศ. ${d.getFullYear() + 543}`; }
-    function formatTime(d) { return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`; }
-    function formatDateStandard(dateStr) {
-      if (!dateStr) return '--/--/----';
-      const [year, month, day] = dateStr.split('-');
-      return `${day}/${month}/${year}`;
-    }
-
-    function updateLiveClock() {
-      const now = new Date();
-      document.getElementById('live-clock').textContent = now.toLocaleTimeString('th-TH', { hour12: false });
-      document.getElementById('live-date').textContent = now.toLocaleDateString('th-TH', { year: 'numeric', month: '2-digit', day: '2-digit' });
-    }
-
-    function showToast(message, type = 'success') {
-      const container = document.getElementById('toast-container');
-      const toast = document.createElement('div');
-      const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500';
-      const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
-      toast.className = `toast ${bgColor} px-4 py-3 rounded-xl text-white font-medium shadow-lg flex items-center gap-2`;
-      toast.innerHTML = `<span>${icon}</span> ${message}`;
-      container.appendChild(toast);
-      setTimeout(() => toast.remove(), 3000);
-    }
-
-    function setNowToInputs(dateId, timeId) {
-      const now = new Date();
-      document.getElementById(dateId).value = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
-      document.getElementById(timeId).value = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-    }
-
-    // --- Tab Navigation ---
-    function setupTabNavigation() {
-      document.querySelectorAll('.nav-tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-          document.querySelectorAll('.nav-tab').forEach(t => {
-            t.classList.remove('active');
-            t.setAttribute('aria-selected', 'false');
-          });
-          document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
-          tab.classList.add('active');
-          tab.setAttribute('aria-selected', 'true');
-          document.getElementById(tab.dataset.tab).style.display = 'block';
-        });
-      });
-    }
-
-    // --- Tab 1: CCTV Calculator & Converter ---
-    function captureCurrentTime() {
-      setNowToInputs('realDate', 'realTime');
-      showToast('จับเวลาปัจจุบันแล้ว', 'info');
-    }
-
-    function calculateOffset() {
-      const cctvDate = document.getElementById('cctvDate').value;
-      const cctvTime = document.getElementById('cctvTime').value;
-      const realDate = document.getElementById('realDate').value;
-      const realTime = document.getElementById('realTime').value;
-
-      if (!cctvDate || !cctvTime || !realDate || !realTime) {
-        showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'error'); return;
-      }
-
-      const cctvDateTime = new Date(`${cctvDate}T${cctvTime}`);
-      const realDateTime = new Date(`${realDate}T${realTime}`);
-      timeOffset = Math.floor((realDateTime - cctvDateTime) / 1000);
-
-      const offsetDays = Math.floor(Math.abs(timeOffset) / 86400);
-      const remainingSeconds = Math.abs(timeOffset) % 86400;
-      const hours = Math.floor(remainingSeconds / 3600);
-      const minutes = Math.floor((remainingSeconds % 3600) / 60);
-      const seconds = remainingSeconds % 60;
-      
-      document.getElementById('offset-days').textContent = `${offsetDays} วัน`;
-      document.getElementById('offset-time').textContent = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
-      
-      const totalEl = document.getElementById('offset-total');
-      totalEl.textContent = `${timeOffset >= 0 ? '+' : ''}${timeOffset.toLocaleString()} วินาที`;
-      
-      if (timeOffset > 0) {
-        totalEl.className = 'mono text-lg font-semibold result-positive';
-        document.getElementById('offset-description').textContent = '🔴 กล้องช้ากว่าเวลาจริง (ต้องบวก Offset)';
-      } else if (timeOffset < 0) {
-        totalEl.className = 'mono text-lg font-semibold result-negative';
-        document.getElementById('offset-description').textContent = '🟢 กล้องเร็วกว่าเวลาจริง (ต้องลบ Offset)';
-      } else {
-        totalEl.className = 'mono text-lg font-semibold result-neutral';
-        document.getElementById('offset-description').textContent = '🟡 กล้องตรงกับเวลาจริง';
-      }
-      
-      document.getElementById('offsetResult').classList.remove('hidden');
-      updateConversion(); // Update converter if it has values
-      showToast('คำนวณความต่างเวลาเรียบร้อย', 'success');
-    }
-
-    function resetCalculator() {
-      const today = new Date().toISOString().split('T')[0];
-      document.getElementById('cctvDate').value = today;
-      document.getElementById('realDate').value = today;
-      document.getElementById('cctvTime').value = '';
-      document.getElementById('realTime').value = '';
-      document.getElementById('offsetResult').classList.add('hidden');
-      timeOffset = 0;
-    }
-
-    function updateConversion() {
-      const convertDate = document.getElementById('convertDate').value;
-      const convertTime = document.getElementById('convertTime').value;
-      const convertType = document.getElementById('convertType').value;
-      const resultDiv = document.getElementById('convertResult');
-      const copyBtn = document.getElementById('copy-btn');
-
-      if (!convertDate || !convertTime || !convertType) {
-        resultDiv.classList.add('hidden');
-        copyBtn.classList.add('hidden');
-        return;
-      }
-
-      const dateTime = new Date(`${convertDate}T${convertTime}`);
-      const resultDateTime = new Date(dateTime.getTime() + (convertType === 'toReal' ? timeOffset : -timeOffset) * 1000);
-
-      document.getElementById('result-date').textContent = formatDateStandard(resultDateTime.toISOString().split('T')[0]);
-      document.getElementById('result-time').textContent = resultDateTime.toTimeString().slice(0, 8);
-
-      resultDiv.classList.remove('hidden');
-      copyBtn.classList.remove('hidden');
-    }
-
-    function resetConverter() {
-      document.getElementById('convertDate').value = new Date().toISOString().split('T')[0];
-      document.getElementById('convertTime').value = '';
-      document.getElementById('convertType').value = '';
-      document.getElementById('convertResult').classList.add('hidden');
-      document.getElementById('copy-btn').classList.add('hidden');
-    }
-
-    function copyResult() {
-      const text = `${document.getElementById('result-date').textContent} ${document.getElementById('result-time').textContent}`;
-      navigator.clipboard.writeText(text).then(() => showToast('คัดลอกผลลัพธ์แล้ว', 'success'));
-    }
-
-    // --- Tab 2: Time Calculator ---
-    function calculateTime() {
-      const bd = document.getElementById('calcBaseDate').value;
-      const bt = document.getElementById('calcBaseTime').value;
-      if (!bd || !bt) { showToast('กรุณากรอกวันที่และเวลา', 'error'); return; }
-
-      const op = document.getElementById('calcOperation').value;
-      const totalMs = (((parseInt(document.getElementById('calcDays').value)||0) * 86400) + 
-                       ((parseInt(document.getElementById('calcHours').value)||0) * 3600) + 
-                       ((parseInt(document.getElementById('calcMinutes').value)||0) * 60) + 
-                       (parseInt(document.getElementById('calcSeconds').value)||0)) * 1000;
-
-      const resultDT = op === 'add' ? new Date(new Date(`${bd}T${bt}`).getTime() + totalMs) : new Date(new Date(`${bd}T${bt}`).getTime() - totalMs);
-
-      document.getElementById('calc-result-time').textContent = formatTime(resultDT);
-      document.getElementById('calc-result-date').textContent = formatThaiDateShort(resultDT);
-      document.getElementById('calcResult').classList.remove('hidden');
-      showToast('คำนวณเรียบร้อย', 'success');
-    }
-
-    function setCalcNow() { setNowToInputs('calcBaseDate', 'calcBaseTime'); }
-    function resetCalcForm() {
-      document.getElementById('calcBaseDate').value = new Date().toISOString().split('T')[0];
-      document.getElementById('calcBaseTime').value = '';
-      ['calcDays', 'calcHours', 'calcMinutes', 'calcSeconds'].forEach(id => document.getElementById(id).value = '0');
-      document.getElementById('calcResult').classList.add('hidden');
-    }
-
-    // --- Tab 3: Stopwatch ---
-    function formatSW(ms) {
-      const h = Math.floor(ms / 36e5), m = Math.floor((ms % 36e5) / 6e4), s = Math.floor((ms % 6e4) / 1e3), ml = ms % 1e3;
-      return `${pad(h)}:${pad(m)}:${pad(s)}<span class="stopwatch-ms">.${String(ml).padStart(3, '0')}</span>`;
-    }
-
-    function updateSW() { document.getElementById('stopwatch-display').innerHTML = formatSW(swElapsed + (Date.now() - swStart)); }
-
-    function toggleStopwatch() {
-      const btn = document.getElementById('btn-sw-start');
-      if (!swRunning) {
-        swRunning = true; swStart = Date.now(); swInterval = setInterval(updateSW, 50);
-        btn.textContent = '⏸ หยุด';
-        btn.className = 'btn-secondary px-8 py-3 rounded-xl text-white font-medium flex items-center gap-2';
-        document.getElementById('btn-sw-lap').disabled = false;
-      } else {
-        swRunning = false; swElapsed += Date.now() - swStart; clearInterval(swInterval);
-        btn.textContent = '▶ เริ่ม';
-        btn.className = 'btn-primary px-8 py-3 rounded-xl text-white font-medium flex items-center gap-2';
-        document.getElementById('btn-sw-lap').disabled = true;
-        updateSW();
-      }
-    }
-
-    function recordLap() {
-      if (!swRunning) return;
-      const total = swElapsed + (Date.now() - swStart);
-      const prevTotal = swLaps.length > 0 ? swLaps[swLaps.length - 1].total : 0;
-      swLaps.push({ total, diff: total - prevTotal });
-      renderLaps();
-    }
-
-    function resetStopwatch() {
-      swRunning = false; swElapsed = 0; swLaps = []; clearInterval(swInterval);
-      document.getElementById('stopwatch-display').innerHTML = formatSW(0);
-      document.getElementById('btn-sw-start').textContent = '▶ เริ่ม';
-      document.getElementById('btn-sw-start').className = 'btn-primary px-8 py-3 rounded-xl text-white font-medium flex items-center gap-2';
-      document.getElementById('btn-sw-lap').disabled = true;
-      document.getElementById('lap-list').innerHTML = '';
-    }
-
-    function renderLaps() {
-      const list = document.getElementById('lap-list'); list.innerHTML = '';
-      swLaps.slice().reverse().forEach((lap, i) => {
-        const div = document.createElement('div'); div.className = 'lap-item';
-        const dH = Math.floor(lap.diff/36e5), dM = Math.floor((lap.diff%36e5)/6e4), dS = Math.floor((lap.diff%6e4)/1e3), dMs = lap.diff%1e3;
-        const tH = Math.floor(lap.total/36e5), tM = Math.floor((lap.total%36e5)/6e4), tS = Math.floor((lap.total%6e4)/1e3), tMs = lap.total%1e3;
-        div.innerHTML = `<span class="lap-num">รอบ ${swLaps.length - i}</span><span class="lap-diff">+${pad(dH)}:${pad(dM)}:${pad(dS)}.${String(dMs).padStart(3, '0')}</span><span class="lap-time">${pad(tH)}:${pad(tM)}:${pad(tS)}.${String(tMs).padStart(3, '0')}</span>`;
-        list.appendChild(div);
-      });
-    }
-
-    // --- Tab 4: Countdown ---
-    function startCountdown() {
-      const totalMs = (((parseInt(document.getElementById('cd-days').value)||0) * 86400) + 
-                       ((parseInt(document.getElementById('cd-hours').value)||0) * 3600) + 
-                       ((parseInt(document.getElementById('cd-minutes').value)||0) * 60) + 
-                       (parseInt(document.getElementById('cd-seconds').value)||0)) * 1000;
-      if (totalMs <= 0) { showToast('กรุณาระบุเวลา', 'error'); return; }
-
-      cdEndTime = Date.now() + totalMs;
-      document.getElementById('btn-cd-start').disabled = true;
-      document.getElementById('btn-cd-stop').disabled = false;
-      document.getElementById('countdown-display').classList.remove('expired');
-
-      cdInterval = setInterval(() => {
-        const rem = cdEndTime - Date.now();
-        if (rem <= 0) {
-          clearInterval(cdInterval);
-          document.getElementById('countdown-display').innerHTML = '00:00:00 <br><span class="text-2xl mt-2 block text-red-400 font-prompt">หมดเวลา!</span>';
-          document.getElementById('countdown-display').classList.add('expired');
-          document.getElementById('btn-cd-start').disabled = false;
-          document.getElementById('btn-cd-stop').disabled = true;
-          showToast('นับถอยหลังจบแล้ว!', 'success');
-          return;
-        }
-        const rd = Math.floor(rem / 864e5), rh = Math.floor(rem / 36e5), rm = Math.floor((rem % 36e5) / 6e4), rs = Math.floor((rem % 6e4) / 1e3);
-        document.getElementById('countdown-display').textContent = rd > 0 ? `${rd} วัน ${pad(rh % 24)}:${pad(rm)}:${pad(rs)}` : `${pad(rh)}:${pad(rm)}:${pad(rs)}`;
-      }, 200);
-    }
-
-    function stopCountdown() {
-      clearInterval(cdInterval);
-      document.getElementById('btn-cd-start').disabled = false;
-      document.getElementById('btn-cd-stop').disabled = true;
-      document.getElementById('countdown-display').classList.remove('expired');
-    }
-
-    // --- Tab 5: Timeline ---
-    async function addTimelineItem() {
-      const d = document.getElementById('tl-date').value, t = document.getElementById('tl-time').value, desc = document.getElementById('tl-desc').value.trim();
-      if (!d || !t || !desc) { showToast('กรุณากรอกข้อมูลให้ครบ', 'error'); return; }
-      if (window.dataSdk) {
-        if ((await window.dataSdk.create({ id: Date.now().toString(), date: d, time: t, desc: desc })).isOk) {
-          document.getElementById('tl-desc').value = '';
-          showToast('เพิ่มเหตุการณ์เรียบร้อย', 'success');
-        } else showToast('ไม่สามารถเพิ่มเหตุการณ์ได้', 'error');
-      }
-    }
-
-    function setTimelineNow() { setNowToInputs('tl-date', 'tl-time'); }
-
-    function renderTimeline() {
-      const list = document.getElementById('timeline-list'), copyBtn = document.getElementById('btn-tl-copy'), clearBtn = document.getElementById('btn-tl-clear');
-      list.innerHTML = '';
-      if (timelineData.length === 0) { copyBtn.style.display = 'none'; clearBtn.style.display = 'none'; return; }
-      copyBtn.style.display = 'inline-block'; clearBtn.style.display = 'inline-block';
-
-      [...timelineData].sort((a, b) => `${a.date}T${a.time}`.localeCompare(`${b.date}T${b.time}`)).forEach(item => {
-        const dt = new Date(`${item.date}T${item.time}`), div = document.createElement('div');
-        div.className = 'timeline-item';
-        div.innerHTML = `<div><div class="timeline-time">${formatTime(dt)}</div><div class="timeline-date">${formatDateStandard(dt.toISOString().split('T')[0])}</div></div><div class="timeline-desc">${item.desc.replace(/</g, '&lt;')}</div><div class="timeline-actions"><button type="button" title="ลบ" onclick="deleteTimelineItem('${item.__backendId}')">🗑</button></div>`;
-        list.appendChild(div);
-      });
-    }
-
-    async function deleteTimelineItem(id) {
-      const item = timelineData.find(x => x.__backendId === id);
-      if (item && window.dataSdk && (await window.dataSdk.delete(item)).isOk) showToast('ลบเหตุการณ์เรียบร้อย', 'success');
-    }
-
-    async function clearAllTimeline() {
-      if (!confirm('ต้องการล้าง Timeline ทั้งหมดหรือไม่?')) return;
-      if (window.dataSdk) {
-        for (const item of timelineData) await window.dataSdk.delete(item);
-        showToast('ล้าง Timeline เรียบร้อย', 'success');
-      }
-    }
-
-    function copyTimeline() {
-      const text = [...timelineData].sort((a, b) => `${a.date}T${a.time}`.localeCompare(`${b.date}T${b.time}`))
-        .map(e => `${formatTime(new Date(`${e.date}T${e.time}`))} ${formatDateStandard(e.date)} — ${e.desc}`).join('\n');
-      navigator.clipboard.writeText(text).then(() => showToast('คัดลอก Timeline แล้ว', 'success'));
-    }
-
-    // --- Tab 6: Time Zone Converter ---
-    function setupTimezoneOptions() {
-      const select = document.getElementById('convert-tz-from');
-      cities.forEach(city => {
-        const opt = document.createElement('option');
-        opt.value = city.tz; opt.textContent = `${city.flag} ${city.name}`;
-        if (city.tz === 'Asia/Bangkok') opt.selected = true;
-        select.appendChild(opt);
-      });
-    }
-
-    function convertTimezone() {
-      const dv = document.getElementById('convert-tz-date').value, tv = document.getElementById('convert-tz-time').value, fromTZ = document.getElementById('convert-tz-from').value;
-      if (!dv || !tv) { showToast('กรุณาระบุวันที่และเวลา', 'error'); return; }
-
-      const dts = `${dv}T${tv}`;
-      const srcUTC = new Date(new Date(dts).toLocaleString('en-US', { timeZone: 'UTC' }));
-      const srcLocal = new Date(new Date(dts).toLocaleString('en-US', { timeZone: fromTZ }));
-      const utcTs = new Date(dts).getTime() - (srcLocal.getTime() - srcUTC.getTime());
-
-      const grid = document.getElementById('result-grid'); grid.innerHTML = '';
-      cities.forEach(city => {
-        const conv = new Date(new Date(utcTs).toLocaleString('en-US', { timeZone: city.tz }));
-        const item = document.createElement('div'); item.className = 'result-item';
-        item.innerHTML = `<div class="city">${city.flag} ${city.name}</div><div class="time">${formatTime(conv)}</div><div class="date">${formatDateStandard(conv.toISOString().split('T')[0])}</div>`;
-        grid.appendChild(item);
-      });
-      document.getElementById('convert-tz-result').classList.remove('hidden');
-      showToast('แปลงเวลาเรียบร้อย', 'success');
-    }
-
-    // Init
-    window.addEventListener('DOMContentLoaded', initApp);
-  </script>
+  
 </body>
+
 </html>

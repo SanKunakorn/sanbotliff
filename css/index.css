@@ -1,0 +1,176 @@
+body {
+            box-sizing: border-box;
+            font-family: 'Sarabun', 'Prompt', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+
+        /* Modern Light Background */
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .animated-bg {
+            background: linear-gradient(-45deg, #ffffff, #f8fafc, #f1f5f9, #e2e8f0);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            position: relative;
+        }
+
+        .animated-bg::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(168, 85, 247, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Modern Glass Effect */
+        .glass {
+            /* ปรับให้โปร่งแสงลงนิดหน่อย (0.85) เพื่อให้เห็นลายพื้นหลัง */
+            background: rgba(255, 255, 255, 0.85); 
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow:
+                0 4px 6px -1px rgba(0, 0, 0, 0.05),
+                0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            position: relative;
+            z-index: 1;
+        }
+
+        .glass::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.2), transparent);
+        }
+
+        /* Modern Navigation Button Styles */
+        .nav-btn {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid rgba(59, 130, 246, 0.1);
+            color: #1e40af;
+            font-family: 'Sarabun', sans-serif;
+            font-weight: 600;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 1);
+            border-color: rgba(59, 130, 246, 0.3);
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            border-color: #3b82f6;
+            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
+            transform: translateY(-2px);
+            color: #ffffff;
+        }
+
+        /* Card Hover Effects */
+        .card-hover {
+            transition: all 0.4s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-8px) scale(1.02);
+            /* เปลี่ยนจากเงานีออน เป็นเงาสีฟ้าแบบคลีนๆ */
+            box-shadow:
+                0 20px 25px -5px rgba(59, 130, 246, 0.1),
+                0 8px 10px -6px rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        /* Input Focus Effect */
+        .input-glow {
+            transition: all 0.3s ease;
+        }
+
+        .input-glow:focus {
+            background: rgb(205, 248, 255);/* พื้นหลัง Textbox */
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+            outline: none;
+        }
+
+        /* Mobile Touch Optimization */
+        .touch-manipulation {
+            touch-action: manipulation;
+        }
+
+        /* Hide scrollbar but keep functionality */
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Icon Bounce Animation */
+        .floating {
+            animation: cyber-floating 4s ease-in-out infinite;
+        }
+
+        @keyframes cyber-floating {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+                /* เปลี่ยนแสงนีออนเป็นแสงสีฟ้าอ่อน */
+                filter: drop-shadow(0 4px 6px rgba(59, 130, 246, 0.2)); 
+            }
+            50% {
+                transform: translateY(-10px) rotate(2deg);
+                filter: drop-shadow(0 10px 15px rgba(59, 130, 246, 0.4));
+            }
+        }
+
+        /* Search Tab Active State */
+        .search-tab {
+            position: relative;
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid rgba(59, 130, 246, 0.1);
+            color: #1e40af;
+            transition: all 0.3s ease;
+        }
+
+        .search-tab:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1);
+        }
+
+        .search-tab.active {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.2);
+            border-color: #3b82f6;
+        }
+
+        .search-tab.active::before {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #3b82f6, transparent);
+        }
+
+        @view-transition {
+            navigation: auto;
+        }
