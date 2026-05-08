@@ -269,22 +269,33 @@
         </div>
 
         <!-- TimeCal Page -->
-        <div id="page-timecal" class="page-content hidden">
-            <!--Content will be loaded dynamically from time.html -->
+           <div id="page-timecal" class="page-content hidden">
             <div id="timecal-container">
                 <!-- Time calculator content will be injected here -->
             </div>
             <script>
-                function loadHTML(id, url) {
+                function loadTimeCal(id, url) {
                     fetch(url)
-                        .then(res => res.text())
+                        .then(res => {
+                            if (!res.ok) throw new Error("ไม่สามารถโหลดไฟล์ได้");
+                            return res.text();
+                        })
                         .then(data => {
+                            // 1. นำ HTML มาแปะ
                             document.getElementById(id).innerHTML = data;
-                        });
+
+                            // 2. สิ่งสำคัญ: สั่งรันระบบของ TimeCal หลังจากแปะ HTML เสร็จแล้ว!
+                            if (typeof initApp === 'function') {
+                                initApp();
+                            } else {
+                                console.error("หาฟังก์ชัน initApp ไม่เจอ โปรดเช็คว่าโหลดไฟล์ script.js หรือยัง");
+                            }
+                        })
+                        .catch(err => console.error("Error:", err));
                 }
 
-                // โหลด time.html มาใส่ใน div
-                loadHTML("timecal-container", "TimeCal.html");
+                // เรียกใช้งานฟังก์ชัน
+                loadTimeCal("timecal-container", "TimeCal.html");
             </script>
         </div>
 
